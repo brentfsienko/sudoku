@@ -46,8 +46,15 @@ function SoloGame({
       me={me}
       onExit={onExit}
       onRematch={onRematch}
-      onFinish={({ solved, score, elapsedSeconds }) =>
-        recordGame({ won: solved, score, difficulty, elapsedSeconds })
+      onFinish={({ solved, score, elapsedSeconds, mistakes, hintsUsed }) =>
+        recordGame({
+          won: solved,
+          score,
+          difficulty,
+          elapsedSeconds,
+          mistakes,
+          hintsUsed,
+        })
       }
     />
   );

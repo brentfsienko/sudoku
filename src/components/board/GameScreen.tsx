@@ -39,6 +39,8 @@ type Props = {
     solved: boolean;
     score: number;
     elapsedSeconds: number;
+    mistakes: number;
+    hintsUsed: number;
   }) => void;
 };
 
@@ -102,7 +104,13 @@ export function GameScreen({
   // Notify parent once when finished.
   useEffect(() => {
     if (done && onFinish)
-      onFinish({ solved, score: computedFinal, elapsedSeconds: elapsed });
+      onFinish({
+        solved,
+        score: computedFinal,
+        elapsedSeconds: elapsed,
+        mistakes: snapshot.mistakes,
+        hintsUsed: snapshot.hintsUsed,
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 

@@ -6,11 +6,17 @@ import { DifficultySelect } from "@/components/home/DifficultySelect";
 import { ModeSelect } from "@/components/home/ModeSelect";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
 import { DogAvatar } from "@/components/DogAvatar";
-import { FlameIcon, PawIcon, TrophyIcon } from "@/components/icons";
+import {
+  ClockIcon,
+  FlameIcon,
+  PawIcon,
+  TargetIcon,
+  TrophyIcon,
+} from "@/components/icons";
 import { DIFFICULTY_LABELS, type Difficulty, type GameMode } from "@/lib/game/types";
 import { DOGS, type DogId } from "@/lib/theme/dogs";
 import { getProfile, setProfile, type Profile } from "@/lib/profile";
-import { loadStats, type LocalStats } from "@/lib/storage";
+import { loadStats, resetStats, type LocalStats } from "@/lib/storage";
 import { formatTime } from "@/lib/game/scoring";
 
 function newRoomCode(): string {
@@ -161,7 +167,12 @@ export default function Home() {
         )}
 
         {tab === "me" && profile && (
-          <MeTab profile={profile} stats={stats} onUpdate={updateProfile} />
+          <MeTab
+            profile={profile}
+            stats={stats}
+            onUpdate={updateProfile}
+            onReset={() => setStats(resetStats())}
+          />
         )}
       </main>
 
@@ -170,84 +181,267 @@ export default function Home() {
   );
 }
 
+const DIFFICULTY_ORDER: Difficulty[] = [
+  "easy",
+  "medium",
+  "hard",
+  "expert",
+  "master",
+];
+
+const DIFFICULTY_COLORS: Record<Difficulty, string> = {
+  easy: "#5cc98b",
+  medium: "#f4a259",
+  hard: "#ef8f4a",
+  expert: "#ef6f6c",
+  master: "#a06bd6",
+};
+
 function MeTab({
   profile,
   stats,
   onUpdate,
+  onReset,
 }: {
   profile: Profile;
   stats: LocalStats | null;
   onUpdate: (next: Partial<Profile>) => void;
+  onReset: () => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const s = stats;
+
+  const played = s?.gamesPlayed ?? 0;
+  const won = s?.gamesWon ?? 0;
+  const losses = Math.max(0, played - won);
+  const winPct = played > 0 ? Math.round((won / played) * 100) : 0;
+  const avgScore = won > 0 ? Math.round((s?.totalScore ?? 0) / won) : 0;
+  const avgSolve = won > 0 ? Math.round((s?.totalSolveSeconds ?? 0) / won) : 0;
+
+  const favorite = DIFFICULTY_ORDER.reduce<{ d: Difficulty; n: number } | null>(
+    (best, d) => {
+      const n = s?.playsByDifficulty?.[d] ?? 0;
+      if (n > 0 && (!best || n > best.n)) return { d, n };
+      return best;
+    },
+    null,
+  );
+
+  const fastestDifficulty =
+    s?.fastestSolveSeconds != null
+      ? (DIFFICULTY_ORDER.find(
+          (d) => s.bestTimeByDifficulty?.[d] === s.fastestSolveSeconds,
+        ) ?? null)
+      : null;
+
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col items-center gap-3 rounded-3xl bg-white p-5 shadow-sm">
-        <DogAvatar dogId={profile.dogId} size={96} ringColor="#3b82f6" />
-        <input
-          value={profile.name}
-          onChange={(e) => onUpdate({ name: e.target.value.slice(0, 16) })}
-          className="font-display w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-center text-lg font-bold outline-none focus:border-[var(--primary)]"
-          placeholder="Your name"
-        />
-        <div className="grid grid-cols-4 gap-2">
-          {DOGS.map((d) => (
-            <button
-              key={d.id}
-              type="button"
-              onClick={() => onUpdate({ dogId: d.id as DogId })}
-              className={`rounded-2xl p-1 transition ${
-                profile.dogId === d.id
-                  ? "bg-[var(--primary-soft)] ring-2 ring-[var(--primary)]"
-                  : "bg-[var(--surface-soft)]"
-              }`}
-              aria-label={d.breed}
-            >
-              <DogAvatar dogId={d.id} size={48} />
-            </button>
-          ))}
+    <div className="flex flex-col gap-4">
+      {/* Greeting + profile */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setEditing((v) => !v)}
+          className="shrink-0 rounded-full transition active:scale-95"
+          aria-label="Edit profile"
+        >
+          <DogAvatar dogId={profile.dogId} size={56} ringColor="#3b82f6" />
+        </button>
+        <div className="min-w-0">
+          <div className="text-sm text-[var(--muted)]">Here are your stats,</div>
+          <div className="font-display truncate text-xl font-extrabold text-[var(--foreground)]">
+            {profile.name}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setEditing((v) => !v)}
+          className="ml-auto rounded-full bg-white px-4 py-2 text-sm font-bold text-[var(--paw)] shadow-sm transition active:scale-95"
+        >
+          {editing ? "Done" : "Edit"}
+        </button>
+      </div>
+
+      {editing && (
+        <div className="animate-float-in flex flex-col items-center gap-3 rounded-3xl bg-white p-4 shadow-sm">
+          <input
+            value={profile.name}
+            onChange={(e) => onUpdate({ name: e.target.value.slice(0, 16) })}
+            className="font-display w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-center text-lg font-bold outline-none focus:border-[var(--primary)]"
+            placeholder="Your name"
+          />
+          <div className="grid grid-cols-4 gap-2">
+            {DOGS.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => onUpdate({ dogId: d.id as DogId })}
+                className={`rounded-2xl p-1 transition ${
+                  profile.dogId === d.id
+                    ? "bg-[var(--primary-soft)] ring-2 ring-[var(--primary)]"
+                    : "bg-[var(--surface-soft)]"
+                }`}
+                aria-label={d.breed}
+              >
+                <DogAvatar dogId={d.id} size={48} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Wins / Losses */}
+      <div className="rounded-3xl bg-white p-5 shadow-sm">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-[var(--primary)]">
+            <TrophyIcon width={20} height={20} />
+          </span>
+          <span className="text-sm font-semibold text-[var(--muted)]">
+            {winPct}% win rate
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="text-center">
+            <div className="font-display text-3xl font-extrabold text-[var(--foreground)]">
+              {won}
+            </div>
+            <div className="text-xs font-semibold text-[var(--muted)]">Wins</div>
+          </div>
+          <div className="h-3 flex-1 overflow-hidden rounded-full bg-[var(--surface-soft)]">
+            <div
+              className="h-full rounded-full bg-[var(--primary)] transition-all"
+              style={{ width: `${winPct}%` }}
+            />
+          </div>
+          <div className="text-center">
+            <div className="font-display text-3xl font-extrabold text-[var(--muted)]">
+              {losses}
+            </div>
+            <div className="text-xs font-semibold text-[var(--muted)]">Losses</div>
+          </div>
         </div>
       </div>
 
+      {/* Core stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <BigStat label="Avg Score" value={avgScore.toLocaleString()} />
+        <BigStat label="Best Score" value={(s?.bestScore ?? 0).toLocaleString()} />
+        <BigStat label="Solved" value={String(won)} />
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <BigStat label="Day Streak" value={String(s?.streak ?? 0)} />
+        <BigStat label="Best Streak" value={String(s?.bestStreak ?? 0)} />
+        <BigStat label="Perfect" value={String(s?.perfectGames ?? 0)} />
+      </div>
+
+      {/* Highlights */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Games Played" value={String(stats?.gamesPlayed ?? 0)} />
-        <StatCard label="Games Won" value={String(stats?.gamesWon ?? 0)} />
-        <StatCard label="Day Streak" value={String(stats?.streak ?? 0)} />
-        <StatCard
-          label="Best Score"
-          value={(stats?.bestScore ?? 0).toLocaleString()}
+        <HighlightCard
+          icon={<ClockIcon width={20} height={20} />}
+          title="Fastest Solve"
+          value={
+            s?.fastestSolveSeconds != null
+              ? formatTime(s.fastestSolveSeconds)
+              : "--:--"
+          }
+          subtitle={
+            won > 0
+              ? `${fastestDifficulty ? DIFFICULTY_LABELS[fastestDifficulty] : "Solo"} · avg ${formatTime(avgSolve)}`
+              : "No wins yet"
+          }
+        />
+        <HighlightCard
+          icon={<TargetIcon width={20} height={20} />}
+          title="Favorite"
+          value={favorite ? DIFFICULTY_LABELS[favorite.d] : "—"}
+          subtitle={favorite ? `${favorite.n} games` : "Play to unlock"}
+          accent={favorite ? DIFFICULTY_COLORS[favorite.d] : undefined}
         />
       </div>
 
+      {/* Best times by difficulty */}
       <div className="rounded-3xl bg-white p-4 shadow-sm">
-        <h3 className="font-display mb-2 font-bold text-[var(--foreground)]">
+        <h3 className="font-display mb-3 font-bold text-[var(--foreground)]">
           Best Times
         </h3>
-        <div className="flex flex-col gap-1.5">
-          {(["easy", "medium", "hard", "expert", "master"] as Difficulty[]).map(
-            (d) => (
-              <div key={d} className="flex justify-between text-sm">
-                <span className="text-[var(--muted)]">{DIFFICULTY_LABELS[d]}</span>
-                <span className="font-display font-bold text-[var(--foreground)]">
-                  {stats?.bestTimeByDifficulty?.[d] != null
-                    ? formatTime(stats.bestTimeByDifficulty[d]!)
-                    : "--:--"}
+        <div className="flex flex-col gap-2.5">
+          {DIFFICULTY_ORDER.map((d) => {
+            const t = s?.bestTimeByDifficulty?.[d];
+            return (
+              <div key={d} className="flex items-center gap-3">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: DIFFICULTY_COLORS[d] }}
+                />
+                <span className="text-sm font-semibold text-[var(--foreground)]">
+                  {DIFFICULTY_LABELS[d]}
+                </span>
+                <span className="ml-auto font-display font-bold text-[var(--foreground)]">
+                  {t != null ? formatTime(t) : "--:--"}
                 </span>
               </div>
-            ),
-          )}
+            );
+          })}
         </div>
+      </div>
+
+      <p className="px-2 text-center text-xs text-[var(--muted)]">
+        Only solo games count toward your stats — multiplayer is just for fun. 🐾
+      </p>
+
+      {played > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            if (confirm("Reset all your stats? This can't be undone.")) onReset();
+          }}
+          className="mx-auto text-xs font-semibold text-[var(--muted)] underline underline-offset-2"
+        >
+          Reset stats
+        </button>
+      )}
+    </div>
+  );
+}
+
+function BigStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white p-3 text-center shadow-sm">
+      <div className="font-display text-xl font-extrabold leading-tight text-[var(--foreground)]">
+        {value}
+      </div>
+      <div className="text-[11px] font-semibold leading-tight text-[var(--muted)]">
+        {label}
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function HighlightCard({
+  icon,
+  title,
+  value,
+  subtitle,
+  accent,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  subtitle: string;
+  accent?: string;
+}) {
   return (
-    <div className="rounded-2xl bg-white p-4 text-center shadow-sm">
-      <div className="font-display text-2xl font-extrabold text-[var(--foreground)]">
+    <div className="rounded-2xl bg-white p-4 shadow-sm">
+      <div className="mb-1 flex items-center gap-1.5 text-[var(--muted)]">
+        <span style={{ color: accent ?? "var(--primary)" }}>{icon}</span>
+        <span className="text-xs font-semibold">{title}</span>
+      </div>
+      <div
+        className="font-display text-2xl font-extrabold leading-tight"
+        style={{ color: accent ?? "var(--foreground)" }}
+      >
         {value}
       </div>
-      <div className="text-xs font-semibold text-[var(--muted)]">{label}</div>
+      <div className="text-xs text-[var(--muted)]">{subtitle}</div>
     </div>
   );
 }
