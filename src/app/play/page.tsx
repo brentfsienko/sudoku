@@ -7,7 +7,7 @@ import { createSnapshot, useLocalGame } from "@/lib/game/store";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
 import { getProfile } from "@/lib/profile";
-import { recordGame } from "@/lib/storage";
+import { recordSoloGame } from "@/lib/stats/store";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -47,7 +47,7 @@ function SoloGame({
       onExit={onExit}
       onRematch={onRematch}
       onFinish={({ solved, score, elapsedSeconds, mistakes, hintsUsed }) =>
-        recordGame({
+        void recordSoloGame({
           won: solved,
           score,
           difficulty,

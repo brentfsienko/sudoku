@@ -164,3 +164,21 @@ export function PawIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function ChartIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 19V5" />
+      <path d="M4 17.5 9 12l4 3 7-8" />
+      <path d="M20 7v4h-4" />
+    </svg>
+  );
+}
+
+export function MountainIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="m3 19 6-11 4 6 2-3 6 8H3Z" />
+    </svg>
+  );
+}

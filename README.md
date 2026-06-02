@@ -16,7 +16,8 @@ A floofy, dog-themed Sudoku game built with [Next.js](https://nextjs.org) and de
 - Live opponent presence — see who you're playing against, their dog avatar, and their selected cell.
 - Full board toolkit: notes, hints, undo, erase, mistake tracker (x/3), timer + pause, live score, and same row/column/box/number highlighting.
 - Post-game stats breakdown (time, mistakes, hints, and per-player squares filled).
-- Local stats: streak, all-time best score, best times per difficulty, and a customizable dog profile.
+- A rich **Me** dashboard: separate **Solo** and **Multiplayer** stats, most-played opponent, and a Strava-style **progress graph** (games, time played, mistakes, and a "Climb" difficulty metric) over the past 12 weeks.
+- Stats save on-device by default and sync **across devices** when you sign in (passwordless email magic-link via Supabase).
 
 ## Local development
 
@@ -40,11 +41,30 @@ Single-player works out of the box. Co-op and Competitive need a free [Liveblock
 
 3. Add the same variable in your Vercel project settings (Settings → Environment Variables) so production multiplayer works.
 
+### Enabling cross-device stats (Supabase)
+
+Stats work without this — they're stored in the browser's `localStorage`. To let players sign in and sync stats across devices, add a free [Supabase](https://supabase.com) project:
+
+1. Create a project, then open **SQL Editor** and run the contents of [`supabase/schema.sql`](./supabase/schema.sql) (creates the `user_data` table + row-level security).
+2. From **Project Settings → API Keys**, copy the project URL and the **publishable key**, and add them to `.env.local`:
+
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxxxxxx
+   ```
+
+3. In **Authentication → URL Configuration**, set the **Site URL** to your app's origin (e.g. `http://localhost:3000` for dev and your Vercel URL for prod) and add both to **Redirect URLs**. Email auth is enabled by default.
+4. Add the same two `NEXT_PUBLIC_*` variables in Vercel (Settings → Environment Variables).
+
+Signed-out players keep stats locally; on first sign-in the device's stats seed the account, after which everything syncs.
+
 ## Tech
 
 - Next.js 16 (App Router) + TypeScript + Tailwind CSS v4
 - Liveblocks for real-time shared board state and player presence
+- Supabase (auth + Postgres) for optional cross-device stats sync
 - Custom backtracking Sudoku generator/solver (guaranteed unique solutions)
+- Hand-rolled SVG progress chart (no chart dependencies)
 
 ## Scripts
 

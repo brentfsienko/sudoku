@@ -14,6 +14,8 @@ import { DogAvatar } from "@/components/DogAvatar";
 import { ChevronLeftIcon, PawIcon } from "@/components/icons";
 import { LoadingPaws } from "@/app/play/page";
 import { getProfile, type Profile } from "@/lib/profile";
+import { cellContributions } from "@/lib/game/engine";
+import { recordMultiGame } from "@/lib/stats/store";
 import {
   DIFFICULTIES,
   DIFFICULTY_LABELS,
@@ -126,6 +128,24 @@ function RoomInner({
       peers={game.peers}
       onExit={exit}
       onRematch={game.rematch}
+      onFinish={({ solved, score, elapsedSeconds, mistakes }) => {
+        const snap = game.controller?.snapshot;
+        if (!snap) return;
+        const contrib = cellContributions(snap.puzzle, snap.solution, snap.cells);
+        const oppRole = game.opponent?.role;
+        void recordMultiGame({
+          mode: snap.mode === "competitive" ? "competitive" : "coop",
+          solved,
+          mySquares: contrib[game.me.role] ?? 0,
+          opponentSquares: oppRole ? contrib[oppRole] ?? 0 : 0,
+          opponentName: game.opponent?.name ?? "",
+          opponentDogId: game.opponent?.dogId ?? "",
+          difficulty: snap.difficulty,
+          elapsedSeconds,
+          mistakes,
+          score,
+        });
+      }}
     />
   );
 }
