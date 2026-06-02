@@ -1,26 +1,108 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Floofy, warm dog-park palette */
+  --background: #fdf6ec;
+  --surface: #ffffff;
+  --surface-soft: #fbeedd;
+  --foreground: #4a3b2f;
+  --muted: #9a8a79;
+  --border: #efe2cf;
+
+  --primary: #f4a259; /* golden retriever */
+  --primary-soft: #fde3c4;
+  --accent: #7ec4cf; /* sky collar */
+  --paw: #c98b5b;
+
+  /* Player colors */
+  --player-1: #3b82f6; /* blue */
+  --player-2: #ef6f6c; /* coral */
+
+  /* Board */
+  --cell-bg: #ffffff;
+  --cell-given: #5b4a3a;
+  --cell-highlight: #fbeedd;
+  --cell-peer: #f6e7d3;
+  --cell-selected: #fcd9a8;
+  --cell-error: #fbd5d2;
+  --cell-error-text: #d64545;
+  --grid-line: #e7d8c2;
+  --grid-line-bold: #c9b291;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-paw: var(--paw);
+  --color-player-1: var(--player-1);
+  --color-player-2: var(--player-2);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  overscroll-behavior: none;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+}
+
+/* prevent text selection on tappy UI */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-pop {
+  animation: pop 0.18s ease-out;
+}
+
+@keyframes float-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-float-in {
+  animation: float-in 0.3s ease-out both;
 }
