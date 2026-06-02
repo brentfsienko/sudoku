@@ -12,6 +12,7 @@ import {
   searchProfiles,
   sendFriendRequest,
   syncPublicProfile,
+  updateUsername,
 } from "./api";
 import type { Friend, FriendRequest, GameInvite, PublicProfile } from "./types";
 
@@ -81,6 +82,16 @@ export function useFriends(user: AuthUser | null, profile: Profile | null) {
     [refresh],
   );
 
+  const setUsername = useCallback(
+    async (username: string) => {
+      if (!user) return { ok: false, error: "Sign in to set a username." };
+      const res = await updateUsername(user.id, username);
+      if (res.ok) await refresh();
+      return res;
+    },
+    [user, refresh],
+  );
+
   return {
     myProfile,
     friends,
@@ -91,5 +102,6 @@ export function useFriends(user: AuthUser | null, profile: Profile | null) {
     search,
     requestFriend,
     respond,
+    setUsername,
   };
 }

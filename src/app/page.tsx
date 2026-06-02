@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { SignInGate } from "@/components/auth/SignInGate";
 import { DifficultySelect } from "@/components/home/DifficultySelect";
 import { ModeSelect } from "@/components/home/ModeSelect";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
 import { FriendsTab } from "@/components/home/FriendsTab";
+import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
 import { DogAvatar } from "@/components/DogAvatar";
 import { ProgressChart } from "@/components/stats/ProgressChart";
 import { WinLossBar } from "@/components/stats/WinLossBar";
@@ -19,9 +21,11 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { multiWinLoss } from "@/lib/friends/api";
+import { useFriends } from "@/lib/friends/useFriends";
 import { DIFFICULTY_LABELS, type Difficulty, type GameMode } from "@/lib/game/types";
-import { DOGS, type DogId } from "@/lib/theme/dogs";
+import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
+import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { useUserData } from "@/lib/stats/useUserData";
 import {
   emptyUserData,
@@ -59,6 +63,18 @@ export default function Home() {
   const userData = useUserData();
   const data = userData.data;
   const statsForMe = data ?? emptyUserData();
+  const [signInGateOpen, setSignInGateOpen] = useState(false);
+
+  useEffect(() => {
+    if (
+      !userData.loading &&
+      userData.authConfigured &&
+      !userData.user &&
+      !hasAuthIntroCompleted()
+    ) {
+      setSignInGateOpen(true);
+    }
+  }, [userData.loading, userData.authConfigured, userData.user]);
 
   function startGame() {
     if (mode === "single") {
@@ -76,6 +92,12 @@ export default function Home() {
   }
 
   return (
+    <>
+      <SignInGate
+        open={signInGateOpen}
+        userData={userData}
+        onClose={() => setSignInGateOpen(false)}
+      />
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--background)]">
       <header
         className="flex items-center justify-between px-5 pb-3 pt-5"
@@ -187,12 +209,14 @@ export default function Home() {
                 history: statsForMe.history,
               }}
               userData={userData}
+              onSignIn={() => setSignInGateOpen(true)}
             />
           ))}
       </main>
 
       <BottomNav active={tab} onChange={setTab} />
     </div>
+    </>
   );
 }
 
@@ -215,12 +239,15 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
 function MeTab({
   data,
   userData,
+  onSignIn,
 }: {
   data: { profile: Profile; solo: SoloStats; multi: MultiStats; history: GameLog[] };
   userData: ReturnType<typeof useUserData>;
+  onSignIn: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const { profile, solo, multi, history } = data;
+  const friends = useFriends(userData.user, profile);
 
   const totalGames = solo.played + multi.coopPlayed + multi.compPlayed;
 
@@ -241,46 +268,47 @@ function MeTab({
           <div className="font-display truncate text-xl font-extrabold text-[var(--foreground)]">
             {profile.name}
           </div>
+          {userData.user && friends.myProfile ? (
+            <div className="truncate text-sm font-semibold text-[var(--paw)]">
+              @{friends.myProfile.username}
+            </div>
+          ) : userData.authConfigured && !userData.user ? (
+            <button
+              type="button"
+              onClick={onSignIn}
+              className="text-xs font-semibold text-[var(--primary)] underline underline-offset-2"
+            >
+              Sign in for @username
+            </button>
+          ) : null}
         </div>
         <button
           type="button"
           onClick={() => setEditing((v) => !v)}
           className="ml-auto rounded-full bg-white px-4 py-2 text-sm font-bold text-[var(--paw)] shadow-sm transition active:scale-95"
         >
-          {editing ? "Done" : "Edit"}
+          {editing ? "Cancel" : "Edit"}
         </button>
       </div>
 
       {editing && (
-        <div className="animate-float-in flex flex-col items-center gap-3 rounded-3xl bg-white p-4 shadow-sm">
-          <input
-            value={profile.name}
-            onChange={(e) => void userData.updateProfile({ name: e.target.value.slice(0, 16) })}
-            className="font-display w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-center text-lg font-bold outline-none focus:border-[var(--primary)]"
-            placeholder="Your name"
-          />
-          <div className="grid grid-cols-4 gap-2">
-            {DOGS.map((d) => (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => void userData.updateProfile({ dogId: d.id as DogId })}
-                className={`rounded-2xl p-1 transition ${
-                  profile.dogId === d.id
-                    ? "bg-[var(--primary-soft)] ring-2 ring-[var(--primary)]"
-                    : "bg-[var(--surface-soft)]"
-                }`}
-                aria-label={d.breed}
-              >
-                <DogAvatar dogId={d.id} size={48} />
-              </button>
-            ))}
-          </div>
-        </div>
+        <ProfileEditForm
+          profile={profile}
+          currentUsername={friends.myProfile?.username ?? null}
+          userId={userData.user?.id ?? null}
+          onSaveDisplayName={async (name) => {
+            await userData.updateProfile({ name });
+          }}
+          onSaveUsername={friends.setUsername}
+          onSaveDog={async (dogId) => {
+            await userData.updateProfile({ dogId });
+          }}
+          onDone={() => setEditing(false)}
+        />
       )}
 
       {/* Account / sync */}
-      <AccountCard userData={userData} />
+      <AccountCard userData={userData} onSignIn={onSignIn} />
 
       {/* Multiplayer win/loss — top of stats (Crossplay-style) */}
       <WinLossBar {...multiWinLoss(multi)} />
@@ -310,38 +338,34 @@ function MeTab({
   );
 }
 
-function AccountCard({ userData }: { userData: ReturnType<typeof useUserData> }) {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [error, setError] = useState<string | null>(null);
-
+function AccountCard({
+  userData,
+  onSignIn,
+}: {
+  userData: ReturnType<typeof useUserData>;
+  onSignIn: () => void;
+}) {
   if (!userData.authConfigured) {
     return (
-      <div className="rounded-3xl bg-[var(--surface-soft)] p-4 text-center text-xs text-[var(--muted)]">
-        Stats are saved on this device. Add Supabase keys to enable cloud sync
-        across devices.
-      </div>
+      <p className="text-center text-xs text-[var(--muted)]">
+        Stats are saved on this device.
+      </p>
     );
   }
 
   if (userData.user) {
     return (
-      <div className="flex items-center gap-3 rounded-3xl bg-white p-4 shadow-sm">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
-          <UserIcon width={18} height={18} />
+      <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--surface-soft)] px-3 py-2">
+        <span className="text-[var(--primary)]">
+          <UserIcon width={16} height={16} />
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold text-[var(--muted)]">
-            Synced across devices
-          </div>
-          <div className="truncate text-sm font-bold text-[var(--foreground)]">
-            {userData.user.email ?? "Signed in"}
-          </div>
-        </div>
+        <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[var(--foreground)]">
+          {userData.user.email ?? "Signed in"}
+        </span>
         <button
           type="button"
           onClick={() => void userData.signOut()}
-          className="rounded-full bg-[var(--surface-soft)] px-3 py-1.5 text-xs font-bold text-[var(--paw)] active:scale-95"
+          className="shrink-0 text-xs font-bold text-[var(--paw)] underline underline-offset-2"
         >
           Sign out
         </button>
@@ -349,48 +373,18 @@ function AccountCard({ userData }: { userData: ReturnType<typeof useUserData> })
     );
   }
 
-  async function send() {
-    setStatus("sending");
-    setError(null);
-    const res = await userData.signIn(email);
-    if (res.ok) setStatus("sent");
-    else {
-      setStatus("error");
-      setError(res.error ?? "Something went wrong.");
-    }
-  }
+  if (!hasAuthIntroCompleted()) return null;
 
   return (
-    <div className="flex flex-col gap-2 rounded-3xl bg-white p-4 shadow-sm">
-      <div className="text-sm font-bold text-[var(--foreground)]">
-        Save your stats across devices
-      </div>
-      {status === "sent" ? (
-        <p className="text-sm text-[var(--muted)]">
-          Check your email for a magic link to finish signing in. ✉️
-        </p>
-      ) : (
-        <>
-          <div className="flex items-center gap-2">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@email.com"
-              className="w-full rounded-full border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--primary)]"
-            />
-            <button
-              type="button"
-              onClick={send}
-              disabled={status === "sending"}
-              className="font-display shrink-0 rounded-full bg-[var(--primary)] px-4 py-2.5 text-sm font-extrabold text-white active:scale-95 disabled:opacity-60"
-            >
-              {status === "sending" ? "…" : "Sign in"}
-            </button>
-          </div>
-          {error && <p className="text-xs text-[#ef6f6c]">{error}</p>}
-        </>
-      )}
+    <div className="flex items-center justify-between rounded-2xl bg-[var(--surface-soft)] px-3 py-2 text-xs">
+      <span className="text-[var(--muted)]">Stats saved on this device</span>
+      <button
+        type="button"
+        onClick={onSignIn}
+        className="font-bold text-[var(--primary)] active:opacity-70"
+      >
+        Sign in
+      </button>
     </div>
   );
 }

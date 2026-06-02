@@ -61,8 +61,8 @@ export function FriendsTab({ userData }: Props) {
           Sign in to add friends
         </h2>
         <p className="text-sm text-[var(--muted)]">
-          Use the Me tab to sign in with email, then come back here to search,
-          send requests, and invite pups to play.
+          Sign in with email (from the prompt when you open the app, or Me →
+          Sign in), then search, send requests, and invite pups to play.
         </p>
       </div>
     );

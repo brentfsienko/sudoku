@@ -4,6 +4,7 @@ import { getSupabase } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/stats/types";
 import type { Difficulty, GameMode } from "@/lib/game/types";
 import type { Friend, FriendRequest, GameInvite, PublicProfile } from "./types";
+import { normalizeUsername, validateUsername } from "./username";
 
 type ProfileRow = {
   user_id: string;
@@ -93,14 +94,43 @@ export async function fetchMyPublicProfile(
   return data ? mapProfile(data as ProfileRow) : null;
 }
 
+export async function isUsernameAvailable(
+  username: string,
+  excludeUserId?: string,
+): Promise<boolean> {
+  const clean = normalizeUsername(username);
+  const validation = validateUsername(clean);
+  if (validation) return false;
+
+  const sb = getSupabase();
+  if (!sb) return false;
+
+  let query = sb
+    .from("player_profiles")
+    .select("user_id")
+    .ilike("username", clean);
+
+  if (excludeUserId) {
+    query = query.neq("user_id", excludeUserId);
+  }
+
+  const { data } = await query.maybeSingle();
+  return !data;
+}
+
 export async function updateUsername(
   userId: string,
   username: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const clean = username.toLowerCase().replace(/[^a-z0-9_]/g, "");
-  if (clean.length < 3 || clean.length > 24) {
-    return { ok: false, error: "Username must be 3–24 characters (a-z, 0-9, _)." };
+  const clean = normalizeUsername(username);
+  const validation = validateUsername(clean);
+  if (validation) return { ok: false, error: validation };
+
+  const available = await isUsernameAvailable(clean, userId);
+  if (!available) {
+    return { ok: false, error: "Username already taken." };
   }
+
   const sb = getSupabase();
   if (!sb) return { ok: false, error: "Not configured" };
   const { error } = await sb
