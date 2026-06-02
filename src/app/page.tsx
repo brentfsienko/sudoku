@@ -24,6 +24,7 @@ import { DOGS, type DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
 import { useUserData } from "@/lib/stats/useUserData";
 import {
+  emptyUserData,
   mostPlayedOpponent,
   type GameLog,
   type MultiStats,
@@ -57,6 +58,7 @@ export default function Home() {
 
   const userData = useUserData();
   const data = userData.data;
+  const statsForMe = data ?? emptyUserData();
 
   function startGame() {
     if (mode === "single") {
@@ -170,22 +172,22 @@ export default function Home() {
         {tab === "friends" && <FriendsTab userData={userData} />}
 
         {tab === "me" &&
-          (data ? (
-            <MeTab
-              data={{
-                profile: data.profile,
-                solo: data.solo,
-                multi: data.multi,
-                history: data.history,
-              }}
-              userData={userData}
-            />
-          ) : (
+          (userData.loading ? (
             <div className="flex flex-1 items-center justify-center">
               <span className="font-display animate-pulse text-[var(--muted)]">
                 Loading your stats… 🐾
               </span>
             </div>
+          ) : (
+            <MeTab
+              data={{
+                profile: statsForMe.profile,
+                solo: statsForMe.solo,
+                multi: statsForMe.multi,
+                history: statsForMe.history,
+              }}
+              userData={userData}
+            />
           ))}
       </main>
 

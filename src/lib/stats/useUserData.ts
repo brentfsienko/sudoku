@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { syncPublicProfile } from "@/lib/friends/api";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { loadLocal } from "./local";
 import { loadUserData, saveUserData } from "./store";
 import { emptyUserData, type Profile, type UserData } from "./types";
 
@@ -40,31 +41,42 @@ export function useUserData(): UseUserData {
     let active = true;
 
     async function init() {
-      const sb = getSupabase();
       let authUser: { id: string; email: string | null } | null = null;
-      if (sb) {
-        const { data: sessionData } = await sb.auth.getSession();
-        const u = sessionData.session?.user;
-        authUser = u ? { id: u.id, email: u.email ?? null } : null;
-        if (active) setUser(authUser);
+      try {
+        const sb = getSupabase();
+        if (sb) {
+          const { data: sessionData } = await sb.auth.getSession();
+          const u = sessionData.session?.user;
+          authUser = u ? { id: u.id, email: u.email ?? null } : null;
+          if (active) setUser(authUser);
+        }
+        const d = await loadUserData();
+        if (active) setDataBoth(d);
+        if (authUser && active) void syncPublicProfile(authUser.id, d.profile);
+      } catch (err) {
+        console.warn("[stats] init failed, using local data:", err);
+        if (active) setDataBoth(loadLocal());
+      } finally {
+        if (active) setLoading(false);
       }
-      const d = await loadUserData();
-      if (active) {
-        setDataBoth(d);
-        setLoading(false);
-      }
-      if (authUser && d) void syncPublicProfile(authUser.id, d.profile);
     }
 
-    init();
+    void init();
 
     const sb = getSupabase();
     const sub = sb?.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user;
+      if (!active) return;
       setUser(u ? { id: u.id, email: u.email ?? null } : null);
-      const d = await loadUserData();
-      if (active) setDataBoth(d);
-      if (u && d) void syncPublicProfile(u.id, d.profile);
+      try {
+        const d = await loadUserData();
+        if (active) setDataBoth(d);
+        if (u && active) void syncPublicProfile(u.id, d.profile);
+      } catch {
+        if (active) setDataBoth(loadLocal());
+      } finally {
+        if (active) setLoading(false);
+      }
     });
 
     const onVisible = () => {
