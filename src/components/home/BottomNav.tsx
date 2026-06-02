@@ -1,9 +1,9 @@
 "use client";
 
 import type { ComponentType, SVGProps } from "react";
-import { CalendarIcon, HomeIcon, UserIcon } from "@/components/icons";
+import { HomeIcon, UserIcon, UsersIcon } from "@/components/icons";
 
-export type HomeTab = "main" | "daily" | "me";
+export type HomeTab = "main" | "friends" | "me";
 
 const TABS: {
   id: HomeTab;
@@ -11,7 +11,7 @@ const TABS: {
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
 }[] = [
   { id: "main", label: "Play", Icon: HomeIcon },
-  { id: "daily", label: "Daily", Icon: CalendarIcon },
+  { id: "friends", label: "Friends", Icon: UsersIcon },
   { id: "me", label: "Me", Icon: UserIcon },
 ];
 

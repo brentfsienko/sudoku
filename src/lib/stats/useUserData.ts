@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { syncPublicProfile } from "@/lib/friends/api";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadUserData, saveUserData } from "./store";
 import { emptyUserData, type Profile, type UserData } from "./types";
@@ -40,16 +41,19 @@ export function useUserData(): UseUserData {
 
     async function init() {
       const sb = getSupabase();
+      let authUser: { id: string; email: string | null } | null = null;
       if (sb) {
         const { data: sessionData } = await sb.auth.getSession();
         const u = sessionData.session?.user;
-        if (active) setUser(u ? { id: u.id, email: u.email ?? null } : null);
+        authUser = u ? { id: u.id, email: u.email ?? null } : null;
+        if (active) setUser(authUser);
       }
       const d = await loadUserData();
       if (active) {
         setDataBoth(d);
         setLoading(false);
       }
+      if (authUser && d) void syncPublicProfile(authUser.id, d.profile);
     }
 
     init();
@@ -60,6 +64,7 @@ export function useUserData(): UseUserData {
       setUser(u ? { id: u.id, email: u.email ?? null } : null);
       const d = await loadUserData();
       if (active) setDataBoth(d);
+      if (u && d) void syncPublicProfile(u.id, d.profile);
     });
 
     const onVisible = () => {
@@ -84,6 +89,8 @@ export function useUserData(): UseUserData {
       };
       setDataBoth(merged);
       await saveUserData(merged);
+      const uid = (await getSupabase()?.auth.getSession())?.data.session?.user?.id;
+      if (uid) void syncPublicProfile(uid, merged.profile);
     },
     [setDataBoth],
   );

@@ -45,7 +45,7 @@ Single-player works out of the box. Co-op and Competitive need a free [Liveblock
 
 Stats work without this — they're stored in the browser's `localStorage`. To let players sign in and sync stats across devices, add a free [Supabase](https://supabase.com) project:
 
-1. Create a project, then open **SQL Editor** and run the contents of [`supabase/schema.sql`](./supabase/schema.sql) (creates the `user_data` table + row-level security).
+1. Create a project, then open **SQL Editor** and run [`supabase/schema.sql`](./supabase/schema.sql) and [`supabase/friends.sql`](./supabase/friends.sql) (stats storage, searchable profiles, friends, and game invites).
 2. From **Project Settings → API Keys**, copy the project URL and the **publishable key**, and add them to `.env.local`:
 
    ```bash

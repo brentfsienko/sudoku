@@ -3,7 +3,6 @@
 import { GAME_MODE_LABELS, type GameMode } from "@/lib/game/types";
 
 const MODES: { id: GameMode; label: string; hint: string; emoji: string }[] = [
-  { id: "single", label: GAME_MODE_LABELS.single, hint: "Just you", emoji: "🐕" },
   { id: "coop", label: GAME_MODE_LABELS.coop, hint: "Solve together", emoji: "🐶🐶" },
   {
     id: "competitive",
@@ -11,6 +10,7 @@ const MODES: { id: GameMode; label: string; hint: string; emoji: string }[] = [
     hint: "Most squares wins",
     emoji: "🏆",
   },
+  { id: "single", label: GAME_MODE_LABELS.single, hint: "Just you", emoji: "🐕" },
 ];
 
 type Props = {

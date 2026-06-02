@@ -1,12 +1,11 @@
-import { DIFFICULTY_RANK, type GameLog } from "./types";
+import type { GameLog } from "./types";
 
-export type Metric = "games" | "time" | "mistakes" | "climb";
+export type Metric = "games" | "time" | "mistakes";
 
 export const METRICS: { id: Metric; label: string }[] = [
   { id: "games", label: "Games" },
   { id: "time", label: "Time" },
   { id: "mistakes", label: "Mistakes" },
-  { id: "climb", label: "Climb" },
 ];
 
 /** Per-game contribution to a metric. */
@@ -18,9 +17,6 @@ export function metricValue(log: GameLog, metric: Metric): number {
       return log.seconds;
     case "mistakes":
       return log.mistakes;
-    case "climb":
-      // Only summited puzzles count toward the climb.
-      return log.won ? DIFFICULTY_RANK[log.difficulty] : 0;
   }
 }
 
@@ -64,17 +60,15 @@ export type PeriodTotals = {
   games: number;
   seconds: number;
   mistakes: number;
-  climb: number;
 };
 
 export function totalsSince(history: GameLog[], sinceMs: number): PeriodTotals {
-  const t: PeriodTotals = { games: 0, seconds: 0, mistakes: 0, climb: 0 };
+  const t: PeriodTotals = { games: 0, seconds: 0, mistakes: 0 };
   for (const log of history) {
     if (log.t < sinceMs) continue;
     t.games += 1;
     t.seconds += log.seconds;
     t.mistakes += log.mistakes;
-    t.climb += log.won ? DIFFICULTY_RANK[log.difficulty] : 0;
   }
   return t;
 }

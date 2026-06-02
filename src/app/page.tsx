@@ -5,18 +5,20 @@ import { useRouter } from "next/navigation";
 import { DifficultySelect } from "@/components/home/DifficultySelect";
 import { ModeSelect } from "@/components/home/ModeSelect";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
+import { FriendsTab } from "@/components/home/FriendsTab";
 import { DogAvatar } from "@/components/DogAvatar";
 import { ProgressChart } from "@/components/stats/ProgressChart";
+import { WinLossBar } from "@/components/stats/WinLossBar";
 import {
   ChartIcon,
   ClockIcon,
   FlameIcon,
-  MountainIcon,
   PawIcon,
   TargetIcon,
   TrophyIcon,
   UserIcon,
 } from "@/components/icons";
+import { multiWinLoss } from "@/lib/friends/api";
 import { DIFFICULTY_LABELS, type Difficulty, type GameMode } from "@/lib/game/types";
 import { DOGS, type DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
@@ -50,7 +52,7 @@ export default function Home() {
   const router = useRouter();
   const [tab, setTab] = useState<HomeTab>("main");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [mode, setMode] = useState<GameMode>("single");
+  const [mode, setMode] = useState<GameMode>("coop");
   const [joinCode, setJoinCode] = useState("");
 
   const userData = useUserData();
@@ -101,10 +103,18 @@ export default function Home() {
             <div className="flex items-center justify-between rounded-3xl bg-gradient-to-br from-[var(--primary-soft)] to-[var(--surface-soft)] px-5 py-4">
               <div>
                 <div className="text-sm font-semibold text-[var(--paw)]">
-                  All-Time Best Score
+                  Multiplayer record
                 </div>
                 <div className="font-display text-3xl font-extrabold text-[var(--foreground)]">
-                  {(data?.solo.bestScore ?? 0).toLocaleString()}
+                  {data
+                    ? (() => {
+                        const m = multiWinLoss(data.multi);
+                        return `${m.wins}-${m.losses}`;
+                      })()
+                    : "0-0"}
+                </div>
+                <div className="text-xs font-semibold text-[var(--muted)]">
+                  wins · losses
                 </div>
               </div>
               <span className="text-[var(--primary)]">
@@ -119,15 +129,15 @@ export default function Home() {
               <button
                 type="button"
                 onClick={startGame}
-                className="font-display mt-1 rounded-full bg-[var(--primary)] py-4 text-xl font-extrabold text-white shadow-lg shadow-[var(--primary)]/30 transition active:scale-[0.98]"
+                className="font-display mt-1 rounded-full border-2 border-[var(--border)] bg-white py-4 text-xl font-extrabold text-[var(--foreground)] transition active:scale-[0.98]"
               >
-                New Game
+                Solo Practice
               </button>
             ) : (
               <div className="mt-1 flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm">
                 <p className="text-center text-sm text-[var(--muted)]">
-                  Play with a friend over Wi-Fi. Create a room and share the
-                  code, or join theirs.
+                  Create a room and share the code, invite from the Friends tab,
+                  or join a friend&apos;s game.
                 </p>
                 <button
                   type="button"
@@ -157,18 +167,7 @@ export default function Home() {
           </>
         )}
 
-        {tab === "daily" && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-            <DogAvatar dogId="corgi" size={120} />
-            <h2 className="font-display text-2xl font-extrabold text-[var(--foreground)]">
-              Daily Challenges
-            </h2>
-            <p className="max-w-xs text-[var(--muted)]">
-              A fresh puzzle every day is coming soon. Keep your streak warm in
-              the meantime!
-            </p>
-          </div>
-        )}
+        {tab === "friends" && <FriendsTab userData={userData} />}
 
         {tab === "me" &&
           (data ? (
@@ -281,14 +280,17 @@ function MeTab({
       {/* Account / sync */}
       <AccountCard userData={userData} />
 
+      {/* Multiplayer win/loss — top of stats (Crossplay-style) */}
+      <WinLossBar {...multiWinLoss(multi)} />
+
       {/* Progress */}
       <ProgressSection history={history} />
 
+      {/* Multiplayer details */}
+      <MultiSection multi={multi} />
+
       {/* Solo */}
       <SoloSection solo={solo} />
-
-      {/* Multiplayer */}
-      <MultiSection multi={multi} />
 
       {totalGames > 0 && (
         <button
@@ -395,7 +397,6 @@ const METRIC_COLORS: Record<Metric, string> = {
   games: "#f4a259",
   time: "#4ea1a3",
   mistakes: "#ef6f6c",
-  climb: "#a06bd6",
 };
 
 function ProgressSection({ history }: { history: GameLog[] }) {
@@ -441,15 +442,10 @@ function ProgressSection({ history }: { history: GameLog[] }) {
       <div className="font-display text-sm font-extrabold text-[var(--foreground)]">
         This week
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <WeekStat label="Games" value={week.games.toLocaleString()} />
         <WeekStat label="Time" value={formatDuration(week.seconds)} />
         <WeekStat label="Mistakes" value={week.mistakes.toLocaleString()} />
-        <WeekStat
-          label="Climb"
-          value={week.climb.toLocaleString()}
-          icon={<MountainIcon width={12} height={12} />}
-        />
       </div>
 
       <div className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
@@ -465,22 +461,13 @@ function ProgressSection({ history }: { history: GameLog[] }) {
   );
 }
 
-function WeekStat({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-}) {
+function WeekStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
       <div className="font-display text-lg font-extrabold leading-tight text-[var(--foreground)]">
         {value}
       </div>
-      <div className="flex items-center gap-1 text-[11px] font-semibold leading-tight text-[var(--muted)]">
-        {icon}
+      <div className="text-[11px] font-semibold leading-tight text-[var(--muted)]">
         {label}
       </div>
     </div>
