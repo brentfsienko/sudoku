@@ -57,6 +57,7 @@ export function useLiveGame(opts: {
   const meta = useStorage((root) => root.meta);
   const cellsMap = useStorage((root) => root.cells) as unknown as
     | ReadonlyMap<string, CellEntry>
+    | Record<string, CellEntry>
     | null;
   const [myPresence, updateMyPresence] = useMyPresence();
   const others = useOthers();
@@ -219,9 +220,15 @@ export function useLiveGame(opts: {
   const snapshot: GameSnapshot | null = useMemo(() => {
     if (!meta || !cellsMap) return null;
     const cells: Record<number, CellEntry> = {};
-    cellsMap.forEach((v, k) => {
-      cells[Number(k)] = v as CellEntry;
-    });
+    // Liveblocks' immutable storage may surface a Map or a plain object
+    // depending on version; handle both defensively.
+    const entries: [string, CellEntry][] =
+      cellsMap instanceof Map
+        ? Array.from(cellsMap.entries())
+        : Object.entries(cellsMap as Record<string, CellEntry>);
+    for (const [k, v] of entries) {
+      cells[Number(k)] = v;
+    }
     return {
       puzzle: meta.puzzle,
       solution: meta.solution,
