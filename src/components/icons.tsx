@@ -165,6 +165,33 @@ export function PawIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function SearchIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  );
+}
+
+export function UserPlusIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1" />
+      <circle cx="9" cy="7" r="3" />
+      <path d="M19 8v6M22 11h-6" />
+    </svg>
+  );
+}
+
+export function CrownIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)} fill="currentColor" stroke="none">
+      <path d="M5 16h14l-1.2-8.2-3.3 4.5-2.5-6.3-2.5 6.3-3.3-4.5L5 16Zm-1 3h16v2H4v-2Z" />
+    </svg>
+  );
+}
+
 export function UsersIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Nunito } from "next/font/google";
+import { Baloo_2, Lora, Nunito } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -13,6 +13,12 @@ const nunito = Nunito({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+});
+
+const lora = Lora({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -38,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${baloo.variable} ${nunito.variable} h-full antialiased`}
+      className={`${baloo.variable} ${nunito.variable} ${lora.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}

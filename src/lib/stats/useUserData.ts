@@ -17,7 +17,15 @@ export type UseUserData = {
   refresh: () => Promise<void>;
   updateProfile: (next: Partial<Profile>) => Promise<void>;
   reset: () => Promise<void>;
-  signIn: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  signInWithPassword: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
+  signUp: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
+  resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
 };
 
@@ -114,14 +122,41 @@ export function useUserData(): UseUserData {
     await saveUserData(fresh);
   }, [setDataBoth]);
 
-  const signIn = useCallback(async (email: string) => {
+  const signInWithPassword = useCallback(async (email: string, password: string) => {
     const sb = getSupabase();
     if (!sb) return { ok: false, error: "Sign-in is not configured." };
     const clean = email.trim();
-    if (!clean) return { ok: false, error: "Enter an email address." };
-    const { error } = await sb.auth.signInWithOtp({
-      email: clean,
-      options: { emailRedirectTo: window.location.origin },
+    if (!clean) return { ok: false, error: "Enter your email." };
+    if (!password) return { ok: false, error: "Enter your password." };
+    const { error } = await sb.auth.signInWithPassword({ email: clean, password });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string) => {
+    const sb = getSupabase();
+    if (!sb) return { ok: false, error: "Sign-in is not configured." };
+    const clean = email.trim();
+    if (!clean) return { ok: false, error: "Enter your email." };
+    if (password.length < 6) {
+      return { ok: false, error: "Password must be at least 6 characters." };
+    }
+    const { data, error } = await sb.auth.signUp({ email: clean, password });
+    if (error) return { ok: false, error: error.message };
+    if (data.session) return { ok: true };
+    return {
+      ok: true,
+      needsConfirmation: true,
+    };
+  }, []);
+
+  const resetPassword = useCallback(async (email: string) => {
+    const sb = getSupabase();
+    if (!sb) return { ok: false, error: "Sign-in is not configured." };
+    const clean = email.trim();
+    if (!clean) return { ok: false, error: "Enter your email." };
+    const { error } = await sb.auth.resetPasswordForEmail(clean, {
+      redirectTo: window.location.origin,
     });
     if (error) return { ok: false, error: error.message };
     return { ok: true };
@@ -142,7 +177,9 @@ export function useUserData(): UseUserData {
     refresh,
     updateProfile,
     reset,
-    signIn,
+    signInWithPassword,
+    signUp,
+    resetPassword,
     signOut,
   };
 }

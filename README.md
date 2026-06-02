@@ -17,7 +17,7 @@ A floofy, dog-themed Sudoku game built with [Next.js](https://nextjs.org) and de
 - Full board toolkit: notes, hints, undo, erase, mistake tracker (x/3), timer + pause, live score, and same row/column/box/number highlighting.
 - Post-game stats breakdown (time, mistakes, hints, and per-player squares filled).
 - A rich **Me** dashboard: separate **Solo** and **Multiplayer** stats, most-played opponent, and a Strava-style **progress graph** (games, time played, mistakes, and a "Climb" difficulty metric) over the past 12 weeks.
-- Stats save on-device by default and sync **across devices** when you sign in (passwordless email magic-link via Supabase).
+- Stats save on-device by default and sync **across devices** when you sign in with email and password (Supabase).
 
 ## Local development
 
@@ -53,8 +53,9 @@ Stats work without this — they're stored in the browser's `localStorage`. To l
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxxxxxx
    ```
 
-3. In **Authentication → URL Configuration**, set the **Site URL** to your app's origin (e.g. `http://localhost:3000` for dev and your Vercel URL for prod) and add both to **Redirect URLs**. Email auth is enabled by default.
-4. Add the same two `NEXT_PUBLIC_*` variables in Vercel (Settings → Environment Variables).
+3. In **Authentication → Providers → Email**, keep email enabled and turn on **Confirm email** only if you want verification on sign-up (otherwise new users can sign in immediately). Password sign-in uses the Email provider's password option (enabled by default).
+4. In **Authentication → URL Configuration**, set the **Site URL** to your app's origin (e.g. `http://localhost:3000` for dev and your Vercel URL for prod) and add both to **Redirect URLs** (needed for password reset links only).
+5. Add the same two `NEXT_PUBLIC_*` variables in Vercel (Settings → Environment Variables).
 
 Signed-out players keep stats locally; on first sign-in the device's stats seed the account, after which everything syncs.
 

@@ -1,38 +1,32 @@
-import { TrophyIcon } from "@/components/icons";
+import { CrownIcon } from "@/components/icons";
 
 type Props = {
   wins: number;
   losses: number;
   winPct: number;
-  title?: string;
 };
 
-export function WinLossBar({ wins, losses, winPct, title = "Multiplayer" }: Props) {
+export function WinLossBar({ wins, losses, winPct }: Props) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <span className="text-[var(--primary)]">
-          <TrophyIcon width={20} height={20} />
-        </span>
-        <span className="text-sm font-semibold text-[var(--muted)]">
-          {winPct}% win rate · {title}
-        </span>
-      </div>
-      <div className="flex items-center gap-3">
-        <div className="text-center">
-          <div className="font-display text-3xl font-extrabold text-[var(--foreground)]">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-end gap-4">
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-[var(--primary)]">
+            <CrownIcon width={22} height={22} />
+          </span>
+          <div className="font-serif-title text-4xl leading-none text-[var(--foreground)]">
             {wins}
           </div>
           <div className="text-xs font-semibold text-[var(--muted)]">Wins</div>
         </div>
-        <div className="h-3 flex-1 overflow-hidden rounded-full bg-[var(--surface-soft)]">
+        <div className="mb-5 h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--surface-soft)]">
           <div
             className="h-full rounded-full bg-[var(--primary)] transition-all"
             style={{ width: `${winPct}%` }}
           />
         </div>
-        <div className="text-center">
-          <div className="font-display text-3xl font-extrabold text-[var(--muted)]">
+        <div className="flex flex-col items-center gap-0.5">
+          <div className="font-serif-title text-4xl leading-none text-[var(--foreground)]">
             {losses}
           </div>
           <div className="text-xs font-semibold text-[var(--muted)]">Losses</div>

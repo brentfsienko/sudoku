@@ -7,10 +7,9 @@ import { DifficultySelect } from "@/components/home/DifficultySelect";
 import { ModeSelect } from "@/components/home/ModeSelect";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
 import { FriendsTab } from "@/components/home/FriendsTab";
-import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
+import { MeProfileHeader } from "@/components/profile/MeProfileHeader";
 import { DogAvatar } from "@/components/DogAvatar";
 import { ProgressChart } from "@/components/stats/ProgressChart";
-import { WinLossBar } from "@/components/stats/WinLossBar";
 import {
   ChartIcon,
   ClockIcon,
@@ -21,7 +20,6 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { multiWinLoss } from "@/lib/friends/api";
-import { useFriends } from "@/lib/friends/useFriends";
 import { DIFFICULTY_LABELS, type Difficulty, type GameMode } from "@/lib/game/types";
 import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
@@ -99,29 +97,40 @@ export default function Home() {
         onClose={() => setSignInGateOpen(false)}
       />
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--background)]">
-      <header
-        className="flex items-center justify-between px-5 pb-3 pt-5"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-[var(--primary)]">
-            <PawIcon width={26} height={26} />
-          </span>
-          <h1 className="font-display text-2xl font-extrabold text-[var(--foreground)]">
-            Floof Sudoku
-          </h1>
-        </div>
-        <div className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 shadow-sm">
-          <span className="text-[var(--primary)]">
-            <FlameIcon width={18} height={18} />
-          </span>
-          <span className="font-display font-bold text-[var(--foreground)]">
-            {data?.solo.streak ?? 0}
-          </span>
-        </div>
-      </header>
+      {tab === "main" && (
+        <header
+          className="flex items-center justify-between px-5 pb-3 pt-5"
+          style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--primary)]">
+              <PawIcon width={26} height={26} />
+            </span>
+            <h1 className="font-display text-2xl font-extrabold text-[var(--foreground)]">
+              Floof Sudoku
+            </h1>
+          </div>
+          <div className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 shadow-sm">
+            <span className="text-[var(--primary)]">
+              <FlameIcon width={18} height={18} />
+            </span>
+            <span className="font-display font-bold text-[var(--foreground)]">
+              {data?.solo.streak ?? 0}
+            </span>
+          </div>
+        </header>
+      )}
 
-      <main className="flex flex-1 flex-col gap-4 px-5 pb-6">
+      <main
+        className={`flex flex-1 flex-col gap-4 px-5 pb-6 ${
+          tab !== "main" ? "pt-5" : ""
+        }`}
+        style={
+          tab !== "main"
+            ? { paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }
+            : undefined
+        }
+      >
         {tab === "main" && (
           <>
             <div className="flex items-center justify-between rounded-3xl bg-gradient-to-br from-[var(--primary-soft)] to-[var(--surface-soft)] px-5 py-4">
@@ -191,7 +200,9 @@ export default function Home() {
           </>
         )}
 
-        {tab === "friends" && <FriendsTab userData={userData} />}
+        {tab === "friends" && (
+          <FriendsTab userData={userData} onSignIn={() => setSignInGateOpen(true)} />
+        )}
 
         {tab === "me" &&
           (userData.loading ? (
@@ -245,73 +256,18 @@ function MeTab({
   userData: ReturnType<typeof useUserData>;
   onSignIn: () => void;
 }) {
-  const [editing, setEditing] = useState(false);
   const { profile, solo, multi, history } = data;
-  const friends = useFriends(userData.user, profile);
 
   const totalGames = solo.played + multi.coopPlayed + multi.compPlayed;
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Greeting + profile */}
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => setEditing((v) => !v)}
-          className="shrink-0 rounded-full transition active:scale-95"
-          aria-label="Edit profile"
-        >
-          <DogAvatar dogId={profile.dogId} size={56} ringColor="#3b82f6" />
-        </button>
-        <div className="min-w-0">
-          <div className="text-sm text-[var(--muted)]">Here are your stats,</div>
-          <div className="font-display truncate text-xl font-extrabold text-[var(--foreground)]">
-            {profile.name}
-          </div>
-          {userData.user && friends.myProfile ? (
-            <div className="truncate text-sm font-semibold text-[var(--paw)]">
-              @{friends.myProfile.username}
-            </div>
-          ) : userData.authConfigured && !userData.user ? (
-            <button
-              type="button"
-              onClick={onSignIn}
-              className="text-xs font-semibold text-[var(--primary)] underline underline-offset-2"
-            >
-              Sign in for @username
-            </button>
-          ) : null}
-        </div>
-        <button
-          type="button"
-          onClick={() => setEditing((v) => !v)}
-          className="ml-auto rounded-full bg-white px-4 py-2 text-sm font-bold text-[var(--paw)] shadow-sm transition active:scale-95"
-        >
-          {editing ? "Cancel" : "Edit"}
-        </button>
-      </div>
-
-      {editing && (
-        <ProfileEditForm
-          profile={profile}
-          currentUsername={friends.myProfile?.username ?? null}
-          userId={userData.user?.id ?? null}
-          onSaveDisplayName={async (name) => {
-            await userData.updateProfile({ name });
-          }}
-          onSaveUsername={friends.setUsername}
-          onSaveDog={async (dogId) => {
-            await userData.updateProfile({ dogId });
-          }}
-          onDone={() => setEditing(false)}
-        />
-      )}
-
-      {/* Account / sync */}
-      <AccountCard userData={userData} onSignIn={onSignIn} />
-
-      {/* Multiplayer win/loss — top of stats (Crossplay-style) */}
-      <WinLossBar {...multiWinLoss(multi)} />
+      <MeProfileHeader
+        profile={profile}
+        multi={multi}
+        userData={userData}
+        onSignIn={onSignIn}
+      />
 
       {/* Progress */}
       <ProgressSection history={history} />
@@ -334,57 +290,6 @@ function MeTab({
           Reset stats
         </button>
       )}
-    </div>
-  );
-}
-
-function AccountCard({
-  userData,
-  onSignIn,
-}: {
-  userData: ReturnType<typeof useUserData>;
-  onSignIn: () => void;
-}) {
-  if (!userData.authConfigured) {
-    return (
-      <p className="text-center text-xs text-[var(--muted)]">
-        Stats are saved on this device.
-      </p>
-    );
-  }
-
-  if (userData.user) {
-    return (
-      <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--surface-soft)] px-3 py-2">
-        <span className="text-[var(--primary)]">
-          <UserIcon width={16} height={16} />
-        </span>
-        <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[var(--foreground)]">
-          {userData.user.email ?? "Signed in"}
-        </span>
-        <button
-          type="button"
-          onClick={() => void userData.signOut()}
-          className="shrink-0 text-xs font-bold text-[var(--paw)] underline underline-offset-2"
-        >
-          Sign out
-        </button>
-      </div>
-    );
-  }
-
-  if (!hasAuthIntroCompleted()) return null;
-
-  return (
-    <div className="flex items-center justify-between rounded-2xl bg-[var(--surface-soft)] px-3 py-2 text-xs">
-      <span className="text-[var(--muted)]">Stats saved on this device</span>
-      <button
-        type="button"
-        onClick={onSignIn}
-        className="font-bold text-[var(--primary)] active:opacity-70"
-      >
-        Sign in
-      </button>
     </div>
   );
 }

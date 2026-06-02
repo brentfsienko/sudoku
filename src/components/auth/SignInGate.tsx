@@ -5,6 +5,8 @@ import { PawIcon } from "@/components/icons";
 import { markAuthIntroCompleted } from "@/lib/auth/onboarding";
 import type { UseUserData } from "@/lib/stats/useUserData";
 
+type Mode = "signin" | "signup" | "forgot";
+
 type Props = {
   open: boolean;
   userData: UseUserData;
@@ -12,9 +14,12 @@ type Props = {
 };
 
 export function SignInGate({ open, userData, onClose }: Props) {
+  const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
     if (userData.user) {
@@ -25,16 +30,49 @@ export function SignInGate({ open, userData, onClose }: Props) {
 
   if (!open || !userData.authConfigured || userData.user) return null;
 
-  async function send() {
-    setStatus("sending");
+  async function submit() {
+    setStatus("loading");
     setError(null);
-    const res = await userData.signIn(email);
-    if (res.ok) {
-      setStatus("sent");
+    setInfo(null);
+
+    if (mode === "forgot") {
+      const res = await userData.resetPassword(email);
+      if (res.ok) {
+        setStatus("sent");
+        setInfo("Check your email for a link to reset your password.");
+      } else {
+        setStatus("error");
+        setError(res.error ?? "Something went wrong.");
+      }
+      return;
+    }
+
+    if (mode === "signup") {
+      const res = await userData.signUp(email, password);
+      if (!res.ok) {
+        setStatus("error");
+        setError(res.error ?? "Could not create account.");
+        return;
+      }
+      if (res.needsConfirmation) {
+        setStatus("sent");
+        setInfo("Account created. Check your email to confirm, then sign in.");
+        setMode("signin");
+        setStatus("idle");
+        return;
+      }
       markAuthIntroCompleted();
+      onClose();
+      return;
+    }
+
+    const res = await userData.signInWithPassword(email, password);
+    if (res.ok) {
+      markAuthIntroCompleted();
+      onClose();
     } else {
       setStatus("error");
-      setError(res.error ?? "Something went wrong.");
+      setError(res.error ?? "Sign in failed.");
     }
   }
 
@@ -42,6 +80,13 @@ export function SignInGate({ open, userData, onClose }: Props) {
     markAuthIntroCompleted();
     onClose();
   }
+
+  const title =
+    mode === "signup"
+      ? "Create account"
+      : mode === "forgot"
+        ? "Reset password"
+        : "Sign in";
 
   return (
     <div
@@ -59,47 +104,98 @@ export function SignInGate({ open, userData, onClose }: Props) {
             id="sign-in-gate-title"
             className="font-display text-lg font-extrabold text-[var(--foreground)]"
           >
-            Save stats across devices
+            {title}
           </h2>
         </div>
 
-        {status === "sent" ? (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-[var(--muted)]">
-              Check your email for a magic link to finish signing in.
-            </p>
-            <button
-              type="button"
-              onClick={onClose}
-              className="font-display rounded-full bg-[var(--primary)] py-2.5 text-sm font-extrabold text-white active:scale-95"
-            >
-              Got it
-            </button>
-          </div>
+        {info ? (
+          <p className="mb-3 text-sm text-[var(--muted)]">{info}</p>
         ) : (
-          <div className="flex flex-col gap-2.5">
-            <p className="text-xs text-[var(--muted)]">
-              Sign in once with email — your stats sync everywhere.
-            </p>
-            <div className="flex items-center gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@email.com"
-                autoComplete="email"
-                className="min-w-0 flex-1 rounded-full border-2 border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--primary)]"
-              />
+          <p className="mb-3 text-xs text-[var(--muted)]">
+            {mode === "forgot"
+              ? "Enter your email and we'll send a reset link."
+              : "Sign in with email and password to sync stats and play with friends."}
+          </p>
+        )}
+
+        <div className="flex flex-col gap-2.5">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            autoComplete="email"
+            className="w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--primary)]"
+          />
+          {mode !== "forgot" && (
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              className="w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--primary)]"
+            />
+          )}
+          <button
+            type="button"
+            onClick={submit}
+            disabled={status === "loading"}
+            className="font-display rounded-full bg-[var(--primary)] py-2.5 text-sm font-extrabold text-white active:scale-95 disabled:opacity-60"
+          >
+            {status === "loading"
+              ? "…"
+              : mode === "forgot"
+                ? "Send reset link"
+                : mode === "signup"
+                  ? "Create account"
+                  : "Sign in"}
+          </button>
+          {error && <p className="text-xs text-[#ef6f6c]">{error}</p>}
+
+          <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs font-semibold">
+            {mode === "signin" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("signup");
+                    setError(null);
+                    setInfo(null);
+                  }}
+                  className="text-[var(--primary)] underline underline-offset-2"
+                >
+                  Create account
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("forgot");
+                    setError(null);
+                    setInfo(null);
+                  }}
+                  className="text-[var(--muted)] underline underline-offset-2"
+                >
+                  Forgot password?
+                </button>
+              </>
+            )}
+            {mode !== "signin" && (
               <button
                 type="button"
-                onClick={send}
-                disabled={status === "sending"}
-                className="font-display shrink-0 rounded-full bg-[var(--primary)] px-3.5 py-2 text-sm font-extrabold text-white active:scale-95 disabled:opacity-60"
+                onClick={() => {
+                  setMode("signin");
+                  setError(null);
+                  setInfo(null);
+                }}
+                className="text-[var(--primary)] underline underline-offset-2"
               >
-                {status === "sending" ? "…" : "Sign in"}
+                Back to sign in
               </button>
-            </div>
-            {error && <p className="text-xs text-[#ef6f6c]">{error}</p>}
+            )}
+          </div>
+
+          {mode === "signin" && (
             <button
               type="button"
               onClick={continueOnDevice}
@@ -107,8 +203,8 @@ export function SignInGate({ open, userData, onClose }: Props) {
             >
               Continue on this device
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
