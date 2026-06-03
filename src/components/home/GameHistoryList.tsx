@@ -113,7 +113,9 @@ function OpponentLine({
           @{meName}
         </span>
       </span>
-      <span className="text-xs font-semibold text-[var(--muted)]">vs</span>
+      <span className="text-xs font-semibold text-[var(--muted)]">
+        {log.mode === "coop" ? "with" : "vs"}
+      </span>
       <span className="truncate text-[15px] font-bold text-[var(--foreground)]">
         @{opp.name}
       </span>
