@@ -150,14 +150,14 @@ function FactGuessBody({
           <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
             Sudogku players worldwide
           </p>
-          <div className="flex h-1.5 overflow-hidden rounded-full bg-white/80">
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-[#ef6f6c]"
+            role="img"
+            aria-label={`${globalPct.correctPct}% correct, ${globalPct.wrongPct}% incorrect`}
+          >
             <div
-              className="bg-[#5cc98b] transition-all"
+              className="h-full rounded-l-full bg-[#5cc98b] transition-[width] duration-300"
               style={{ width: `${globalPct.correctPct}%` }}
-            />
-            <div
-              className="bg-[#ef6f6c] transition-all"
-              style={{ width: `${globalPct.wrongPct}%` }}
             />
           </div>
           <div className="mt-1 flex justify-between text-[11px] font-semibold text-[var(--muted)]">

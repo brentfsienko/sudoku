@@ -98,13 +98,18 @@ export async function recordGuess(
     try {
       const sb = getSupabase();
       if (sb) {
-        await sb.rpc("record_trivia_guess", { was_correct: wasCorrect });
+        const { error } = await sb.rpc("record_trivia_guess", {
+          was_correct: wasCorrect,
+        });
+        if (!error) {
+          const remote = await fetchGlobalStats();
+          saveLocalGlobal(remote);
+          return remote;
+        }
       }
     } catch {
-      // local fallback already updated
+      // fall through to local increment
     }
-    const remote = await fetchGlobalStats();
-    return remote;
   }
 
   return next;
