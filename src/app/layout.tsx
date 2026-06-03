@@ -71,7 +71,7 @@ export default function RootLayout({
       lang="en"
       className={`${baloo.variable} ${nunito.variable} ${lora.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden">
         {children}
         <Analytics />
       </body>

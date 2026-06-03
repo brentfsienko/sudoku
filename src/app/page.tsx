@@ -5,7 +5,7 @@ import { SignInGate } from "@/components/auth/SignInGate";
 import { AppFrame } from "@/components/layout/AppFrame";
 import { MainTab } from "@/components/home/MainTab";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
-import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
+import { BottomNav, BOTTOM_NAV_OFFSET, type HomeTab } from "@/components/home/BottomNav";
 import { FriendsTab } from "@/components/home/FriendsTab";
 import { MeProfileHeader } from "@/components/profile/MeProfileHeader";
 import { DogAvatar } from "@/components/DogAvatar";
@@ -82,10 +82,7 @@ export default function Home() {
         className={`flex min-h-0 flex-1 flex-col overflow-hidden ${
           tab === "main" ? "bg-[var(--accent)]" : "bg-[var(--background)]"
         }`}
-        style={{
-          paddingBottom:
-            "calc(4.25rem + env(safe-area-inset-bottom, 0px))",
-        }}
+        style={{ paddingBottom: BOTTOM_NAV_OFFSET }}
       >
         {tab === "main" && (
           <MainTab
@@ -131,13 +128,8 @@ export default function Home() {
           </div>
         )}
       </main>
-
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md">
-        <div className="pointer-events-auto bg-[var(--surface)]">
-          <BottomNav active={tab} onChange={setTab} />
-        </div>
-      </div>
     </AppFrame>
+    <BottomNav active={tab} onChange={setTab} />
     </>
   );
 }

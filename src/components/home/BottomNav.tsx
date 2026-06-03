@@ -20,10 +20,17 @@ type Props = {
   onChange: (tab: HomeTab) => void;
 };
 
+/** Reserve space above fixed nav (tab row + safe area). Keep in sync with page main padding. */
+export const BOTTOM_NAV_OFFSET =
+  "calc(4.25rem + env(safe-area-inset-bottom, 0px))";
+
 export function BottomNav({ active, onChange }: Props) {
   return (
-    <nav className="w-full border-t border-[var(--border)] bg-[var(--surface)]">
-      <div className="mx-auto flex max-w-md items-stretch justify-around pt-2.5 pb-2">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border)] bg-[var(--surface)]"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
+      <div className="mx-auto flex w-full max-w-md items-stretch justify-around pt-2.5 pb-2">
         {TABS.map(({ id, label, Icon }) => {
           const isActive = active === id;
           return (
@@ -56,11 +63,6 @@ export function BottomNav({ active, onChange }: Props) {
           );
         })}
       </div>
-      <div
-        aria-hidden
-        className="bg-[var(--surface)]"
-        style={{ height: "env(safe-area-inset-bottom, 0px)" }}
-      />
     </nav>
   );
 }
