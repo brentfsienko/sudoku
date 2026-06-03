@@ -13,6 +13,7 @@ type Props = {
   size?: "md" | "lg" | "xl";
   /** Title + icon alignment in the header */
   align?: "start" | "center";
+  className?: string;
 };
 
 export function AppBrandTitle({
@@ -22,15 +23,23 @@ export function AppBrandTitle({
   light,
   size = "lg",
   align = "center",
+  className,
 }: Props) {
   const avatarSize =
-    size === "xl" ? (appIcon || profileIcon ? 96 : 42) : size === "lg" ? 36 : 28;
+    size === "xl"
+      ? appIcon || profileIcon
+        ? 128
+        : 48
+      : size === "lg"
+        ? 36
+        : 28;
   const titleClass =
     size === "xl"
       ? "font-serif-title text-[2.75rem] leading-none"
       : size === "lg"
         ? "font-serif-title text-[2.25rem] leading-none"
         : "font-serif-title text-xl leading-none";
+  const headerRow = size === "xl" && align === "start";
 
   const icon =
     profileIcon ? (
@@ -43,13 +52,17 @@ export function AppBrandTitle({
 
   return (
     <div
-      className={`flex items-center gap-3.5 ${
-        align === "start" ? "justify-start" : "justify-center"
-      } ${size === "xl" ? "min-w-0" : ""}`}
+      className={`flex gap-4 ${
+        headerRow ? "items-end pb-0.5" : "items-center gap-3.5"
+      } ${align === "start" ? "justify-start" : "justify-center"} ${
+        size === "xl" ? "min-w-0" : ""
+      } ${className ?? ""}`}
     >
       {icon}
       <span
-        className={`${titleClass} ${light ? "text-white" : "text-[var(--foreground)]"}`}
+        className={`${titleClass} ${light ? "text-white" : "text-[var(--foreground)]"} ${
+          headerRow ? "pb-1" : ""
+        }`}
       >
         {APP_NAME}
       </span>

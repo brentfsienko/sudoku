@@ -152,13 +152,14 @@ export function MainTab({ data, userData, onSignIn }: Props) {
       />
 
       <header
-        className="relative z-20 shrink-0 px-5 pb-6 pr-28"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
+        className="relative z-20 shrink-0 pl-4 pr-28 pb-3"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.5rem)" }}
       >
         <AppBrandTitle
           light
           size="xl"
           align="start"
+          className="mt-1"
           dogId={headerDogId}
           appIcon={!honeyHeader}
           profileIcon={honeyHeader}

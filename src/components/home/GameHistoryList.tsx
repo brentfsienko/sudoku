@@ -236,11 +236,15 @@ function SoloHistoryRow({
   profile,
   userEmail,
   divider,
+  onPlayAgain,
+  rematchBusy,
 }: {
   log: GameLog;
   profile: Profile;
   userEmail?: string | null;
   divider: boolean;
+  onPlayAgain?: () => void;
+  rematchBusy?: boolean;
 }) {
   const meName = displayUsername(profile.username);
 
@@ -268,7 +272,12 @@ function SoloHistoryRow({
           {outcomeText(log)} · {DIFFICULTY_LABELS[log.difficulty]}
         </span>
       </div>
-      <RowActions when={formatWhen(log.t)} />
+      <RowActions
+        when={formatWhen(log.t)}
+        showAgain
+        onPlayAgain={onPlayAgain}
+        rematchBusy={rematchBusy}
+      />
     </div>
   );
 }
@@ -297,6 +306,8 @@ function HistoryRow({
         profile={profile}
         userEmail={userEmail}
         divider={divider}
+        onPlayAgain={() => onPlayAgain(log)}
+        rematchBusy={rematchBusy}
       />
     );
   }
@@ -327,7 +338,10 @@ export function GameHistoryList({
   const rows = [...history].reverse();
 
   async function handlePlayAgain(log: GameLog) {
-    if (log.mode === "solo") return;
+    if (log.mode === "solo") {
+      router.push(`/play?d=${log.difficulty}`);
+      return;
+    }
     const key = `${log.t}`;
     setRematchKey(key);
 

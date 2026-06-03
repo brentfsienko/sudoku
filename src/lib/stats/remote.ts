@@ -27,7 +27,8 @@ export async function fetchRemote(userId: string): Promise<UserData | null> {
     sumHistorySquares(raw.history) < sumHistorySquares(normalized.history) ||
     JSON.stringify(raw.history ?? []) !== JSON.stringify(normalized.history) ||
     JSON.stringify(raw.multi?.opponents ?? {}) !==
-      JSON.stringify(normalized.multi.opponents);
+      JSON.stringify(normalized.multi.opponents) ||
+    (typeof raw.bones === "number" ? raw.bones : 0) < (normalized.bones ?? 0);
   if (needsRepair) {
     void upsertRemote(userId, normalized);
   }

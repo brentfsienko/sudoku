@@ -6,6 +6,7 @@ import { fetchRemote, upsertRemote } from "./remote";
 import {
   applyMultiResult,
   applySoloResult,
+  mergeUserData,
   type MultiResult,
   type SoloResult,
   type UserData,
@@ -33,30 +34,40 @@ async function currentUserId(): Promise<string | null> {
 }
 
 /**
- * Loads the active user data. When signed in, the Supabase row wins; if no row
- * exists yet, the current device's local data seeds the account. When signed
- * out, falls back to localStorage. Never blocks indefinitely on remote calls.
+ * Loads and merges stats (local + remote when signed in). Read-only for remote:
+ * never upserts here — a slow read-time upsert could overwrite a newer save.
  */
 export async function loadUserData(): Promise<UserData> {
   const uid = await currentUserId();
-  if (uid) {
-    const remote = await withTimeout(fetchRemote(uid), 6000, null);
-    if (remote) {
-      saveLocal(remote);
-      return remote;
-    }
-    const local = loadLocal();
-    // Seed cloud in background — don't block the UI on a slow upsert.
-    void upsertRemote(uid, local);
-    return local;
+  if (!uid) return loadLocal();
+
+  const local = loadLocal();
+  const remote = await withTimeout(fetchRemote(uid), 6000, null);
+  if (remote) {
+    const merged = mergeUserData(local, remote);
+    saveLocal(merged);
+    return merged;
   }
-  return loadLocal();
+  return local;
 }
+
+export const STATS_UPDATED_EVENT = "sudogku:stats-updated";
 
 export async function saveUserData(data: UserData): Promise<void> {
   saveLocal(data);
   const uid = await currentUserId();
   if (uid) await upsertRemote(uid, data);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(STATS_UPDATED_EVENT));
+  }
+}
+
+/** Seed first cloud row for a signed-in user with no remote data yet. */
+export async function seedRemoteIfMissing(): Promise<void> {
+  const uid = await currentUserId();
+  if (!uid) return;
+  const remote = await withTimeout(fetchRemote(uid), 6000, null);
+  if (!remote) void upsertRemote(uid, loadLocal());
 }
 
 export async function recordSoloGame(result: SoloResult): Promise<void> {

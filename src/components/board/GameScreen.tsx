@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Board } from "./Board";
 import { NumberPad } from "./NumberPad";
 import { ActionBar } from "./ActionBar";
@@ -130,20 +130,44 @@ export function GameScreen({
     return 0;
   }, [solved, mode, opponent, contrib, me.role]);
 
+  const finishReported = useRef(false);
   useEffect(() => {
-    if (done && onFinish)
-      onFinish({
-        solved,
-        score: computedFinal,
-        elapsedSeconds: elapsed,
-        mistakes: snapshot.mistakes,
-        hintsUsed: snapshot.hintsUsed,
-        squaresFilled: contrib[me.role] ?? contrib.total,
-        bonesFound: bonePlay.sessionBones,
-        winBoneBonus,
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
+    finishReported.current = false;
+  }, [snapshot.puzzle, snapshot.startedAt]);
+
+  useEffect(() => {
+    if (!done || !onFinish || finishReported.current) return;
+    finishReported.current = true;
+    let bonesFound = 0;
+    for (const index of bonePlay.boneCells) {
+      if (snapshot.cells[index]?.correct) bonesFound += 1;
+    }
+    onFinish({
+      solved,
+      score: computedFinal,
+      elapsedSeconds: elapsed,
+      mistakes: snapshot.mistakes,
+      hintsUsed: snapshot.hintsUsed,
+      squaresFilled: contrib[me.role] ?? contrib.total,
+      bonesFound,
+      winBoneBonus,
+    });
+  }, [
+    done,
+    onFinish,
+    solved,
+    computedFinal,
+    elapsed,
+    snapshot.mistakes,
+    snapshot.hintsUsed,
+    snapshot.cells,
+    snapshot.puzzle,
+    snapshot.startedAt,
+    bonePlay.boneCells,
+    contrib,
+    me.role,
+    winBoneBonus,
+  ]);
 
   // Basic keyboard support for desktop testing.
   useEffect(() => {

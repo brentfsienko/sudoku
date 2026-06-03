@@ -5,7 +5,12 @@ import { syncPublicProfile } from "@/lib/friends/api";
 import { resetPasswordRedirectUrl } from "@/lib/auth/password";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadLocal } from "./local";
-import { loadUserData, saveUserData } from "./store";
+import {
+  loadUserData,
+  saveUserData,
+  seedRemoteIfMissing,
+  STATS_UPDATED_EVENT,
+} from "./store";
 import { EXCLUSIVE_BONE_COSTS } from "@/lib/bones/config";
 import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import type { ExclusiveDogId } from "@/lib/theme/dogs";
@@ -79,6 +84,7 @@ export function useUserData(): UseUserData {
         }
         const d = withOwnerProfile(await loadUserData(), authUser?.email);
         if (active) setDataBoth(d);
+        if (authUser && active) void seedRemoteIfMissing();
         if (authUser && active) {
           const synced = await syncPublicProfile(authUser.id, d.profile);
           if (synced.username && active) {
@@ -142,11 +148,17 @@ export function useUserData(): UseUserData {
       if (document.visibilityState === "visible") void refresh();
     };
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    window.addEventListener("pageshow", onVisible);
+    window.addEventListener(STATS_UPDATED_EVENT, onVisible);
 
     return () => {
       active = false;
       sub?.data.subscription.unsubscribe();
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+      window.removeEventListener("pageshow", onVisible);
+      window.removeEventListener(STATS_UPDATED_EVENT, onVisible);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

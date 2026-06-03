@@ -1,4 +1,5 @@
 import type { Difficulty } from "@/lib/game/types";
+import { isGiven } from "@/lib/game/engine";
 import { BONE_CELLS_BY_DIFFICULTY } from "./config";
 
 /** Deterministic RNG from puzzle string. */
@@ -28,7 +29,7 @@ export function pickBoneCellIndices(
   const rng = mulberry32(hashSeed(puzzle, difficulty));
   const candidates: number[] = [];
   for (let i = 0; i < 81; i++) {
-    if (puzzle[i] !== "0") continue;
+    if (isGiven(puzzle, i)) continue;
     candidates.push(i);
   }
   const picked: number[] = [];

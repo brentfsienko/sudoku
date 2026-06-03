@@ -1,4 +1,4 @@
-import type { Difficulty } from "@/lib/game/types";
+import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
 import type { DogId, ExclusiveDogId } from "@/lib/theme/dogs";
 import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { coerceProfile } from "./profile";
@@ -94,6 +94,113 @@ function appendHistory(history: GameLog[], entry: GameLog): GameLog[] {
     : next;
 }
 
+function historyLogKey(log: GameLog): string {
+  return `${log.t}:${log.mode}`;
+}
+
+/** Union local + remote game logs so solo rows are not dropped on sync. */
+export function mergeHistory(a: GameLog[], b: GameLog[]): GameLog[] {
+  const map = new Map<string, GameLog>();
+  for (const log of [...a, ...b]) {
+    const key = historyLogKey(log);
+    const prev = map.get(key);
+    if (!prev || (log.squares ?? 0) >= (prev.squares ?? 0)) {
+      map.set(key, log);
+    }
+  }
+  const merged = [...map.values()].sort((x, y) => x.t - y.t);
+  return merged.length > MAX_HISTORY
+    ? merged.slice(merged.length - MAX_HISTORY)
+    : merged;
+}
+
+function mergeSoloStats(a: SoloStats, b: SoloStats): SoloStats {
+  const bestTimeByDifficulty: SoloStats["bestTimeByDifficulty"] = {
+    ...a.bestTimeByDifficulty,
+    ...b.bestTimeByDifficulty,
+  };
+  for (const d of DIFFICULTIES) {
+    const ta = a.bestTimeByDifficulty[d];
+    const tb = b.bestTimeByDifficulty[d];
+    if (ta != null && tb != null) bestTimeByDifficulty[d] = Math.min(ta, tb);
+  }
+  const playsByDifficulty: SoloStats["playsByDifficulty"] = {
+    ...a.playsByDifficulty,
+  };
+  for (const d of DIFFICULTIES) {
+    playsByDifficulty[d] = Math.max(
+      playsByDifficulty[d] ?? 0,
+      b.playsByDifficulty[d] ?? 0,
+    );
+  }
+  const lastDates = [a.lastPlayedDate, b.lastPlayedDate].filter(Boolean) as string[];
+  return {
+    played: Math.max(a.played, b.played),
+    won: Math.max(a.won, b.won),
+    bestScore: Math.max(a.bestScore, b.bestScore),
+    totalScore: Math.max(a.totalScore, b.totalScore),
+    totalSolveSeconds: Math.max(a.totalSolveSeconds, b.totalSolveSeconds),
+    fastestSolveSeconds:
+      a.fastestSolveSeconds != null && b.fastestSolveSeconds != null
+        ? Math.min(a.fastestSolveSeconds, b.fastestSolveSeconds)
+        : a.fastestSolveSeconds ?? b.fastestSolveSeconds ?? null,
+    perfectGames: Math.max(a.perfectGames, b.perfectGames),
+    streak: Math.max(a.streak, b.streak),
+    bestStreak: Math.max(a.bestStreak, b.bestStreak),
+    lastPlayedDate: lastDates.sort().at(-1) ?? null,
+    bestTimeByDifficulty,
+    playsByDifficulty,
+    totalSquares: Math.max(a.totalSquares, b.totalSquares),
+  };
+}
+
+function mergeMultiStats(a: MultiStats, b: MultiStats): MultiStats {
+  const opponents: MultiStats["opponents"] = { ...a.opponents };
+  for (const [key, rec] of Object.entries(b.opponents)) {
+    const prev = opponents[key];
+    if (!prev) {
+      opponents[key] = rec;
+      continue;
+    }
+    opponents[key] = {
+      name: prev.name || rec.name,
+      dogId: prev.dogId || rec.dogId,
+      games: Math.max(prev.games, rec.games),
+      wins: Math.max(prev.wins, rec.wins),
+      coopGames: Math.max(prev.coopGames, rec.coopGames),
+      compGames: Math.max(prev.compGames, rec.compGames),
+      compWins: Math.max(prev.compWins, rec.compWins),
+    };
+  }
+  return {
+    coopPlayed: Math.max(a.coopPlayed, b.coopPlayed),
+    coopSolved: Math.max(a.coopSolved, b.coopSolved),
+    compPlayed: Math.max(a.compPlayed, b.compPlayed),
+    compWon: Math.max(a.compWon, b.compWon),
+    compTied: Math.max(a.compTied, b.compTied),
+    coopSquares: Math.max(a.coopSquares, b.coopSquares),
+    compSquares: Math.max(a.compSquares, b.compSquares),
+    opponents,
+  };
+}
+
+/** Merge two device copies without losing solo (or any) history rows. */
+export function mergeUserData(local: UserData, remote: UserData): UserData {
+  return normalizeUserData({
+    profile: local.profile.username?.trim() ? local.profile : remote.profile,
+    solo: mergeSoloStats(local.solo, remote.solo),
+    multi: mergeMultiStats(local.multi, remote.multi),
+    history: mergeHistory(local.history, remote.history),
+    bones: Math.max(local.bones ?? 0, remote.bones ?? 0),
+    ownedExclusiveDogs: [
+      ...new Set([
+        ...(local.ownedExclusiveDogs ?? []),
+        ...(remote.ownedExclusiveDogs ?? []),
+      ]),
+    ],
+  });
+}
+
 export function emptySolo(): SoloStats {
   return {
     played: 0,
@@ -173,9 +280,12 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
   if (!raw) return base;
   const solo = { ...base.solo, ...raw.solo, totalSquares: raw.solo?.totalSquares ?? 0 };
   const multi = normalizeMulti(raw.multi);
-  const history = backfillHistoryOpponents(
-    backfillHistorySquares(normalizeHistory(raw.history), solo, multi),
-    multi.opponents,
+  const history = backfillSoloHistory(
+    backfillHistoryOpponents(
+      backfillHistorySquares(normalizeHistory(raw.history), solo, multi),
+      multi.opponents,
+    ),
+    solo,
   );
   const data: UserData = {
     profile: coerceProfile({
@@ -198,13 +308,72 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
 
 function normalizeHistory(raw: GameLog[] | undefined): GameLog[] {
   if (!Array.isArray(raw)) return [];
-  return raw.map((log) => ({
-    ...log,
-    squares: log.squares ?? 0,
-    mySquares: log.mySquares ?? log.squares ?? 0,
-    opponentSquares: log.opponentSquares ?? 0,
-    tied: log.tied ?? false,
-  }));
+  return raw.map((log) => {
+    const rawMode = (log as { mode?: string }).mode;
+    const mode: GameLog["mode"] =
+      rawMode === "single" ? "solo" : (log.mode as GameLog["mode"]);
+    return {
+      ...log,
+      mode,
+      squares: log.squares ?? 0,
+      mySquares: log.mySquares ?? log.squares ?? 0,
+      opponentSquares: log.opponentSquares ?? 0,
+      tied: log.tied ?? false,
+    };
+  });
+}
+
+/**
+ * Older saves incremented solo.played without appending history rows.
+ * Add placeholder solo entries so Recent games can list past solo play.
+ */
+function backfillSoloHistory(history: GameLog[], solo: SoloStats): GameLog[] {
+  const existing = history.filter((l) => l.mode === "solo");
+  const missing = solo.played - existing.length;
+  if (missing <= 0) return history;
+
+  let wonLeft = Math.max(0, solo.won - existing.filter((l) => l.won).length);
+  const now = Date.now();
+  const diffQueue: { difficulty: Difficulty; count: number }[] = DIFFICULTIES.map(
+    (d) => ({ difficulty: d, count: solo.playsByDifficulty[d] ?? 0 }),
+  ).filter((x) => x.count > 0);
+  if (diffQueue.length === 0) {
+    diffQueue.push({ difficulty: "medium", count: missing });
+  }
+
+  let qi = 0;
+  let diffLeft = diffQueue[0]?.count ?? missing;
+  let difficulty = diffQueue[0]?.difficulty ?? "medium";
+  const placeholders: GameLog[] = [];
+
+  for (let i = 0; i < missing; i++) {
+    while (diffLeft <= 0 && qi < diffQueue.length - 1) {
+      qi += 1;
+      diffLeft = diffQueue[qi].count;
+      difficulty = diffQueue[qi].difficulty;
+    }
+    if (diffLeft > 0) diffLeft -= 1;
+
+    const won = wonLeft > 0;
+    if (won) wonLeft -= 1;
+
+    placeholders.push({
+      t: now - (missing - i) * 3_600_000,
+      mode: "solo",
+      won,
+      seconds: solo.bestTimeByDifficulty[difficulty] ?? 0,
+      mistakes: 0,
+      squares: 0,
+      difficulty,
+      score: won ? solo.bestScore : 0,
+    });
+  }
+
+  let next = history;
+  for (const entry of placeholders) {
+    next = appendHistory(next, entry);
+  }
+  return next;
 }
 
 /** Match per-game history squares to stored lifetime totals (pre-tracking migration). */
@@ -431,7 +600,7 @@ export function applySoloResult(data: UserData, r: SoloResult): UserData {
   });
 
   const winBonus = r.won ? GAME_WIN_BONE_BONUS : 0;
-  const bones = data.bones + r.bonesFound + winBonus;
+  const bones = (data.bones ?? 0) + r.bonesFound + winBonus;
 
   return { ...data, solo, history, bones };
 }
@@ -509,7 +678,7 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
       : myWin && !tie
         ? GAME_WIN_BONE_BONUS
         : 0;
-  const bones = data.bones + r.bonesFound + winBonus;
+  const bones = (data.bones ?? 0) + r.bonesFound + winBonus;
 
   return { ...data, solo, multi, history, bones };
 }

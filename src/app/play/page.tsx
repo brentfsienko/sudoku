@@ -7,7 +7,12 @@ import { createSnapshot, useLocalGame } from "@/lib/game/store";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
 import { getProfile } from "@/lib/profile";
-import { loadUserData, recordSoloGame } from "@/lib/stats/store";
+import {
+  loadUserData,
+  recordSoloGame,
+  STATS_UPDATED_EVENT,
+} from "@/lib/stats/store";
+import { loadLocal } from "@/lib/stats/local";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -21,12 +26,14 @@ function SoloGame({
   savedBones,
   onExit,
   onRematch,
+  onWalletSync,
 }: {
   difficulty: Difficulty;
   streak: number;
   savedBones: number;
   onExit: () => void;
   onRematch: () => void;
+  onWalletSync: () => void;
 }) {
   const [snapshot] = useState(() => {
     const puzzle = generatePuzzle(difficulty);
@@ -70,7 +77,7 @@ function SoloGame({
           hintsUsed,
           squaresFilled,
           bonesFound,
-        })
+        }).then(onWalletSync)
       }
     />
   );
@@ -83,11 +90,22 @@ function PlayInner() {
   const [round, setRound] = useState(0);
   const [wallet, setWallet] = useState({ streak: 0, bones: 0 });
 
+  const syncWallet = () => {
+    const d = loadLocal();
+    setWallet({ streak: d.solo.streak, bones: d.bones ?? 0 });
+  };
+
   useEffect(() => {
     void loadUserData().then((d) => {
       setWallet({ streak: d.solo.streak, bones: d.bones ?? 0 });
     });
   }, [round]);
+
+  useEffect(() => {
+    const onStats = () => syncWallet();
+    window.addEventListener(STATS_UPDATED_EVENT, onStats);
+    return () => window.removeEventListener(STATS_UPDATED_EVENT, onStats);
+  }, []);
 
   return (
     <SoloGame
@@ -97,6 +115,7 @@ function PlayInner() {
       savedBones={wallet.bones}
       onExit={() => router.push("/")}
       onRematch={() => setRound((r) => r + 1)}
+      onWalletSync={syncWallet}
     />
   );
 }
