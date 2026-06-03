@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentType, SVGProps } from "react";
-import { HomeIcon, UserIcon, UsersIcon } from "@/components/icons";
+import { HomeIcon, PawIcon, UsersIcon } from "@/components/icons";
 
 export type HomeTab = "main" | "friends" | "me";
 
@@ -12,7 +12,7 @@ const TABS: {
 }[] = [
   { id: "main", label: "Play", Icon: HomeIcon },
   { id: "friends", label: "Friends", Icon: UsersIcon },
-  { id: "me", label: "Me", Icon: UserIcon },
+  { id: "me", label: "Me", Icon: PawIcon },
 ];
 
 type Props = {
