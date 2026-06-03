@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Lora, Nunito } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const baloo = Baloo_2({
@@ -22,9 +23,25 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
+  metadataBase: getSiteUrl(),
   title: "Sudogku",
   description: "A dog-themed multiplayer Sudoku. Play solo or with a friend.",
   applicationName: "Sudogku",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Sudogku",
+    title: "Sudogku",
+    description: "A dog-themed multiplayer Sudoku. Play solo or with a friend.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sudogku",
+    description: "A dog-themed multiplayer Sudoku. Play solo or with a friend.",
+  },
   appleWebApp: {
     capable: true,
     title: "Sudogku",
