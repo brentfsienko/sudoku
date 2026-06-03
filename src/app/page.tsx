@@ -19,7 +19,6 @@ import {
   TrophyIcon,
   UserIcon,
 } from "@/components/icons";
-import { multiWinLoss } from "@/lib/friends/api";
 import {
   DIFFICULTY_LABELS,
   GAME_MODE_LABELS,
@@ -148,28 +147,6 @@ export default function Home() {
       >
         {tab === "main" && (
           <>
-            <div className="flex items-center justify-between rounded-3xl bg-gradient-to-br from-[var(--primary-soft)] to-[var(--surface-soft)] px-5 py-4">
-              <div>
-                <div className="text-sm font-semibold text-[var(--paw)]">
-                  Multiplayer record
-                </div>
-                <div className="font-display text-3xl font-extrabold text-[var(--foreground)]">
-                  {data
-                    ? (() => {
-                        const m = multiWinLoss(data.multi);
-                        return `${m.wins}-${m.losses}`;
-                      })()
-                    : "0-0"}
-                </div>
-                <div className="text-xs font-semibold text-[var(--muted)]">
-                  wins · losses
-                </div>
-              </div>
-              <span className="text-[var(--primary)]">
-                <TrophyIcon width={44} height={44} />
-              </span>
-            </div>
-
             <DifficultySelect value={difficulty} onChange={setDifficulty} />
             <ModeSelect value={mode} onChange={setMode} />
 
