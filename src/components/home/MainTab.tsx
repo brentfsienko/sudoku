@@ -130,7 +130,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
+    <div className="relative flex min-h-0 flex-1 flex-col bg-[var(--accent)]">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 bg-[var(--accent)]"
@@ -144,34 +144,16 @@ export function MainTab({ data, userData, onSignIn }: Props) {
         <AppBrandTitle dogId={data.profile.dogId as DogId} light />
       </header>
 
-      {/* Streak + white sheet move together on pull */}
+      {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}
       <div
-        ref={sheetRef}
-        className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
+        className="relative z-10 flex min-h-0 flex-1 flex-col overflow-visible"
         style={sheetMotion}
       >
-        {/* Bridge: streak sits on blue/white seam, aligned right */}
-        <div className="relative shrink-0 px-5 pb-0 pt-2">
-          <div className="absolute right-5 top-full z-30 -translate-y-1/2">
-            <div className="flex shrink-0 items-center gap-2 rounded-full bg-white py-2 pl-2 pr-3 shadow-md ring-1 ring-black/[0.04]">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)]">
-                <span className="text-[var(--primary)]">
-                  <FlameIcon width={18} height={18} />
-                </span>
-              </div>
-              <div className="leading-none">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                  Streak
-                </p>
-                <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
-                  {streak} {streak === 1 ? "day" : "days"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex min-h-0 flex-1 flex-col rounded-t-[28px] bg-white px-5 pb-4 pt-9 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-visible">
+          <div
+            ref={sheetRef}
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-10 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
+          >
           <section className="mb-5">
             <h2 className="font-serif-title mb-3 text-lg text-[var(--foreground)]">
               Play
@@ -203,6 +185,26 @@ export function MainTab({ data, userData, onSignIn }: Props) {
             userId={userData.user?.id ?? null}
             authConfigured={userData.authConfigured}
           />
+          </div>
+
+          {/* Above white bg, centered on rounded top edge */}
+          <div className="pointer-events-none absolute right-5 top-0 z-40 -translate-y-1/2">
+            <div className="pointer-events-auto flex shrink-0 items-center gap-2 rounded-full bg-white py-2 pl-2 pr-3 shadow-md ring-1 ring-black/[0.04]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)]">
+                <span className="text-[var(--primary)]">
+                  <FlameIcon width={18} height={18} />
+                </span>
+              </div>
+              <div className="leading-none">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+                  Streak
+                </p>
+                <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
+                  {streak} {streak === 1 ? "day" : "days"}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
