@@ -9,7 +9,6 @@ export function AppDogIcon({ size = 42 }: { size?: number }) {
       role="img"
       aria-hidden
     >
-      <rect width="100" height="100" rx="22" fill="#fdf6ec" />
       <circle cx="50" cy="52" r="34" fill="#f4c87a" />
       <ellipse
         cx="26"
