@@ -262,27 +262,24 @@ function opponentKey(name: string | undefined): string {
   return clean || "anon";
 }
 
-/** Sync per-mode opponent counts from game history and fix legacy rows. */
+/** Rebuild per-opponent stats from game history (source of truth for mode counts). */
 function reconcileOpponents(
   opponents: MultiStats["opponents"],
   history: GameLog[],
 ): MultiStats["opponents"] {
   const next: MultiStats["opponents"] = {};
-  for (const [key, rec] of Object.entries(opponents)) {
-    next[key] = { ...rec };
-  }
 
   for (const log of history) {
     if (log.mode === "solo") continue;
     const key = opponentKey(log.opponentName);
+    const stored = opponents[key];
     const displayName =
       log.opponentName?.replace(/^@/, "").trim() ||
-      next[key]?.name ||
-      opponents[key]?.name ||
+      stored?.name ||
       "Anon Pup";
     const prev = next[key] ?? {
       name: displayName,
-      dogId: log.opponentDogId || "golden",
+      dogId: log.opponentDogId || stored?.dogId || "golden",
       games: 0,
       wins: 0,
       coopGames: 0,
@@ -290,32 +287,18 @@ function reconcileOpponents(
       compWins: 0,
     };
     const win = log.mode === "coop" ? log.won : log.won && !log.tied;
+    const coopGames = prev.coopGames + (log.mode === "coop" ? 1 : 0);
+    const compGames = prev.compGames + (log.mode === "competitive" ? 1 : 0);
     next[key] = {
-      name: displayName || prev.name,
-      dogId: log.opponentDogId || prev.dogId,
-      games: prev.games + 1,
-      wins: prev.wins + (win ? 1 : 0),
-      coopGames: prev.coopGames + (log.mode === "coop" ? 1 : 0),
-      compGames: prev.compGames + (log.mode === "competitive" ? 1 : 0),
-      compWins: prev.compWins + (log.mode === "competitive" && win ? 1 : 0),
-    };
-  }
-
-  const coopHist = history.filter((l) => l.mode === "coop").length;
-  const compHist = history.filter((l) => l.mode === "competitive").length;
-
-  for (const [key, rec] of Object.entries(next)) {
-    let coopGames = rec.coopGames;
-    let compGames = rec.compGames;
-    if (coopGames === 0 && compGames === 0 && rec.games > 0) {
-      if (coopHist > 0 && compHist === 0) coopGames = rec.games;
-      else if (compHist > 0 && coopHist === 0) compGames = rec.games;
-    }
-    next[key] = {
-      ...rec,
+      name: prev.name || displayName,
+      dogId: log.opponentDogId || prev.dogId || stored?.dogId || "golden",
       coopGames,
       compGames,
-      games: Math.max(rec.games, coopGames + compGames),
+      games: coopGames + compGames,
+      wins: prev.wins + (win ? 1 : 0),
+      compWins:
+        prev.compWins +
+        (log.mode === "competitive" && win ? 1 : 0),
     };
   }
 
@@ -468,13 +451,15 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     compGames: 0,
     compWins: 0,
   };
+  const coopGames = prev.coopGames + (r.mode === "coop" ? 1 : 0);
+  const compGames = prev.compGames + (r.mode === "competitive" ? 1 : 0);
   multi.opponents[key] = {
     name: oppName || prev.name,
     dogId: r.opponentDogId || prev.dogId,
-    games: prev.games + 1,
+    coopGames,
+    compGames,
+    games: coopGames + compGames,
     wins: prev.wins + (myWin ? 1 : 0),
-    coopGames: prev.coopGames + (r.mode === "coop" ? 1 : 0),
-    compGames: prev.compGames + (r.mode === "competitive" ? 1 : 0),
     compWins:
       prev.compWins +
       (r.mode === "competitive" && myWin && !tie ? 1 : 0),

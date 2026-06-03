@@ -37,10 +37,7 @@ export function opponentModeGames(
   rec: OpponentRecord,
   mode: "coop" | "competitive",
 ): number {
-  const specific = mode === "coop" ? rec.coopGames : rec.compGames;
-  if (specific > 0) return specific;
-  if (rec.games > 0 && rec.coopGames === 0 && rec.compGames === 0) return rec.games;
-  return 0;
+  return mode === "coop" ? rec.coopGames : rec.compGames;
 }
 
 export function mostPlayedOpponentForMode(
