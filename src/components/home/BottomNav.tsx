@@ -28,16 +28,12 @@ export const BOTTOM_NAV_ROW = "3.5rem";
 function NavTabs({
   active,
   onChange,
-  compact,
 }: {
   active: HomeTab;
   onChange: (tab: HomeTab) => void;
-  compact?: boolean;
 }) {
   return (
-    <div
-      className={`flex items-stretch justify-around ${compact ? "pt-2 pb-1" : "pt-2.5 pb-2"}`}
-    >
+    <div className="flex items-stretch justify-around pt-2.5 pb-2">
       {TABS.map(({ id, label, Icon }) => {
         const isActive = active === id;
         return (
@@ -80,7 +76,7 @@ export function BottomNav({ active, onChange, variant = "inline" }: Props) {
         className="bottom-nav-dock border-t border-[var(--border)] md:hidden"
         aria-label="Main navigation"
       >
-        <NavTabs active={active} onChange={onChange} compact />
+        <NavTabs active={active} onChange={onChange} />
       </nav>
     );
   }

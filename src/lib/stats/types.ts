@@ -622,17 +622,18 @@ function isYesterday(dateStr: string): boolean {
   return d.toISOString().slice(0, 10) === yesterday.toISOString().slice(0, 10);
 }
 
-/** Bump day streak for any completed game (solo, co-op, or versus). */
+/** Bump streak when any game finishes (solo, co-op, or versus; win or loss). */
 function applyPlayStreak(solo: SoloStats): SoloStats {
   const today = todayKey();
   const next = { ...solo };
-  if (next.lastPlayedDate !== today) {
-    next.streak =
-      next.lastPlayedDate && isYesterday(next.lastPlayedDate) ? next.streak + 1 : 1;
-    next.lastPlayedDate = today;
-  } else if (next.streak === 0) {
+  if (next.lastPlayedDate === today) {
+    next.streak = Math.max(next.streak, 1);
+  } else if (next.lastPlayedDate && isYesterday(next.lastPlayedDate)) {
+    next.streak = next.streak + 1;
+  } else {
     next.streak = 1;
   }
+  next.lastPlayedDate = today;
   next.bestStreak = Math.max(next.bestStreak, next.streak);
   return next;
 }

@@ -11,6 +11,7 @@ import {
   removeActiveSolo,
   upsertActiveSolo,
 } from "@/lib/game/activeSolo";
+import { claimSoloFinish } from "@/lib/game/finishedSolo";
 import { createSnapshot, useLocalGame, type GameSnapshot } from "@/lib/game/store";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
@@ -36,7 +37,13 @@ function resolveResumeId(resumeParam: string | null): string | null {
 
 function initialState(playId: string, difficulty: Difficulty): GameSnapshot {
   const saved = loadActiveSolo(playId);
-  if (saved) return saved.snapshot;
+  if (saved) {
+    if (!isActiveSolo(saved.snapshot)) {
+      removeActiveSolo(playId);
+    } else {
+      return saved.snapshot;
+    }
+  }
   const puzzle = generatePuzzle(difficulty);
   return createSnapshot({
     puzzle: puzzle.puzzle,
@@ -74,9 +81,12 @@ function SoloGame({
   controllerRef.current = controller;
 
   useEffect(() => {
-    const s = controller.snapshot;
-    if (!isActiveSolo(s)) return;
-    const id = setTimeout(() => upsertActiveSolo(s, activeId), 250);
+    if (!isActiveSolo(controller.snapshot)) return;
+    const id = setTimeout(() => {
+      const s = controllerRef.current.snapshot;
+      if (!isActiveSolo(s)) return;
+      upsertActiveSolo(s, activeId);
+    }, 250);
     return () => clearTimeout(id);
   }, [controller.snapshot, activeId]);
 
@@ -111,17 +121,21 @@ function SoloGame({
         bonesFound,
       }) =>
         void (async () => {
+          if (!claimSoloFinish(activeId)) return;
           removeActiveSolo(activeId);
-          await recordSoloGame({
-            won: solved,
-            score,
-            difficulty: snapshot.difficulty,
-            elapsedSeconds,
-            mistakes,
-            hintsUsed,
-            squaresFilled,
-            bonesFound,
-          });
+          await recordSoloGame(
+            {
+              won: solved,
+              score,
+              difficulty: snapshot.difficulty,
+              elapsedSeconds,
+              mistakes,
+              hintsUsed,
+              squaresFilled,
+              bonesFound,
+            },
+            { activeId },
+          );
           onWalletSync();
         })()
       }

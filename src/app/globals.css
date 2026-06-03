@@ -109,12 +109,18 @@ body {
     width: 100%;
   }
 
-  /* In-flow dock — no absolute/fixed (avoids extra gap on iOS standalone) */
+  /* In-flow dock — tab row matches desktop; ::after fills home-indicator zone */
   .bottom-nav-dock {
     flex-shrink: 0;
     width: 100%;
     background-color: var(--surface);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .bottom-nav-dock::after {
+    content: "";
+    display: block;
+    height: env(safe-area-inset-bottom, 0px);
+    background-color: var(--surface);
   }
 }
 

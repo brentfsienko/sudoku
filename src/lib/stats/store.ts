@@ -3,6 +3,7 @@
 import {
   ACTIVE_SOLO_UPDATED_EVENT,
   loadActiveSolos,
+  removeActiveSolo,
   replaceActiveSolosLocal,
 } from "@/lib/game/activeSolo";
 import { getSupabase } from "@/lib/supabase/client";
@@ -104,8 +105,22 @@ async function loadForWrite(): Promise<UserData> {
   return data;
 }
 
-export async function recordSoloGame(result: SoloResult): Promise<void> {
-  const data = await loadForWrite();
+export async function recordSoloGame(
+  result: SoloResult,
+  opts?: { activeId?: string },
+): Promise<void> {
+  if (opts?.activeId) removeActiveSolo(opts.activeId);
+
+  let data = await loadForWrite();
+  if (opts?.activeId) {
+    data = {
+      ...data,
+      activeSolos: mergeActiveSolos([], data.activeSolos).filter(
+        (item) => item.id !== opts.activeId,
+      ),
+    };
+  }
+
   const bonesFound = Math.max(0, result.bonesFound);
   await saveUserData(applySoloResult(data, { ...result, bonesFound }));
 }
