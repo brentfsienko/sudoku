@@ -25,6 +25,14 @@ export const metadata: Metadata = {
   title: "Floof Sudoku",
   description: "A floofy dog-themed multiplayer Sudoku. Play solo or with a friend.",
   applicationName: "Floof Sudoku",
+  appleWebApp: {
+    capable: true,
+    title: "Floof Sudoku",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {

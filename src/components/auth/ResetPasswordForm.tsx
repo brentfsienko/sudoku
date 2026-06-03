@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { passwordsMatch } from "@/lib/auth/password";
+import { isStandalonePwa } from "@/lib/pwa/standalone";
 import type { UseUserData } from "@/lib/stats/useUserData";
 
 type Props = {
@@ -15,6 +16,7 @@ export function ResetPasswordForm({ userData }: Props) {
   const [confirm, setConfirm] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const inPwa = isStandalonePwa();
 
   async function submit() {
     const check = passwordsMatch(password, confirm);
@@ -27,7 +29,9 @@ export function ResetPasswordForm({ userData }: Props) {
     const res = await userData.updatePassword(password);
     if (res.ok) {
       setStatus("done");
-      setTimeout(() => router.replace("/"), 800);
+      if (inPwa) {
+        setTimeout(() => router.replace("/"), 800);
+      }
     } else {
       setStatus("error");
       setError(res.error ?? "Could not update password.");
@@ -35,10 +39,27 @@ export function ResetPasswordForm({ userData }: Props) {
   }
 
   if (status === "done") {
+    if (inPwa) {
+      return (
+        <p className="font-serif-title text-center text-lg text-[var(--foreground)]">
+          Password updated. Taking you home…
+        </p>
+      );
+    }
     return (
-      <p className="font-serif-title text-center text-lg text-[var(--foreground)]">
-        Password updated. Taking you home…
-      </p>
+      <div className="flex flex-col gap-4 text-center">
+        <p className="font-serif-title text-lg text-[var(--foreground)]">
+          Password updated
+        </p>
+        <p className="text-sm leading-relaxed text-[var(--muted)]">
+          Open <span className="font-bold text-[var(--foreground)]">Floof Sudoku</span>{" "}
+          from your home screen, tap Sign in, and use your email with the new password
+          you just set.
+        </p>
+        <p className="text-xs text-[var(--muted)]">
+          You can close this browser tab — your home screen app is separate on iPhone.
+        </p>
+      </div>
     );
   }
 
@@ -67,7 +88,7 @@ export function ResetPasswordForm({ userData }: Props) {
         type="button"
         onClick={submit}
         disabled={status === "loading"}
-        className="ui-button w-full rounded-full bg-[var(--foreground)] py-3.5 text-sm font-bold text-white active:scale-[0.98] disabled:opacity-60"
+        className="ui-button w-full rounded-full bg-[var(--primary)] py-3.5 text-sm font-bold text-white active:scale-[0.98] disabled:opacity-60"
       >
         {status === "loading" ? "Saving…" : "Save new password"}
       </button>

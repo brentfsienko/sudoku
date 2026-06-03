@@ -57,6 +57,8 @@ Stats work without this — they're stored in the browser's `localStorage`. To l
 4. In **Authentication → URL Configuration**, set the **Site URL** to your app's origin (e.g. `http://localhost:3000` for dev and your Vercel URL for prod) and add these to **Redirect URLs**:
    - `http://localhost:3000/auth/reset-password` (dev)
    - `https://your-vercel-domain/auth/reset-password` (prod)
+
+**iOS home screen app:** iPhone cannot open email links inside an installed PWA — reset links open in Safari/Chrome by design. Users should set their new password in the browser page, then open Floof Sudoku from the home screen and sign in with the new password.
 5. Add the same two `NEXT_PUBLIC_*` variables in Vercel (Settings → Environment Variables).
 
 Signed-out players keep stats locally; on first sign-in the device's stats seed the account, after which everything syncs.

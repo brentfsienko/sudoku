@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
+import { PwaBrowserHint } from "@/components/pwa/PwaBrowserHint";
 import { getSupabase } from "@/lib/supabase/client";
 import { useUserData } from "@/lib/stats/useUserData";
 
@@ -72,9 +73,11 @@ export default function ResetPasswordPage() {
       <h1 className="font-serif-title mb-2 text-[2.75rem] leading-none text-[var(--foreground)]">
         New password
       </h1>
-      <p className="mb-6 font-serif-title text-base text-[var(--foreground)]">
+      <p className="mb-4 font-serif-title text-base text-[var(--foreground)]">
         Set a new password to finish resetting your account.
       </p>
+
+      <PwaBrowserHint context="reset-password" />
 
       {state === "loading" && (
         <p className="text-sm text-[var(--muted)] animate-pulse">Loading…</p>
