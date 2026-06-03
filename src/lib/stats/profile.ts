@@ -1,6 +1,27 @@
+import { isExclusiveDogUnlocked } from "@/lib/dogs/challenges";
 import { normalizeUsername, validateUsername } from "@/lib/friends/username";
-import type { DogId } from "@/lib/theme/dogs";
-import type { Profile } from "./types";
+import {
+  isExclusiveDogId,
+  resolveDogId,
+  type DogId,
+} from "@/lib/theme/dogs";
+import type { Profile, UserData } from "./types";
+
+function coerceDogId(
+  dogId: string | undefined,
+  username: string,
+  userData?: UserData,
+): DogId {
+  const resolved = resolveDogId(dogId, { username });
+  if (
+    isExclusiveDogId(resolved) &&
+    userData &&
+    !isExclusiveDogUnlocked(resolved, userData)
+  ) {
+    return "golden";
+  }
+  return resolved;
+}
 
 export function randomUsername(): string {
   return `pup_${Math.floor(1000 + Math.random() * 9000)}`;
@@ -9,6 +30,7 @@ export function randomUsername(): string {
 /** Normalize stored profile data; migrates legacy `name` → `username`. */
 export function coerceProfile(
   raw?: Partial<Profile> & { name?: string; dogId?: string },
+  userData?: UserData,
 ): Profile {
   let username =
     raw?.username?.trim() ||
@@ -22,6 +44,6 @@ export function coerceProfile(
 
   return {
     username,
-    dogId: (raw?.dogId as DogId) ?? "golden",
+    dogId: coerceDogId(raw?.dogId, username, userData),
   };
 }

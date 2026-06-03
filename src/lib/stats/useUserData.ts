@@ -6,6 +6,7 @@ import { resetPasswordRedirectUrl } from "@/lib/auth/password";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadLocal } from "./local";
 import { loadUserData, saveUserData } from "./store";
+import { coerceProfile } from "./profile";
 import { emptyUserData, type Profile, type UserData } from "./types";
 
 export type AuthUser = { id: string; email: string | null };
@@ -137,7 +138,10 @@ export function useUserData(): UseUserData {
       const current = dataRef.current ?? (await loadUserData());
       const merged: UserData = {
         ...current,
-        profile: { ...current.profile, ...next },
+        profile: coerceProfile(
+          { ...current.profile, ...next },
+          { ...current, profile: { ...current.profile, ...next } },
+        ),
       };
       setDataBoth(merged);
       await saveUserData(merged);

@@ -172,7 +172,7 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
     backfillHistorySquares(normalizeHistory(raw.history), solo, multi),
     multi.opponents,
   );
-  return {
+  const data: UserData = {
     profile: coerceProfile({
       ...base.profile,
       ...(raw.profile as Partial<Profile> & { name?: string }),
@@ -180,6 +180,10 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
     solo,
     multi: { ...multi, opponents: reconcileOpponents(multi.opponents, history) },
     history,
+  };
+  return {
+    ...data,
+    profile: coerceProfile(data.profile, data),
   };
 }
 

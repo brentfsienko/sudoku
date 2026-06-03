@@ -5,7 +5,7 @@ import type { DogId } from "@/lib/theme/dogs";
 
 type Props = {
   dogId?: DogId;
-  /** App icon.svg golden dog (e.g. main tab header) instead of profile avatar */
+  /** Pixel golden brand dog (e.g. main tab header) instead of profile avatar */
   appIcon?: boolean;
   /** White text for accent header backgrounds */
   light?: boolean;

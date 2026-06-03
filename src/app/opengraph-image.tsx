@@ -1,46 +1,13 @@
 import { ImageResponse } from "next/og";
+import { brandDogDataUrl } from "@/lib/brand-dog-data-url";
 
 export const alt = "Sudogku — dog-themed Sudoku";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/** Golden dog mark (same shapes as AppDogIcon / icon.svg, no background tile). */
-function OgDogIcon({ size }: { size: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 100 100">
-      <circle cx="50" cy="52" r="34" fill="#f4c87a" />
-      <ellipse
-        cx="26"
-        cy="42"
-        rx="10"
-        ry="17"
-        fill="#e0a956"
-        transform="rotate(-18 26 42)"
-      />
-      <ellipse
-        cx="74"
-        cy="42"
-        rx="10"
-        ry="17"
-        fill="#e0a956"
-        transform="rotate(18 74 42)"
-      />
-      <ellipse cx="50" cy="62" rx="17" ry="14" fill="#fbe7c2" />
-      <circle cx="40" cy="48" r="4" fill="#3a2c20" />
-      <circle cx="60" cy="48" r="4" fill="#3a2c20" />
-      <ellipse cx="50" cy="58" rx="5" ry="3.6" fill="#3a2c20" />
-      <path
-        d="M50 61 Q50 68 44 68 M50 61 Q50 68 56 68"
-        stroke="#3a2c20"
-        strokeWidth="2"
-        fill="none"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 export default function OgImage() {
+  const dogSrc = brandDogDataUrl();
+
   return new ImageResponse(
     (
       <div
@@ -65,7 +32,14 @@ export default function OgImage() {
             boxShadow: "0 24px 48px rgba(74, 59, 47, 0.15)",
           }}
         >
-          <OgDogIcon size={140} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={dogSrc}
+            width={140}
+            height={140}
+            alt=""
+            style={{ objectFit: "contain" }}
+          />
           <div
             style={{
               display: "flex",

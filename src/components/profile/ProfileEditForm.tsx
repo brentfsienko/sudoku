@@ -2,10 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { DogAvatar } from "@/components/DogAvatar";
+import { displayDogId } from "@/lib/dogs/display";
+import {
+  challengeForExclusiveDog,
+  isExclusiveDogUnlocked,
+} from "@/lib/dogs/challenges";
 import { isUsernameAvailable } from "@/lib/friends/api";
 import { normalizeUsername, validateUsername } from "@/lib/friends/username";
-import { DOGS, type DogId } from "@/lib/theme/dogs";
-import type { Profile } from "@/lib/stats/types";
+import {
+  EXCLUSIVE_DOGS,
+  STANDARD_DOGS,
+  type DogId,
+  type ExclusiveDogId,
+} from "@/lib/theme/dogs";
+import type { Profile, UserData } from "@/lib/stats/types";
 
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid" | "unchanged";
 
@@ -13,15 +23,68 @@ type Props = {
   profile: Profile;
   currentUsername: string | null;
   userId: string | null;
+  userData: UserData;
   onSaveUsername: (username: string) => Promise<{ ok: boolean; error?: string }>;
   onSaveDog: (dogId: DogId) => Promise<void>;
   onDone: () => void;
 };
 
+function DogPickerButton({
+  dogId,
+  breed,
+  selected,
+  locked,
+  lockHint,
+  onSelect,
+  username,
+  userData,
+}: {
+  dogId: DogId;
+  breed: string;
+  selected: boolean;
+  locked?: boolean;
+  lockHint?: string;
+  onSelect: () => void;
+  username: string;
+  userData: UserData;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={locked ? undefined : onSelect}
+      disabled={locked}
+      title={locked ? lockHint : breed}
+      className={`relative flex aspect-square items-center justify-center rounded-2xl p-1 transition ${
+        selected
+          ? "bg-[var(--primary-soft)] ring-2 ring-[var(--primary)]"
+          : "bg-[var(--surface-soft)]"
+      } ${locked ? "cursor-not-allowed opacity-55" : "active:scale-95"}`}
+      aria-label={locked ? `${breed} locked` : breed}
+    >
+      <DogAvatar
+        dogId={dogId}
+        size={48}
+        username={username}
+        userData={userData}
+        className="block shrink-0"
+      />
+      {locked && (
+        <span
+          className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/25 text-lg"
+          aria-hidden
+        >
+          🔒
+        </span>
+      )}
+    </button>
+  );
+}
+
 export function ProfileEditForm({
   profile,
   currentUsername,
   userId,
+  userData,
   onSaveUsername,
   onSaveDog,
   onDone,
@@ -31,6 +94,14 @@ export function ProfileEditForm({
   const [usernameHint, setUsernameHint] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const displayUsername = normalizeUsername(
+    currentUsername ?? profile.username,
+  );
+  const resolvedDogId = displayDogId(profile.dogId, {
+    username: displayUsername,
+    userData,
+  });
 
   useEffect(() => {
     setUsername(currentUsername ?? profile.username);
@@ -170,22 +241,70 @@ export function ProfileEditForm({
         )}
       </label>
 
-      <div className="grid grid-cols-4 gap-2">
-        {DOGS.map((d) => (
-          <button
-            key={d.id}
-            type="button"
-            onClick={() => void onSaveDog(d.id as DogId)}
-            className={`flex aspect-square items-center justify-center rounded-2xl p-1 transition ${
-              profile.dogId === d.id
-                ? "bg-[var(--primary-soft)] ring-2 ring-[var(--primary)]"
-                : "bg-[var(--surface-soft)]"
-            }`}
-            aria-label={d.breed}
-          >
-            <DogAvatar dogId={d.id} size={48} className="block shrink-0" />
-          </button>
-        ))}
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+          Profile pup
+        </span>
+        <div className="grid grid-cols-4 gap-2">
+          {STANDARD_DOGS.map((d) => (
+            <DogPickerButton
+              key={d.id}
+              dogId={d.id}
+              breed={d.breed}
+              selected={resolvedDogId === d.id}
+              onSelect={() => void onSaveDog(d.id)}
+              username={displayUsername}
+              userData={userData}
+            />
+          ))}
+        </div>
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--muted)]">
+          Exclusive — complete challenges to unlock
+        </p>
+        <div className="grid grid-cols-4 gap-2">
+          {EXCLUSIVE_DOGS.map((d) => {
+            const id = d.id as ExclusiveDogId;
+            const unlocked = isExclusiveDogUnlocked(id, userData);
+            const challenge = challengeForExclusiveDog(id);
+            return (
+              <DogPickerButton
+                key={d.id}
+                dogId={d.id}
+                breed={d.breed}
+                selected={resolvedDogId === d.id}
+                locked={!unlocked}
+                lockHint={
+                  challenge
+                    ? `${challenge.title}: ${challenge.description}`
+                    : undefined
+                }
+                onSelect={() => void onSaveDog(d.id)}
+                username={displayUsername}
+                userData={userData}
+              />
+            );
+          })}
+        </div>
+        {EXCLUSIVE_DOGS.some(
+          (d) => !isExclusiveDogUnlocked(d.id as ExclusiveDogId, userData),
+        ) && (
+          <ul className="space-y-1 text-[11px] text-[var(--muted)]">
+            {EXCLUSIVE_DOGS.map((d) => {
+              const id = d.id as ExclusiveDogId;
+              const challenge = challengeForExclusiveDog(id);
+              if (!challenge) return null;
+              const done = isExclusiveDogUnlocked(id, userData);
+              return (
+                <li key={d.id} className={done ? "text-[#5cc98b]" : undefined}>
+                  <span className="font-bold text-[var(--foreground)]">
+                    {challenge.title}
+                  </span>
+                  {done ? " ✓" : ` — ${challenge.progressHint(userData)}`}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       {saveError && <p className="text-center text-xs text-[#ef6f6c]">{saveError}</p>}

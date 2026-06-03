@@ -11,7 +11,7 @@ import { PencilIcon, SettingsIcon } from "@/components/icons";
 import { COOP_ACCENT, VERSUS_ACCENT, compWinLoss, coopWinLoss } from "@/lib/stats/multi";
 import { GAME_MODE_LABELS } from "@/lib/game/types";
 import { useFriends } from "@/lib/friends/useFriends";
-import type { MultiStats, Profile } from "@/lib/stats/types";
+import { emptyUserData, type MultiStats, type Profile } from "@/lib/stats/types";
 import type { UseUserData } from "@/lib/stats/useUserData";
 
 type Props = {
@@ -94,7 +94,13 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
           className="relative rounded-full active:scale-95"
           aria-label="Edit profile"
         >
-          <DogAvatar dogId={profile.dogId} size={96} ringColor="#7ec4cf" />
+          <DogAvatar
+            dogId={profile.dogId}
+            size={96}
+            ringColor="#7ec4cf"
+            username={username}
+            userData={userData.data ?? undefined}
+          />
           <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[var(--surface-soft)] text-[var(--muted)]">
             <PencilIcon width={14} height={14} />
           </span>
@@ -142,6 +148,7 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
       <ProfileEditModal open={editing} onClose={() => setEditing(false)}>
         <ProfileEditForm
           profile={profile}
+          userData={userData.data ?? emptyUserData(profile)}
           currentUsername={friends.myProfile?.username ?? profile.username}
           userId={userData.user?.id ?? null}
           onSaveUsername={async (username) => {

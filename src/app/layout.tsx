@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   description: "A dog-themed multiplayer Sudoku. Play solo or with a friend.",
   applicationName: "Sudogku",
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    icon: [{ url: "/dogs/golden.png", type: "image/png", sizes: "512x512" }],
+    apple: [{ url: "/dogs/golden.png", type: "image/png", sizes: "512x512" }],
   },
   openGraph: {
     type: "website",
