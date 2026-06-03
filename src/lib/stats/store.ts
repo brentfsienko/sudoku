@@ -70,12 +70,23 @@ export async function seedRemoteIfMissing(): Promise<void> {
   if (!remote) void upsertRemote(uid, loadLocal());
 }
 
+async function loadForWrite(): Promise<UserData> {
+  const uid = await currentUserId();
+  let data = loadLocal();
+  if (!uid) return data;
+  const remote = await withTimeout(fetchRemote(uid), 6000, null);
+  if (remote) data = mergeUserData(data, remote);
+  return data;
+}
+
 export async function recordSoloGame(result: SoloResult): Promise<void> {
-  const data = await loadUserData();
-  await saveUserData(applySoloResult(data, result));
+  const data = await loadForWrite();
+  const bonesFound = Math.max(0, result.bonesFound);
+  await saveUserData(applySoloResult(data, { ...result, bonesFound }));
 }
 
 export async function recordMultiGame(result: MultiResult): Promise<void> {
-  const data = await loadUserData();
-  await saveUserData(applyMultiResult(data, result));
+  const data = await loadForWrite();
+  const bonesFound = Math.max(0, result.bonesFound);
+  await saveUserData(applyMultiResult(data, { ...result, bonesFound }));
 }

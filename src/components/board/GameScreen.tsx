@@ -8,6 +8,7 @@ import { StatsBar } from "./StatsBar";
 import { ResultsOverlay } from "./ResultsOverlay";
 import { PlayerBadge } from "@/components/PlayerBadge";
 import { StreakBonePill } from "@/components/home/StreakBonePill";
+import { countCollectedBones } from "@/lib/bones/collect";
 import { useGameBones } from "@/lib/bones/useGameBones";
 import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { ChevronLeftIcon, PlayIcon } from "@/components/icons";
@@ -138,20 +139,21 @@ export function GameScreen({
   useEffect(() => {
     if (!done || !onFinish || finishReported.current) return;
     finishReported.current = true;
-    let bonesFound = 0;
-    for (const index of bonePlay.boneCells) {
-      if (snapshot.cells[index]?.correct) bonesFound += 1;
-    }
-    onFinish({
-      solved,
-      score: computedFinal,
-      elapsedSeconds: elapsed,
-      mistakes: snapshot.mistakes,
-      hintsUsed: snapshot.hintsUsed,
-      squaresFilled: contrib[me.role] ?? contrib.total,
-      bonesFound,
-      winBoneBonus,
+    const frame = requestAnimationFrame(() => {
+      const fromBoard = countCollectedBones(snapshot, bonePlay.boneCells);
+      const bonesFound = Math.max(fromBoard, bonePlay.sessionBones);
+      onFinish({
+        solved,
+        score: computedFinal,
+        elapsedSeconds: elapsed,
+        mistakes: snapshot.mistakes,
+        hintsUsed: snapshot.hintsUsed,
+        squaresFilled: contrib[me.role] ?? contrib.total,
+        bonesFound,
+        winBoneBonus,
+      });
     });
+    return () => cancelAnimationFrame(frame);
   }, [
     done,
     onFinish,
