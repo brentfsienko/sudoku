@@ -135,20 +135,27 @@ export function MainTab({ data, userData, onSignIn }: Props) {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
+      {/* Title stays pinned; sheet scrolls over it (z-20 > z-10) */}
+      <header
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-[var(--accent)] px-5"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+      >
+        <PlayTabHeader />
+      </header>
+
       <div
         ref={sheetRef}
-        className="flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-y-contain"
+        className="relative z-20 flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-y-contain"
       >
         <div className="relative flex flex-col" style={sheetMotion}>
-          {/* Title scrolls away; white sheet (z-20) passes over it when scrolling up */}
+          {/* Spacer: initial layout below title; scrolls away as sheet covers header */}
           <div
-            className="relative z-0 shrink-0 bg-[var(--accent)] px-5 pb-10"
-            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
-          >
-            <PlayTabHeader />
-          </div>
+            className="shrink-0 bg-[var(--accent)]"
+            style={{ height: "calc(env(safe-area-inset-top) + 6.75rem)" }}
+            aria-hidden
+          />
 
-          <div className="relative z-20 -mt-6">
+          <div className="relative -mt-10">
             <div className="pointer-events-none absolute bottom-full left-3 z-30 mb-[-2.5rem] translate-y-1/2 sm:left-5">
               <AppDogIcon size={128} />
             </div>
