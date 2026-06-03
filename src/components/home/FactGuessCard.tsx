@@ -43,12 +43,7 @@ export function FactGuessCard() {
   useEffect(() => {
     setExpanded(false);
     const saved = loadUserGuesses()[fact.id];
-    if (saved) {
-      setUserGuess(saved);
-      setExpanded(true);
-    } else {
-      setUserGuess(null);
-    }
+    setUserGuess(saved ?? null);
     void fetchGlobalStats().then(setGlobal);
   }, [fact.id]);
 
@@ -80,7 +75,11 @@ export function FactGuessCard() {
             </p>
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
               Today&apos;s fact ·{" "}
-              {expanded ? "tap to collapse" : "dog or Sudoku?"}
+              {expanded
+                ? "tap to collapse"
+                : userGuess
+                  ? "tap to see result"
+                  : "dog or Sudoku?"}
             </p>
           </div>
           <span
