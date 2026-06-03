@@ -2,8 +2,9 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { AppBrandTitle } from "@/components/AppBrandTitle";
+import { ActiveSoloGames } from "@/components/home/ActiveSoloGames";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
+import { PlayTabHeader } from "@/components/home/PlayTabHeader";
 import {
   GameSetupSheet,
   type GameSetupResult,
@@ -151,15 +152,8 @@ export function MainTab({ data, userData, onSignIn }: Props) {
         style={{ height: "env(safe-area-inset-top)" }}
       />
 
-      <header
-        className="relative z-20 shrink-0 pl-2 pr-28 pb-3"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.5rem)" }}
-      >
-        <AppBrandTitle
-          light
-          size="xl"
-          align="start"
-          className="mt-1 -ml-0.5"
+      <header className="relative z-20 shrink-0">
+        <PlayTabHeader
           dogId={headerDogId}
           appIcon={!honeyHeader}
           profileIcon={honeyHeader}
@@ -176,6 +170,11 @@ export function MainTab({ data, userData, onSignIn }: Props) {
             ref={sheetRef}
             className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-6 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
           >
+          <ActiveSoloGames
+            profile={data.profile}
+            userEmail={userData.user?.email}
+          />
+
           <section className="mb-5">
             <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
             <div className="flex flex-col gap-2">
