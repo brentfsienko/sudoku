@@ -1,7 +1,6 @@
 export type PublicProfile = {
   userId: string;
   username: string;
-  displayName: string;
   dogId: string;
 };
 

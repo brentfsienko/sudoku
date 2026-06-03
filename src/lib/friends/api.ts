@@ -17,18 +17,8 @@ function mapProfile(row: ProfileRow): PublicProfile {
   return {
     userId: row.user_id,
     username: row.username,
-    displayName: row.display_name,
     dogId: row.dog_id,
   };
-}
-
-function slugBase(name: string): string {
-  const base = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_|_$/g, "")
-    .slice(0, 16);
-  return base.length >= 3 ? base : "pup";
 }
 
 /** Ensures the signed-in user has a searchable public profile. */
@@ -50,9 +40,11 @@ export async function syncPublicProfile(
     preferredUsername?.toLowerCase().replace(/[^a-z0-9_]/g, "") ||
     existing?.username;
 
+  const base = normalizeUsername(profile.username) || "pup";
+
   if (!username) {
     for (let i = 0; i < 8; i++) {
-      const candidate = `${slugBase(profile.name)}_${Math.floor(1000 + Math.random() * 9000)}`;
+      const candidate = `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
       const { data: taken } = await sb
         .from("player_profiles")
         .select("user_id")
@@ -70,7 +62,7 @@ export async function syncPublicProfile(
     {
       user_id: userId,
       username,
-      display_name: profile.name,
+      display_name: username,
       dog_id: profile.dogId,
       updated_at: new Date().toISOString(),
     },
@@ -135,7 +127,11 @@ export async function updateUsername(
   if (!sb) return { ok: false, error: "Not configured" };
   const { error } = await sb
     .from("player_profiles")
-    .update({ username: clean, updated_at: new Date().toISOString() })
+    .update({
+      username: clean,
+      display_name: clean,
+      updated_at: new Date().toISOString(),
+    })
     .eq("user_id", userId);
   if (error) {
     if (error.code === "23505") return { ok: false, error: "Username already taken." };
@@ -156,7 +152,7 @@ export async function searchProfiles(
   const { data } = await sb
     .from("player_profiles")
     .select("user_id, username, display_name, dog_id")
-    .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+    .ilike("username", `%${q}%`)
     .neq("user_id", myUserId)
     .limit(12);
 

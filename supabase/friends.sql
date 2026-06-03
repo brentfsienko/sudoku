@@ -7,7 +7,7 @@
 create table if not exists public.player_profiles (
   user_id uuid primary key references auth.users (id) on delete cascade,
   username text not null,
-  display_name text not null,
+  display_name text not null, -- mirrors username (legacy column)
   dog_id text not null default 'golden',
   updated_at timestamptz not null default now(),
   constraint player_profiles_username_len check (char_length(username) >= 3 and char_length(username) <= 24),

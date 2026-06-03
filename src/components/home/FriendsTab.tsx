@@ -149,7 +149,7 @@ export function FriendsTab({ userData, onSignIn }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && void runSearch()}
           onBlur={() => query.trim().length >= 2 && void runSearch()}
-          placeholder="Search by name"
+          placeholder="Search by @username"
           className="w-full rounded-2xl border border-[var(--border)] bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--primary)]"
         />
       </div>
@@ -254,7 +254,6 @@ export function FriendsTab({ userData, onSignIn }: Props) {
             key={p.userId}
             avatar={<DogAvatar dogId={p.dogId as DogId} size={44} />}
             primary={p.username}
-            secondary={p.displayName !== p.username ? p.displayName : undefined}
             action={
               <FriendPillButton onClick={() => void addFriend(p)}>Invite</FriendPillButton>
             }

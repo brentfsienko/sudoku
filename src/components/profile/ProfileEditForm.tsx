@@ -13,7 +13,6 @@ type Props = {
   profile: Profile;
   currentUsername: string | null;
   userId: string | null;
-  onSaveDisplayName: (name: string) => Promise<void>;
   onSaveUsername: (username: string) => Promise<{ ok: boolean; error?: string }>;
   onSaveDog: (dogId: DogId) => Promise<void>;
   onDone: () => void;
@@ -23,22 +22,19 @@ export function ProfileEditForm({
   profile,
   currentUsername,
   userId,
-  onSaveDisplayName,
   onSaveUsername,
   onSaveDog,
   onDone,
 }: Props) {
-  const [displayName, setDisplayName] = useState(profile.name);
-  const [username, setUsername] = useState(currentUsername ?? "");
+  const [username, setUsername] = useState(currentUsername ?? profile.username);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
   const [usernameHint, setUsernameHint] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setDisplayName(profile.name);
-    setUsername(currentUsername ?? "");
-  }, [profile.name, currentUsername]);
+    setUsername(currentUsername ?? profile.username);
+  }, [currentUsername, profile.username]);
 
   useEffect(() => {
     if (!userId) {
@@ -90,11 +86,6 @@ export function ProfileEditForm({
     setSaveError(null);
     setSaving(true);
     try {
-      const trimmedName = displayName.trim().slice(0, 16) || "Pup";
-      if (trimmedName !== profile.name) {
-        await onSaveDisplayName(trimmedName);
-      }
-
       if (userId) {
         const clean = normalizeUsername(username);
         const validation = validateUsername(clean);
@@ -107,6 +98,20 @@ export function ProfileEditForm({
             setSaveError("Username already taken.");
             return;
           }
+          const res = await onSaveUsername(clean);
+          if (!res.ok) {
+            setSaveError(res.error ?? "Could not save username.");
+            return;
+          }
+        }
+      } else {
+        const clean = normalizeUsername(username);
+        const validation = validateUsername(clean);
+        if (validation) {
+          setSaveError(validation);
+          return;
+        }
+        if (clean !== profile.username) {
           const res = await onSaveUsername(clean);
           if (!res.ok) {
             setSaveError(res.error ?? "Could not save username.");
@@ -132,19 +137,6 @@ export function ProfileEditForm({
     <div className="animate-float-in flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm">
       <label className="flex flex-col gap-1">
         <span className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
-          Display name
-        </span>
-        <input
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          maxLength={16}
-          className="font-display w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-center text-lg font-bold outline-none focus:border-[var(--primary)]"
-          placeholder="Your name"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1">
-        <span className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
           Username
         </span>
         <div className="flex items-center gap-1">
@@ -152,13 +144,12 @@ export function ProfileEditForm({
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            disabled={!userId}
             maxLength={24}
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
-            className={`font-display w-full rounded-2xl border-2 bg-[var(--background)] px-3 py-2.5 text-sm font-bold outline-none focus:border-[var(--primary)] disabled:opacity-50 ${usernameBorder}`}
-            placeholder={userId ? "your_username" : "sign in first"}
+            className={`ui-input w-full rounded-2xl border-2 bg-[var(--background)] px-3 py-2.5 text-sm font-bold outline-none focus:border-[var(--primary)] ${usernameBorder}`}
+            placeholder="your_username"
           />
         </div>
         {usernameHint && (
@@ -170,6 +161,11 @@ export function ProfileEditForm({
             }`}
           >
             {usernameStatus === "checking" ? "Checking availability…" : usernameHint}
+          </p>
+        )}
+        {!userId && (
+          <p className="text-xs text-[var(--muted)]">
+            Saved on this device. Sign in to claim it and play with friends.
           </p>
         )}
       </label>

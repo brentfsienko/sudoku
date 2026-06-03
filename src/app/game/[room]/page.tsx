@@ -55,7 +55,7 @@ function RoomRoute() {
       <RoomProvider
         id={`floof-${code}`}
         initialPresence={{
-          name: profile.name,
+          name: profile.username,
           dogId: profile.dogId,
           role: isHost ? "player-1" : "player-2",
           selectedCell: null,
@@ -97,7 +97,7 @@ function RoomInner({
     isHost,
     seedDifficulty,
     seedMode,
-    hostName: profile.name,
+    hostName: profile.username,
   });
 
   const exit = () => router.push("/");

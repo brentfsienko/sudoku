@@ -1,6 +1,7 @@
 import { Liveblocks } from "@liveblocks/node";
 import { NextResponse } from "next/server";
-import { randomDogName, randomDogId } from "@/lib/theme/dogs";
+import { randomUsername } from "@/lib/stats/profile";
+import { randomDogId } from "@/lib/theme/dogs";
 
 const secret = process.env.LIVEBLOCKS_SECRET_KEY;
 
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   const userId = `anon-${crypto.randomUUID()}`;
-  const name = body.name?.trim() || randomDogName();
+  const name = body.name?.trim() || randomUsername();
   const dogId = body.dogId || randomDogId();
 
   const session = liveblocks.prepareSession(userId, {

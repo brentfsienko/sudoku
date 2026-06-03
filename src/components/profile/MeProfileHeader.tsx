@@ -26,8 +26,7 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
   const friends = useFriends(userData.user, profile);
   const wl = multiWinLoss(multi);
 
-  const username =
-    friends.myProfile?.username ?? profile.name.toLowerCase().replace(/\s+/g, "");
+  const username = friends.myProfile?.username ?? profile.username;
 
   return (
     <div className="flex flex-col gap-6">
@@ -119,12 +118,17 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
       {editing && (
         <ProfileEditForm
           profile={profile}
-          currentUsername={friends.myProfile?.username ?? null}
+          currentUsername={friends.myProfile?.username ?? profile.username}
           userId={userData.user?.id ?? null}
-          onSaveDisplayName={async (name) => {
-            await userData.updateProfile({ name });
+          onSaveUsername={async (username) => {
+            if (userData.user) {
+              const res = await friends.setUsername(username);
+              if (res.ok) await userData.updateProfile({ username });
+              return res;
+            }
+            await userData.updateProfile({ username });
+            return { ok: true };
           }}
-          onSaveUsername={friends.setUsername}
           onSaveDog={async (dogId) => {
             await userData.updateProfile({ dogId });
           }}

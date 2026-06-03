@@ -62,7 +62,17 @@ export function useUserData(): UseUserData {
         }
         const d = await loadUserData();
         if (active) setDataBoth(d);
-        if (authUser && active) void syncPublicProfile(authUser.id, d.profile);
+        if (authUser && active) {
+          const synced = await syncPublicProfile(authUser.id, d.profile);
+          if (synced.username && active) {
+            const merged = {
+              ...d,
+              profile: { ...d.profile, username: synced.username },
+            };
+            setDataBoth(merged);
+            await saveUserData(merged);
+          }
+        }
       } catch (err) {
         console.warn("[stats] init failed, using local data:", err);
         if (active) setDataBoth(loadLocal());
@@ -81,7 +91,17 @@ export function useUserData(): UseUserData {
       try {
         const d = await loadUserData();
         if (active) setDataBoth(d);
-        if (u && active) void syncPublicProfile(u.id, d.profile);
+        if (u && active) {
+          const synced = await syncPublicProfile(u.id, d.profile);
+          if (synced.username && active) {
+            const merged = {
+              ...d,
+              profile: { ...d.profile, username: synced.username },
+            };
+            setDataBoth(merged);
+            await saveUserData(merged);
+          }
+        }
       } catch {
         if (active) setDataBoth(loadLocal());
       } finally {
@@ -112,7 +132,13 @@ export function useUserData(): UseUserData {
       setDataBoth(merged);
       await saveUserData(merged);
       const uid = (await getSupabase()?.auth.getSession())?.data.session?.user?.id;
-      if (uid) void syncPublicProfile(uid, merged.profile);
+      if (uid) {
+        const synced = await syncPublicProfile(uid, merged.profile);
+        if (synced.username) {
+          merged.profile.username = synced.username;
+          setDataBoth(merged);
+        }
+      }
     },
     [setDataBoth],
   );

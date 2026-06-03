@@ -1,4 +1,6 @@
 import type { Difficulty } from "@/lib/game/types";
+import type { DogId } from "@/lib/theme/dogs";
+import { coerceProfile } from "./profile";
 
 export type SoloStats = {
   played: number;
@@ -33,8 +35,8 @@ export type MultiStats = {
 };
 
 export type Profile = {
-  name: string;
-  dogId: string;
+  username: string;
+  dogId: DogId;
 };
 
 /** One completed game, kept for the progress timeline. */
@@ -102,9 +104,9 @@ export function emptyMulti(): MultiStats {
   };
 }
 
-export function emptyUserData(profile?: Partial<Profile>): UserData {
+export function emptyUserData(profile?: Partial<Profile> & { name?: string }): UserData {
   return {
-    profile: { name: profile?.name ?? "Pup", dogId: profile?.dogId ?? "golden" },
+    profile: coerceProfile(profile),
     solo: emptySolo(),
     multi: emptyMulti(),
     history: [],
@@ -116,7 +118,10 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
   const base = emptyUserData();
   if (!raw) return base;
   return {
-    profile: { ...base.profile, ...raw.profile },
+    profile: coerceProfile({
+      ...base.profile,
+      ...(raw.profile as Partial<Profile> & { name?: string }),
+    }),
     solo: { ...base.solo, ...raw.solo },
     multi: { ...base.multi, ...raw.multi },
     history: Array.isArray(raw.history) ? raw.history : [],

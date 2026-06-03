@@ -35,7 +35,7 @@ function SoloGame({
   });
   const [me] = useState(() => {
     const p = getProfile();
-    return { name: p.name, dogId: p.dogId, role: "player-1" as const };
+    return { name: p.username, dogId: p.dogId, role: "player-1" as const };
   });
 
   const controller = useLocalGame(snapshot);
