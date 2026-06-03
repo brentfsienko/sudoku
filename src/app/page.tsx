@@ -39,6 +39,7 @@ import {
   coopWinLoss,
   filterHistory,
   mostPlayedOpponentForMode,
+  opponentModeGames,
   type HistoryFilter,
 } from "@/lib/stats/multi";
 import {
@@ -579,7 +580,7 @@ function OpponentHighlight({
   mode: "coop" | "competitive";
   emptyMessage: string;
 }) {
-  const games = top ? (mode === "coop" ? top.coopGames : top.compGames) : 0;
+  const games = top ? opponentModeGames(top, mode) : 0;
   const label = mode === "coop" ? "Top co-op partner" : "Top rival";
 
   return (

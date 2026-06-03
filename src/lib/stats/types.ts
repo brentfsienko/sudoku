@@ -163,21 +163,20 @@ function normalizeOpponents(
 export function normalizeUserData(raw: Partial<UserData> | null | undefined): UserData {
   const base = emptyUserData();
   if (!raw) return base;
+  const solo = { ...base.solo, ...raw.solo, totalSquares: raw.solo?.totalSquares ?? 0 };
+  const multi = normalizeMulti(raw.multi);
+  const history = backfillHistoryOpponents(
+    backfillHistorySquares(normalizeHistory(raw.history), solo, multi),
+    multi.opponents,
+  );
   return {
     profile: coerceProfile({
       ...base.profile,
       ...(raw.profile as Partial<Profile> & { name?: string }),
     }),
-    solo: { ...base.solo, ...raw.solo, totalSquares: raw.solo?.totalSquares ?? 0 },
-    multi: normalizeMulti(raw.multi),
-    history: backfillHistoryOpponents(
-      backfillHistorySquares(
-        normalizeHistory(raw.history),
-        { ...base.solo, ...raw.solo, totalSquares: raw.solo?.totalSquares ?? 0 },
-        normalizeMulti(raw.multi),
-      ),
-      normalizeMulti(raw.multi).opponents,
-    ),
+    solo,
+    multi: { ...multi, opponents: reconcileOpponents(multi.opponents, history) },
+    history,
   };
 }
 
@@ -233,7 +232,9 @@ function backfillHistoryOpponents(
 
   const pickOpponent = (mode: "coop" | "competitive") => {
     const eligible = records.filter((r) =>
-      mode === "coop" ? r.coopGames > 0 : r.compGames > 0,
+      mode === "coop"
+        ? r.coopGames > 0 || (r.games > 0 && r.compGames === 0)
+        : r.compGames > 0 || (r.games > 0 && r.coopGames === 0),
     );
     const pool = eligible.length > 0 ? eligible : records;
     return pool.sort((a, b) => b.games - a.games)[0] ?? null;
@@ -249,6 +250,71 @@ function backfillHistoryOpponents(
       opponentDogId: log.opponentDogId || rec.dogId,
     };
   });
+}
+
+function opponentKey(name: string | undefined): string {
+  const clean = (name ?? "").replace(/^@/, "").trim().toLowerCase();
+  return clean || "anon";
+}
+
+/** Sync per-mode opponent counts from game history and fix legacy rows. */
+function reconcileOpponents(
+  opponents: MultiStats["opponents"],
+  history: GameLog[],
+): MultiStats["opponents"] {
+  const next: MultiStats["opponents"] = {};
+  for (const [key, rec] of Object.entries(opponents)) {
+    next[key] = { ...rec };
+  }
+
+  for (const log of history) {
+    if (log.mode === "solo") continue;
+    const key = opponentKey(log.opponentName);
+    const displayName =
+      log.opponentName?.replace(/^@/, "").trim() ||
+      next[key]?.name ||
+      opponents[key]?.name ||
+      "Anon Pup";
+    const prev = next[key] ?? {
+      name: displayName,
+      dogId: log.opponentDogId || "golden",
+      games: 0,
+      wins: 0,
+      coopGames: 0,
+      compGames: 0,
+      compWins: 0,
+    };
+    const win = log.mode === "coop" ? log.won : log.won && !log.tied;
+    next[key] = {
+      name: displayName || prev.name,
+      dogId: log.opponentDogId || prev.dogId,
+      games: prev.games + 1,
+      wins: prev.wins + (win ? 1 : 0),
+      coopGames: prev.coopGames + (log.mode === "coop" ? 1 : 0),
+      compGames: prev.compGames + (log.mode === "competitive" ? 1 : 0),
+      compWins: prev.compWins + (log.mode === "competitive" && win ? 1 : 0),
+    };
+  }
+
+  const coopHist = history.filter((l) => l.mode === "coop").length;
+  const compHist = history.filter((l) => l.mode === "competitive").length;
+
+  for (const [key, rec] of Object.entries(next)) {
+    let coopGames = rec.coopGames;
+    let compGames = rec.compGames;
+    if (coopGames === 0 && compGames === 0 && rec.games > 0) {
+      if (coopHist > 0 && compHist === 0) coopGames = rec.games;
+      else if (compHist > 0 && coopHist === 0) compGames = rec.games;
+    }
+    next[key] = {
+      ...rec,
+      coopGames,
+      compGames,
+      games: Math.max(rec.games, coopGames + compGames),
+    };
+  }
+
+  return next;
 }
 
 function normalizeMulti(raw: Partial<MultiStats> | undefined): MultiStats {
@@ -380,9 +446,10 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
   if (r.mode === "coop") multi.coopSquares += r.mySquares;
   else multi.compSquares += r.mySquares;
 
-  const key = (r.opponentName || "anon").trim().toLowerCase() || "anon";
+  const oppName = r.opponentName.replace(/^@/, "").trim();
+  const key = opponentKey(oppName);
   const prev = multi.opponents[key] ?? {
-    name: r.opponentName || "Anon Pup",
+    name: oppName || "Anon Pup",
     dogId: r.opponentDogId,
     games: 0,
     wins: 0,
@@ -391,7 +458,7 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     compWins: 0,
   };
   multi.opponents[key] = {
-    name: r.opponentName || prev.name,
+    name: oppName || prev.name,
     dogId: r.opponentDogId || prev.dogId,
     games: prev.games + 1,
     wins: prev.wins + (myWin ? 1 : 0),

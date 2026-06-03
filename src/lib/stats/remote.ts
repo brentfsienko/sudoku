@@ -25,7 +25,9 @@ export async function fetchRemote(userId: string): Promise<UserData | null> {
   const normalized = normalizeUserData(raw);
   const needsRepair =
     sumHistorySquares(raw.history) < sumHistorySquares(normalized.history) ||
-    JSON.stringify(raw.history ?? []) !== JSON.stringify(normalized.history);
+    JSON.stringify(raw.history ?? []) !== JSON.stringify(normalized.history) ||
+    JSON.stringify(raw.multi?.opponents ?? {}) !==
+      JSON.stringify(normalized.multi.opponents);
   if (needsRepair) {
     void upsertRemote(userId, normalized);
   }

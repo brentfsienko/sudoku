@@ -33,16 +33,25 @@ export function filterHistory(history: GameLog[], filter: HistoryFilter): GameLo
   return history.filter((log) => log.mode === filter);
 }
 
+export function opponentModeGames(
+  rec: OpponentRecord,
+  mode: "coop" | "competitive",
+): number {
+  const specific = mode === "coop" ? rec.coopGames : rec.compGames;
+  if (specific > 0) return specific;
+  if (rec.games > 0 && rec.coopGames === 0 && rec.compGames === 0) return rec.games;
+  return 0;
+}
+
 export function mostPlayedOpponentForMode(
   multi: MultiStats,
   mode: "coop" | "competitive",
 ): OpponentRecord | null {
-  const key = mode === "coop" ? "coopGames" : "compGames";
   let best: OpponentRecord | null = null;
   for (const rec of Object.values(multi.opponents)) {
-    const n = rec[key] ?? 0;
+    const n = opponentModeGames(rec, mode);
     if (n <= 0) continue;
-    if (!best || n > (best[key] ?? 0)) best = rec;
+    if (!best || n > opponentModeGames(best, mode)) best = rec;
   }
   return best;
 }

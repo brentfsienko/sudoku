@@ -61,7 +61,9 @@ export function loadLocal(): UserData {
       const normalized = normalizeUserData(parsed);
       const needsRepair =
         sumHistorySquares(parsed.history) < sumHistorySquares(normalized.history) ||
-        JSON.stringify(parsed.history ?? []) !== JSON.stringify(normalized.history);
+        JSON.stringify(parsed.history ?? []) !== JSON.stringify(normalized.history) ||
+        JSON.stringify(parsed.multi?.opponents ?? {}) !==
+          JSON.stringify(normalized.multi.opponents);
       if (needsRepair) {
         saveLocal(normalized);
       }
