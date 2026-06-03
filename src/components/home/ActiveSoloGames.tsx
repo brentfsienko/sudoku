@@ -8,10 +8,14 @@ import {
   ACTIVE_SOLO_UPDATED_EVENT,
   type ActiveSoloSave,
   isActiveSolo,
-  loadActiveSolo,
+  loadActiveSolos,
 } from "@/lib/game/activeSolo";
 import { formatGameClock } from "@/lib/game/format";
-import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
+import {
+  elapsedSeconds,
+  wallClockSeconds,
+  type GameSnapshot,
+} from "@/lib/game/store";
 import { DIFFICULTY_LABELS } from "@/lib/game/types";
 import type { Profile } from "@/lib/stats/types";
 import { dogIdForUsername } from "@/lib/theme/dogs";
@@ -38,28 +42,33 @@ function ActiveSoloRow({
   snapshot,
   profile,
   userEmail,
+  divider,
   onOpen,
 }: {
   snapshot: GameSnapshot;
   profile: Profile;
   userEmail?: string | null;
+  divider: boolean;
   onOpen: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
   const meName = displayUsername(profile.username);
+  const invested = elapsedSeconds(snapshot, now);
+  const live = wallClockSeconds(snapshot, now);
+  const paused = snapshot.status === "paused";
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const elapsed = elapsedSeconds(snapshot, now);
-
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition active:bg-white/50"
+      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left transition active:bg-white/50 ${
+        divider ? "border-b border-white/70" : ""
+      }`}
     >
       <DogAvatar
         dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
@@ -76,12 +85,15 @@ function ActiveSoloRow({
           <SoloModeBadge />
         </div>
         <span className="text-[10px] font-semibold text-[var(--muted)]">
-          In progress · {DIFFICULTY_LABELS[snapshot.difficulty]}
+          {paused ? "Paused" : "In progress"} · {DIFFICULTY_LABELS[snapshot.difficulty]}
         </span>
       </div>
-      <div className="flex shrink-0 flex-col items-end justify-center gap-1">
-        <span className="text-[10px] font-semibold leading-none text-[var(--muted)]">
-          {formatGameClock(elapsed)}
+      <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
+        <span className="text-[10px] font-semibold leading-none text-[var(--foreground)]">
+          {formatGameClock(invested)}
+        </span>
+        <span className="text-[9px] font-semibold leading-none text-[var(--muted)]">
+          {formatGameClock(live)} live
         </span>
       </div>
     </button>
@@ -95,10 +107,10 @@ type Props = {
 
 export function ActiveSoloGames({ profile, userEmail }: Props) {
   const router = useRouter();
-  const [active, setActive] = useState<ActiveSoloSave | null>(null);
+  const [actives, setActives] = useState<ActiveSoloSave[]>([]);
 
   useEffect(() => {
-    const refresh = () => setActive(loadActiveSolo());
+    const refresh = () => setActives(loadActiveSolos());
     refresh();
     window.addEventListener(ACTIVE_SOLO_UPDATED_EVENT, refresh);
     window.addEventListener("focus", refresh);
@@ -110,17 +122,22 @@ export function ActiveSoloGames({ profile, userEmail }: Props) {
     };
   }, []);
 
-  if (!active || !isActiveSolo(active.snapshot)) return null;
+  const rows = actives.filter((item) => isActiveSolo(item.snapshot));
+  if (rows.length === 0) return null;
 
   return (
     <section className="mb-5">
-      <FriendListPanel title="Active Games" titleClassName={homeSectionTitleClass}>
-        <ActiveSoloRow
-          snapshot={active.snapshot}
-          profile={profile}
-          userEmail={userEmail}
-          onOpen={() => router.push("/play?resume=1")}
-        />
+      <FriendListPanel title="Active games" titleClassName={homeSectionTitleClass}>
+        {rows.map((item, index) => (
+          <ActiveSoloRow
+            key={item.id}
+            snapshot={item.snapshot}
+            profile={profile}
+            userEmail={userEmail}
+            divider={index < rows.length - 1}
+            onOpen={() => router.push(`/play?resume=${encodeURIComponent(item.id)}`)}
+          />
+        ))}
       </FriendListPanel>
     </section>
   );

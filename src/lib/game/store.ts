@@ -284,11 +284,24 @@ export function useLocalGame(initial: GameSnapshot): GameController {
   );
 }
 
-/** Elapsed seconds for a snapshot, accounting for pauses. */
+/** Elapsed seconds for a snapshot, accounting for pauses (active play time). */
 export function elapsedSeconds(s: GameSnapshot, now: number): number {
   if (!s.startedAt) return 0;
   const end = s.finishedAt ?? now;
   const livePause =
     s.status === "paused" && s.pauseStartedAt ? now - s.pauseStartedAt : 0;
   return Math.max(0, Math.floor((end - s.startedAt - s.pausedMs - livePause) / 1000));
+}
+
+/** Wall-clock seconds since the game started (includes paused time). */
+export function wallClockSeconds(s: GameSnapshot, now: number): number {
+  if (!s.startedAt) return 0;
+  const end = s.finishedAt ?? now;
+  return Math.max(0, Math.floor((end - s.startedAt) / 1000));
+}
+
+/** Pause an in-progress game for persistence when leaving the board. */
+export function pauseSnapshot(s: GameSnapshot, now = Date.now()): GameSnapshot {
+  if (s.status !== "playing") return s;
+  return { ...s, status: "paused", pauseStartedAt: now };
 }

@@ -1,12 +1,16 @@
 "use client";
 
-import type { GameSnapshot } from "./store";
+import { pauseSnapshot, type GameSnapshot } from "./store";
 
-const STORAGE_KEY = "floof-active-solo";
+const STORAGE_KEY = "floof-active-solos";
+const LEGACY_KEY = "floof-active-solo";
+
 export const ACTIVE_SOLO_UPDATED_EVENT = "sudogku:active-solo-updated";
 
 export type ActiveSoloSave = {
+  id: string;
   snapshot: GameSnapshot;
+  updatedAt: number;
 };
 
 export function isActiveSoloStatus(status: GameSnapshot["status"]): boolean {
@@ -17,35 +21,109 @@ export function isActiveSolo(snapshot: GameSnapshot): boolean {
   return isActiveSoloStatus(snapshot.status);
 }
 
-export function loadActiveSolo(): ActiveSoloSave | null {
-  if (typeof window === "undefined") return null;
+export function newActiveSoloId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function parseList(raw: string | null): ActiveSoloSave[] {
+  if (!raw) return [];
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as ActiveSoloSave;
-    if (!parsed?.snapshot?.puzzle || !parsed.snapshot.solution) return null;
-    if (!isActiveSolo(parsed.snapshot)) return null;
-    return parsed;
+    const parsed = JSON.parse(raw) as ActiveSoloSave[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item) =>
+        item?.id &&
+        item.snapshot?.puzzle &&
+        item.snapshot.solution &&
+        isActiveSolo(item.snapshot),
+    );
   } catch {
-    return null;
+    return [];
   }
 }
 
-export function saveActiveSolo(snapshot: GameSnapshot): void {
-  if (typeof window === "undefined") return;
-  if (!isActiveSolo(snapshot)) return;
+function migrateLegacy(): ActiveSoloSave[] {
+  if (typeof window === "undefined") return [];
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ snapshot }));
+    const raw = window.localStorage.getItem(LEGACY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { snapshot?: GameSnapshot };
+    if (!parsed?.snapshot || !isActiveSolo(parsed.snapshot)) return [];
+    window.localStorage.removeItem(LEGACY_KEY);
+    return [
+      {
+        id: newActiveSoloId(),
+        snapshot: parsed.snapshot,
+        updatedAt: Date.now(),
+      },
+    ];
+  } catch {
+    return [];
+  }
+}
+
+function writeList(list: ActiveSoloSave[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     window.dispatchEvent(new Event(ACTIVE_SOLO_UPDATED_EVENT));
   } catch {
     // ignore quota errors
   }
 }
 
+export function loadActiveSolos(): ActiveSoloSave[] {
+  if (typeof window === "undefined") return [];
+  try {
+    let list = parseList(window.localStorage.getItem(STORAGE_KEY));
+    if (list.length === 0) {
+      list = migrateLegacy();
+      if (list.length > 0) writeList(list);
+    }
+    return list.sort((a, b) => b.updatedAt - a.updatedAt);
+  } catch {
+    return [];
+  }
+}
+
+export function loadActiveSolo(id: string): ActiveSoloSave | null {
+  return loadActiveSolos().find((item) => item.id === id) ?? null;
+}
+
+/** Most recently updated active solo (for legacy `?resume=1` links). */
+export function loadLatestActiveSolo(): ActiveSoloSave | null {
+  const list = loadActiveSolos();
+  return list[0] ?? null;
+}
+
+export function upsertActiveSolo(
+  snapshot: GameSnapshot,
+  id: string,
+  opts?: { pauseIfPlaying?: boolean },
+): void {
+  if (typeof window === "undefined") return;
+  if (!isActiveSolo(snapshot)) return;
+  const toStore = opts?.pauseIfPlaying ? pauseSnapshot(snapshot) : snapshot;
+  if (!isActiveSolo(toStore)) return;
+
+  const list = loadActiveSolos().filter((item) => item.id !== id);
+  list.push({ id, snapshot: toStore, updatedAt: Date.now() });
+  list.sort((a, b) => b.updatedAt - a.updatedAt);
+  writeList(list);
+}
+
+export function removeActiveSolo(id: string): void {
+  if (typeof window === "undefined") return;
+  const list = loadActiveSolos().filter((item) => item.id !== id);
+  writeList(list);
+}
+
+/** @deprecated Use removeActiveSolo — clears all actives. */
 export function clearActiveSolo(): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(LEGACY_KEY);
     window.dispatchEvent(new Event(ACTIVE_SOLO_UPDATED_EVENT));
   } catch {
     // ignore

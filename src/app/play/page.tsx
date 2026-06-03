@@ -1,13 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GameScreen } from "@/components/board/GameScreen";
 import {
-  clearActiveSolo,
   isActiveSolo,
   loadActiveSolo,
-  saveActiveSolo,
+  loadLatestActiveSolo,
+  newActiveSoloId,
+  removeActiveSolo,
+  upsertActiveSolo,
 } from "@/lib/game/activeSolo";
 import { createSnapshot, useLocalGame, type GameSnapshot } from "@/lib/game/store";
 import { generatePuzzle } from "@/lib/sudoku/generator";
@@ -26,13 +28,15 @@ function parseDifficulty(value: string | null): Difficulty {
     : "medium";
 }
 
-function initialSnapshot(resume: boolean, difficulty: Difficulty): GameSnapshot {
-  if (resume) {
-    const active = loadActiveSolo();
-    if (active) return active.snapshot;
-  } else {
-    clearActiveSolo();
-  }
+function resolveResumeId(resumeParam: string | null): string | null {
+  if (!resumeParam) return null;
+  if (resumeParam === "1") return loadLatestActiveSolo()?.id ?? null;
+  return loadActiveSolo(resumeParam) ? resumeParam : null;
+}
+
+function initialState(playId: string, difficulty: Difficulty): GameSnapshot {
+  const saved = loadActiveSolo(playId);
+  if (saved) return saved.snapshot;
   const puzzle = generatePuzzle(difficulty);
   return createSnapshot({
     puzzle: puzzle.puzzle,
@@ -43,7 +47,7 @@ function initialSnapshot(resume: boolean, difficulty: Difficulty): GameSnapshot 
 }
 
 function SoloGame({
-  resume,
+  activeId,
   difficulty,
   streak,
   savedBones,
@@ -51,7 +55,7 @@ function SoloGame({
   onRematch,
   onWalletSync,
 }: {
-  resume: boolean;
+  activeId: string;
   difficulty: Difficulty;
   streak: number;
   savedBones: number;
@@ -59,24 +63,33 @@ function SoloGame({
   onRematch: () => void;
   onWalletSync: () => void;
 }) {
-  const [snapshot] = useState(() => initialSnapshot(resume, difficulty));
+  const [snapshot] = useState(() => initialState(activeId, difficulty));
   const [me] = useState(() => {
     const p = getProfile();
     return { name: p.username, dogId: p.dogId, role: "player-1" as const };
   });
 
   const controller = useLocalGame(snapshot);
+  const controllerRef = useRef(controller);
+  controllerRef.current = controller;
 
   useEffect(() => {
     const s = controller.snapshot;
     if (!isActiveSolo(s)) return;
-    const id = setTimeout(() => saveActiveSolo(s), 250);
+    const id = setTimeout(() => upsertActiveSolo(s, activeId), 250);
     return () => clearTimeout(id);
-  }, [controller.snapshot]);
+  }, [controller.snapshot, activeId]);
 
-  const handleExit = () => {
+  useEffect(() => {
+    return () => {
+      const s = controllerRef.current.snapshot;
+      if (isActiveSolo(s)) upsertActiveSolo(s, activeId, { pauseIfPlaying: true });
+    };
+  }, [activeId]);
+
+  const persistAndExit = () => {
     const s = controller.snapshot;
-    if (isActiveSolo(s)) saveActiveSolo(s);
+    if (isActiveSolo(s)) upsertActiveSolo(s, activeId, { pauseIfPlaying: true });
     onExit();
   };
 
@@ -86,7 +99,7 @@ function SoloGame({
       me={me}
       streak={streak}
       savedBones={savedBones}
-      onExit={handleExit}
+      onExit={persistAndExit}
       onRematch={onRematch}
       onFinish={({
         solved,
@@ -98,7 +111,7 @@ function SoloGame({
         bonesFound,
       }) =>
         void (async () => {
-          clearActiveSolo();
+          removeActiveSolo(activeId);
           await recordSoloGame({
             won: solved,
             score,
@@ -119,10 +132,14 @@ function SoloGame({
 function PlayInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const resume = params.get("resume") === "1";
+  const resumeParam = params.get("resume");
   const difficulty = parseDifficulty(params.get("d"));
   const [round, setRound] = useState(0);
   const [wallet, setWallet] = useState({ streak: 0, bones: 0 });
+
+  const [playId, setPlayId] = useState(
+    () => resolveResumeId(resumeParam) ?? newActiveSoloId(),
+  );
 
   const syncWallet = () => {
     const d = loadLocal();
@@ -143,14 +160,15 @@ function PlayInner() {
 
   return (
     <SoloGame
-      key={resume ? "resume" : `${round}-${difficulty}`}
-      resume={resume}
+      key={`${playId}-${round}`}
+      activeId={playId}
       difficulty={difficulty}
       streak={wallet.streak}
       savedBones={wallet.bones}
       onExit={() => router.push("/")}
       onRematch={() => {
-        clearActiveSolo();
+        removeActiveSolo(playId);
+        setPlayId(newActiveSoloId());
         setRound((r) => r + 1);
       }}
       onWalletSync={syncWallet}
