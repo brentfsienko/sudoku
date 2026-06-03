@@ -1,15 +1,33 @@
 import type { ReactNode } from "react";
 
+/** Section headings on the home tab (Play, Recent games, etc.) */
+export const homeSectionTitleClass =
+  "font-serif-title text-[1.35rem] leading-tight text-[var(--foreground)]";
+
 type Props = {
   title: string;
   children: ReactNode;
   empty?: string;
+  /** Override section heading style (defaults to FriendListPanel title) */
+  titleClassName?: string;
 };
 
-export function FriendListPanel({ title, children, empty }: Props) {
+export function FriendListPanel({
+  title,
+  children,
+  empty,
+  titleClassName,
+}: Props) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="font-serif-title text-xl text-[var(--foreground)]">{title}</h2>
+      <h2
+        className={
+          titleClassName ??
+          "font-serif-title text-xl text-[var(--foreground)]"
+        }
+      >
+        {title}
+      </h2>
       <div className="overflow-hidden rounded-2xl bg-[var(--list-panel)]">
         {empty ? (
           <p className="px-4 py-6 text-center text-sm text-[var(--muted)]">{empty}</p>

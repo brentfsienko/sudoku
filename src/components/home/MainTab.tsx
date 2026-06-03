@@ -9,6 +9,7 @@ import {
   type GameSetupResult,
 } from "@/components/home/GameSetupSheet";
 import { FactGuessCard } from "@/components/home/FactGuessCard";
+import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 import { StartGameSheet } from "@/components/home/StartGameSheet";
 import { FlameIcon, PawIcon, UsersIcon } from "@/components/icons";
 import { createGameInvite } from "@/lib/friends/api";
@@ -138,10 +139,10 @@ export function MainTab({ data, userData, onSignIn }: Props) {
       />
 
       <header
-        className="relative z-20 shrink-0 px-5 pb-2"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}
+        className="relative z-20 shrink-0 px-5 pb-5"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
       >
-        <AppBrandTitle dogId={data.profile.dogId as DogId} light />
+        <AppBrandTitle dogId={data.profile.dogId as DogId} light size="xl" />
       </header>
 
       {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}
@@ -152,12 +153,10 @@ export function MainTab({ data, userData, onSignIn }: Props) {
         <div className="relative flex min-h-0 flex-1 flex-col overflow-visible">
           <div
             ref={sheetRef}
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-10 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-6 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
           >
           <section className="mb-5">
-            <h2 className="font-serif-title mb-3 text-lg text-[var(--foreground)]">
-              Play
-            </h2>
+            <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
             <div className="flex flex-col gap-2">
               <PlayRow
                 icon={<PawIcon width={20} height={20} />}

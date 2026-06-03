@@ -7,6 +7,7 @@ import {
   FriendListPanel,
   FriendListRow,
   FriendPillButton,
+  homeSectionTitleClass,
 } from "@/components/home/FriendListPanel";
 import { CrownIcon } from "@/components/icons";
 import { createGameInvite, lookupProfileByUsername } from "@/lib/friends/api";
@@ -329,6 +330,7 @@ export function GameHistoryList({
   return (
     <FriendListPanel
       title="Recent games"
+      titleClassName={homeSectionTitleClass}
       empty={
         rows.length === 0
           ? "No games yet. Finish a puzzle and it will show up here."
