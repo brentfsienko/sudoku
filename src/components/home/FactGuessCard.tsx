@@ -63,7 +63,13 @@ export function FactGuessCard() {
       <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface-soft)]">
         <button
           type="button"
-          onClick={() => setExpanded((e) => !e)}
+          onClick={() => {
+            setExpanded((e) => {
+              const next = !e;
+              if (next) void fetchGlobalStats().then(setGlobal);
+              return next;
+            });
+          }}
           className="flex w-full items-start gap-3 px-4 py-3.5 text-left transition active:bg-white/40"
         >
           <span className="mt-0.5 shrink-0 text-[var(--primary)]">

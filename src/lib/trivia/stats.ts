@@ -71,10 +71,15 @@ export async function fetchGlobalStats(): Promise<GlobalTriviaStats> {
       .eq("id", "global")
       .maybeSingle();
     if (error || !data) return local;
-    return {
-      correct: Number(data.correct) || local.correct,
-      wrong: Number(data.wrong) || local.wrong,
+    const remote: GlobalTriviaStats = {
+      correct: Number(data.correct) || 0,
+      wrong: Number(data.wrong) || 0,
     };
+    if (remote.correct + remote.wrong > 0) {
+      saveLocalGlobal(remote);
+      return remote;
+    }
+    return local;
   } catch {
     return local;
   }

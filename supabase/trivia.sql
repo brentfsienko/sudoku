@@ -1,5 +1,5 @@
--- Optional: app-wide trivia guess stats (run in Supabase SQL editor).
--- If not applied, the app falls back to local seeded aggregates.
+-- App-wide trivia guess stats (run once in Supabase SQL editor).
+-- Without this, the app falls back to per-device local aggregates.
 
 create table if not exists public.trivia_stats (
   id text primary key default 'global',
