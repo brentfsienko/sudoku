@@ -20,16 +20,30 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { multiWinLoss } from "@/lib/friends/api";
-import { DIFFICULTY_LABELS, type Difficulty, type GameMode } from "@/lib/game/types";
+import {
+  DIFFICULTY_LABELS,
+  GAME_MODE_LABELS,
+  type Difficulty,
+  type GameMode,
+} from "@/lib/game/types";
 import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
 import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { useUserData } from "@/lib/stats/useUserData";
 import {
+  COOP_ACCENT,
+  VERSUS_ACCENT,
+  compWinLoss,
+  coopWinLoss,
+  filterHistory,
+  mostPlayedOpponentForMode,
+  type HistoryFilter,
+} from "@/lib/stats/multi";
+import {
   emptyUserData,
-  mostPlayedOpponent,
   type GameLog,
   type MultiStats,
+  type OpponentRecord,
   type Profile,
   type SoloStats,
 } from "@/lib/stats/types";
@@ -273,7 +287,8 @@ function MeTab({
       <ProgressSection history={history} />
 
       {/* Multiplayer details */}
-      <MultiSection multi={multi} />
+      <CoopSection multi={multi} />
+      <VersusSection multi={multi} />
 
       {/* Solo */}
       <SoloSection solo={solo} />
@@ -300,15 +315,29 @@ const METRIC_COLORS: Record<Metric, string> = {
   mistakes: "#ef6f6c",
 };
 
+const HISTORY_FILTERS: { id: HistoryFilter; label: string; color: string }[] = [
+  { id: "all", label: "All", color: METRIC_COLORS.games },
+  { id: "coop", label: GAME_MODE_LABELS.coop, color: COOP_ACCENT },
+  { id: "competitive", label: "Versus", color: VERSUS_ACCENT },
+  { id: "solo", label: "Solo", color: "#a06bd6" },
+];
+
 function ProgressSection({ history }: { history: GameLog[] }) {
   const [metric, setMetric] = useState<Metric>("games");
+  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
+  const filteredHistory = useMemo(
+    () => filterHistory(history, historyFilter),
+    [history, historyFilter],
+  );
   const starts = useMemo(() => weekStarts(12), []);
   const series = useMemo(
-    () => weeklySeries(history, metric, 12),
-    [history, metric],
+    () => weeklySeries(filteredHistory, metric, 12),
+    [filteredHistory, metric],
   );
-  const week = useMemo(() => thisWeekTotals(history), [history]);
-  const color = METRIC_COLORS[metric];
+  const week = useMemo(() => thisWeekTotals(filteredHistory), [filteredHistory]);
+  const chartColor =
+    HISTORY_FILTERS.find((f) => f.id === historyFilter)?.color ?? METRIC_COLORS[metric];
+  const color = historyFilter === "all" ? METRIC_COLORS[metric] : chartColor;
 
   return (
     <section className="flex flex-col gap-3 border-t border-[var(--border)] pt-5">
@@ -334,6 +363,27 @@ function ProgressSection({ history }: { history: GameLog[] }) {
               }}
             >
               {m.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        {HISTORY_FILTERS.map((f) => {
+          const active = f.id === historyFilter;
+          return (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => setHistoryFilter(f.id)}
+              className="shrink-0 rounded-full border-2 px-3 py-1 text-xs font-bold transition active:scale-95"
+              style={{
+                borderColor: active ? f.color : "var(--border)",
+                backgroundColor: active ? f.color : "transparent",
+                color: active ? "#fff" : "var(--muted)",
+              }}
+            >
+              {f.label}
             </button>
           );
         })}
@@ -498,40 +548,85 @@ function SoloSection({ solo }: { solo: SoloStats }) {
   );
 }
 
-function MultiSection({ multi }: { multi: MultiStats }) {
-  const compGames = multi.compPlayed;
-  const compRecord = `${multi.compWon}-${Math.max(
-    0,
-    compGames - multi.compWon - multi.compTied,
-  )}-${multi.compTied}`;
-  const top = mostPlayedOpponent(multi);
+function CoopSection({ multi }: { multi: MultiStats }) {
+  const coop = coopWinLoss(multi);
+  const top = mostPlayedOpponentForMode(multi, "coop");
+
+  return (
+    <section className="flex flex-col gap-3 border-t border-[var(--border)] pt-5">
+      <SectionHeader
+        icon={<PawIcon width={18} height={18} />}
+        title={GAME_MODE_LABELS.coop}
+        trailing={`${coop.played} games`}
+        accent={COOP_ACCENT}
+      />
+
+      <StatGrid
+        items={[
+          { value: `${coop.wins}/${coop.played}`, label: "Solved" },
+          { value: String(coop.losses), label: "Unsolved" },
+          { value: `${coop.winPct}%`, label: "Solve Rate" },
+        ]}
+      />
+
+      <OpponentHighlight
+        top={top}
+        mode="coop"
+        emptyMessage="Play co-op with a friend to track your puzzle partners. 🐶🐶"
+      />
+    </section>
+  );
+}
+
+function VersusSection({ multi }: { multi: MultiStats }) {
+  const versus = compWinLoss(multi);
+  const top = mostPlayedOpponentForMode(multi, "competitive");
 
   return (
     <section className="flex flex-col gap-3 border-t border-[var(--border)] pt-5">
       <SectionHeader
         icon={<TrophyIcon width={18} height={18} />}
-        title="Multiplayer"
-        trailing={`${multi.coopPlayed + multi.compPlayed} games`}
+        title={GAME_MODE_LABELS.competitive}
+        trailing={`${versus.played} games`}
+        accent={VERSUS_ACCENT}
       />
 
       <StatGrid
         items={[
-          {
-            value: `${multi.coopSolved}/${multi.coopPlayed}`,
-            label: "Co-op Solved",
-          },
-          { value: compRecord, label: "Versus W-L-T" },
+          { value: versus.record, label: "W-L-T" },
+          { value: String(versus.wins), label: "Wins" },
           { value: multi.totalSquares.toLocaleString(), label: "Squares Filled" },
         ]}
       />
 
+      <OpponentHighlight
+        top={top}
+        mode="competitive"
+        emptyMessage="Challenge a friend head-to-head to see your rival stats. 🏆"
+      />
+    </section>
+  );
+}
+
+function OpponentHighlight({
+  top,
+  mode,
+  emptyMessage,
+}: {
+  top: OpponentRecord | null;
+  mode: "coop" | "competitive";
+  emptyMessage: string;
+}) {
+  const games = top ? (mode === "coop" ? top.coopGames : top.compGames) : 0;
+  const label = mode === "coop" ? "Top co-op partner" : "Top rival";
+
+  return (
+    <>
       <div className="flex items-center gap-1.5 pt-1 text-[var(--muted)]">
         <UserIcon width={15} height={15} />
-        <span className="text-xs font-bold uppercase tracking-wide">
-          Most-Played Opponent
-        </span>
+        <span className="text-xs font-bold uppercase tracking-wide">{label}</span>
       </div>
-      {top ? (
+      {top && games > 0 ? (
         <div className="flex items-center gap-3 rounded-2xl bg-[var(--surface-soft)] p-3">
           <DogAvatar dogId={top.dogId as DogId} size={44} />
           <div className="min-w-0 flex-1">
@@ -539,24 +634,27 @@ function MultiSection({ multi }: { multi: MultiStats }) {
               {top.name}
             </div>
             <div className="text-xs text-[var(--muted)]">
-              {top.games} {top.games === 1 ? "game" : "games"} together
+              {games} {games === 1 ? "game" : "games"}{" "}
+              {mode === "coop" ? "together" : "versus"}
             </div>
           </div>
-          <div className="text-right">
-            <div className="font-display text-lg font-extrabold text-[var(--foreground)]">
-              {top.wins}-{Math.max(0, top.games - top.wins)}
+          {mode === "competitive" && (
+            <div className="text-right">
+              <div className="font-display text-lg font-extrabold text-[var(--foreground)]">
+                {top.compWins}-{Math.max(0, top.compGames - top.compWins)}
+              </div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                vs them
+              </div>
             </div>
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
-              vs them
-            </div>
-          </div>
+          )}
         </div>
       ) : (
         <p className="rounded-2xl bg-[var(--surface-soft)] p-3 text-center text-sm text-[var(--muted)]">
-          Play a co-op or versus match to meet your rivals. 🐾
+          {emptyMessage}
         </p>
       )}
-    </section>
+    </>
   );
 }
 
@@ -564,14 +662,16 @@ function SectionHeader({
   icon,
   title,
   trailing,
+  accent,
 }: {
   icon: React.ReactNode;
   title: string;
   trailing?: string;
+  accent?: string;
 }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[var(--primary)]">{icon}</span>
+      <span style={{ color: accent ?? "var(--primary)" }}>{icon}</span>
       <h3 className="font-display text-lg font-extrabold text-[var(--foreground)]">
         {title}
       </h3>

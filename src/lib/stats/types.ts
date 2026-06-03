@@ -22,6 +22,9 @@ export type OpponentRecord = {
   dogId: string;
   games: number;
   wins: number;
+  coopGames: number;
+  compGames: number;
+  compWins: number;
 };
 
 export type MultiStats = {
@@ -114,6 +117,25 @@ export function emptyUserData(profile?: Partial<Profile> & { name?: string }): U
 }
 
 /** Defensively fill any missing fields after loading from storage/remote. */
+function normalizeOpponents(
+  raw: MultiStats["opponents"] | undefined,
+): MultiStats["opponents"] {
+  if (!raw) return {};
+  const out: MultiStats["opponents"] = {};
+  for (const [key, rec] of Object.entries(raw)) {
+    out[key] = {
+      name: rec.name,
+      dogId: rec.dogId,
+      games: rec.games ?? 0,
+      wins: rec.wins ?? 0,
+      coopGames: rec.coopGames ?? 0,
+      compGames: rec.compGames ?? 0,
+      compWins: rec.compWins ?? 0,
+    };
+  }
+  return out;
+}
+
 export function normalizeUserData(raw: Partial<UserData> | null | undefined): UserData {
   const base = emptyUserData();
   if (!raw) return base;
@@ -123,7 +145,11 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
       ...(raw.profile as Partial<Profile> & { name?: string }),
     }),
     solo: { ...base.solo, ...raw.solo },
-    multi: { ...base.multi, ...raw.multi },
+    multi: {
+      ...base.multi,
+      ...raw.multi,
+      opponents: normalizeOpponents(raw.multi?.opponents),
+    },
     history: Array.isArray(raw.history) ? raw.history : [],
   };
 }
@@ -238,12 +264,20 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     dogId: r.opponentDogId,
     games: 0,
     wins: 0,
+    coopGames: 0,
+    compGames: 0,
+    compWins: 0,
   };
   multi.opponents[key] = {
     name: r.opponentName || prev.name,
     dogId: r.opponentDogId || prev.dogId,
     games: prev.games + 1,
     wins: prev.wins + (myWin ? 1 : 0),
+    coopGames: prev.coopGames + (r.mode === "coop" ? 1 : 0),
+    compGames: prev.compGames + (r.mode === "competitive" ? 1 : 0),
+    compWins:
+      prev.compWins +
+      (r.mode === "competitive" && myWin && !tie ? 1 : 0),
   };
 
   const history = appendHistory(data.history, {

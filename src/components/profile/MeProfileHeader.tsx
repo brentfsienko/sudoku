@@ -7,7 +7,8 @@ import { FriendCodeModal } from "@/components/profile/FriendCodeModal";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
 import { WinLossBar } from "@/components/stats/WinLossBar";
 import { PencilIcon, SettingsIcon } from "@/components/icons";
-import { multiWinLoss } from "@/lib/friends/api";
+import { COOP_ACCENT, VERSUS_ACCENT, compWinLoss, coopWinLoss } from "@/lib/stats/multi";
+import { GAME_MODE_LABELS } from "@/lib/game/types";
 import { useFriends } from "@/lib/friends/useFriends";
 import type { MultiStats, Profile } from "@/lib/stats/types";
 import type { UseUserData } from "@/lib/stats/useUserData";
@@ -24,7 +25,8 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [friendCodeOpen, setFriendCodeOpen] = useState(false);
   const friends = useFriends(userData.user, profile);
-  const wl = multiWinLoss(multi);
+  const coop = coopWinLoss(multi);
+  const versus = compWinLoss(multi);
 
   const username = friends.myProfile?.username ?? profile.username;
 
@@ -113,7 +115,28 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
         )}
       </div>
 
-      <WinLossBar {...wl} />
+      <div className="flex flex-col gap-5">
+        <WinLossBar
+          {...coop}
+          title={GAME_MODE_LABELS.coop}
+          subtitle={
+            coop.played > 0 ? `${coop.wins} solved · ${coop.played} played` : "No games yet"
+          }
+          color={COOP_ACCENT}
+        />
+        <WinLossBar
+          wins={versus.wins}
+          losses={versus.losses}
+          winPct={versus.winPct}
+          title={GAME_MODE_LABELS.competitive}
+          subtitle={
+            versus.played > 0
+              ? `${versus.record} W-L-T · ${versus.played} played`
+              : "No games yet"
+          }
+          color={VERSUS_ACCENT}
+        />
+      </div>
 
       {editing && (
         <ProfileEditForm

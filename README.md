@@ -12,7 +12,7 @@ A floofy, dog-themed Sudoku game built with [Next.js](https://nextjs.org) and de
   - **Co-op** — two pups solve one board together, 3-strikes shared.
   - **Competitive** — both play the same board; whoever fills the most squares wins.
 - Real-time two-player play via shareable **room codes** (powered by Liveblocks).
-- Each player gets their own color; entries appear in that color, wrong entries fill the cell light red.
+- Each player gets their own color (blue and violet); entries appear in that color, wrong entries fill the cell light red.
 - Live opponent presence — see who you're playing against, their dog avatar, and their selected cell.
 - Full board toolkit: notes, hints, undo, erase, mistake tracker (x/3), timer + pause, live score, and same row/column/box/number highlighting.
 - Post-game stats breakdown (time, mistakes, hints, and per-player squares filled).
