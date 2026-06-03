@@ -10,9 +10,11 @@ import { displayDogId } from "@/lib/dogs/display";
 import { isUsernameAvailable } from "@/lib/friends/api";
 import { normalizeUsername, validateUsername } from "@/lib/friends/username";
 import {
+  BEE_DOG,
   EXCLUSIVE_DOGS,
   STANDARD_DOGS,
   isExclusiveDogId,
+  isHoneyUser,
   type DogId,
   type ExclusiveDogId,
 } from "@/lib/theme/dogs";
@@ -43,9 +45,6 @@ function DogPickerButton({
   owned,
   cost,
   onSelect,
-  username,
-  userEmail,
-  userData,
 }: {
   dogId: DogId;
   breed: string;
@@ -53,9 +52,6 @@ function DogPickerButton({
   owned: boolean;
   cost?: number;
   onSelect: () => void;
-  username: string;
-  userEmail?: string | null;
-  userData: UserData;
 }) {
   const showCost = cost != null && !owned;
 
@@ -69,16 +65,7 @@ function DogPickerButton({
       }`}
       aria-label={breed}
     >
-      <DogAvatar
-        dogId={dogId}
-        size={PICKER_DOG_SIZE}
-        bare
-        username={username}
-        email={userEmail}
-        userData={userData}
-        preview={!owned && cost != null}
-        className="block shrink-0"
-      />
+      <DogAvatar dogId={dogId} size={PICKER_DOG_SIZE} bare literal />
       {showCost && (
         <span className="flex items-center gap-0.5 text-[10px] font-bold text-[var(--foreground)]">
           <BoneIcon size={12} />
@@ -119,6 +106,10 @@ export function ProfileEditForm({
   const displayUsername = normalizeUsername(
     currentUsername ?? profile.username,
   );
+  const honeyProfile = isHoneyUser({
+    username: displayUsername,
+    email: userEmail,
+  });
   const resolvedDogId = displayDogId(profile.dogId, {
     username: displayUsername,
     email: userEmail,
@@ -177,6 +168,11 @@ export function ProfileEditForm({
   }, [username, userId, currentUsername]);
 
   async function handleDogPick(dogId: DogId) {
+    if (dogId === "bee") {
+      if (!honeyProfile) return;
+      await onSaveDog("bee");
+      return;
+    }
     if (isExclusiveDogId(dogId)) {
       const owned = ownsExclusiveDog(dogId, userData);
       if (owned) {
@@ -298,12 +294,27 @@ export function ProfileEditForm({
               selected={resolvedDogId === d.id}
               owned
               onSelect={() => void handleDogPick(d.id)}
-              username={displayUsername}
-              userEmail={userEmail}
-              userData={userData}
             />
           ))}
         </div>
+
+        {honeyProfile && (
+          <>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--muted)]">
+              Only you — special pup
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              <DogPickerButton
+                dogId={BEE_DOG.id}
+                breed={BEE_DOG.breed}
+                selected={resolvedDogId === "bee"}
+                owned
+                onSelect={() => void handleDogPick("bee")}
+              />
+            </div>
+          </>
+        )}
+
         <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--muted)]">
           Exclusive — unlock with bones
         </p>
@@ -321,9 +332,6 @@ export function ProfileEditForm({
                 owned={owned}
                 cost={cost}
                 onSelect={() => void handleDogPick(d.id)}
-                username={displayUsername}
-                userEmail={userEmail}
-                userData={userData}
               />
             );
           })}

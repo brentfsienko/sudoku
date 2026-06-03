@@ -1,7 +1,9 @@
 import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import { normalizeUsername, validateUsername } from "@/lib/friends/username";
 import {
+  defaultProfileDogId,
   isExclusiveDogId,
+  isHoneyUser,
   resolveDogId,
   type DogId,
 } from "@/lib/theme/dogs";
@@ -17,10 +19,14 @@ function coerceDogId(
   userData?: UserData,
   email?: string | null,
 ): DogId {
-  let raw = dogId;
+  let raw = dogId?.trim();
+  if (!raw) raw = defaultProfileDogId({ username, email });
   if (raw === "party") raw = "pug";
 
-  const resolved = resolveDogId(raw, { username, email });
+  const resolved = resolveDogId(raw, { username });
+  if (resolved === "bee" && !isHoneyUser({ username, email })) {
+    return "golden";
+  }
   if (
     isExclusiveDogId(resolved) &&
     userData &&

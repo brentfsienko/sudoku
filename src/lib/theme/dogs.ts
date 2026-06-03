@@ -84,27 +84,31 @@ export function isHoneyUser(opts?: {
   return normalizeUsername(opts?.username ?? "") === "honey";
 }
 
-function profileDogOverride(opts?: {
+function usernameDogOverride(username: string): DogId | null {
+  return USERNAME_DOG_OVERRIDES[normalizeUsername(username)] ?? null;
+}
+
+/** Default pup when none is stored yet. */
+export function defaultProfileDogId(opts?: {
   username?: string;
   email?: string | null;
-}): DogId | null {
+}): DogId {
   if (isHoneyUser(opts)) return "bee";
-  const u = normalizeUsername(opts?.username ?? "");
-  return USERNAME_DOG_OVERRIDES[u] ?? null;
+  return "golden";
 }
 
 /** Profile dog for a user, including fixed usernames and party → pug migration. */
 export function dogIdForUsername(
   username: string,
   storedDogId?: string | null,
-  email?: string | null,
 ): DogId {
-  const override = profileDogOverride({ username, email });
+  const override = usernameDogOverride(username);
   if (override) return override;
   const u = normalizeUsername(username);
   const id = storedDogId?.trim() || "golden";
   if (id === "party") return "pug";
-  return resolveDogId(id, { username: u, email });
+  if (id === "bee") return "bee";
+  return resolveDogId(id, { username: u });
 }
 
 export function dogById(id: string | null | undefined): Dog {
@@ -119,9 +123,9 @@ export function isExclusiveDogId(id: string): id is ExclusiveDogId {
 
 export function resolveDogId(
   dogId: string | null | undefined,
-  opts?: { username?: string; email?: string | null },
+  opts?: { username?: string },
 ): DogId {
-  const override = profileDogOverride(opts);
+  const override = usernameDogOverride(opts?.username ?? "");
   if (override) return override;
 
   let id = (dogId?.trim() || "golden") as DogId;

@@ -17,10 +17,7 @@ export function displayDogId(
   },
 ): DogId {
   const email = opts?.email ?? undefined;
-  const resolved = resolveDogId(dogId, {
-    username: opts?.username,
-    email,
-  });
+  const resolved = resolveDogId(dogId, { username: opts?.username });
 
   if (resolved === "bee" && !isHoneyUser({ username: opts?.username, email })) {
     return "golden";

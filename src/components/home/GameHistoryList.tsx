@@ -204,7 +204,7 @@ function MultiplayerHistoryRow({
         </div>
         <div className="flex items-center gap-1.5">
           <PlayerChip
-            dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
+            dogId={dogIdForUsername(meName, profile.dogId)}
             username={meName}
             email={userEmail}
             percent={competitive ? (share?.mine ?? null) : undefined}
@@ -251,7 +251,7 @@ function SoloHistoryRow({
       }`}
     >
       <DogAvatar
-        dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
+        dogId={dogIdForUsername(meName, profile.dogId)}
         username={meName}
         email={userEmail}
         size={40}

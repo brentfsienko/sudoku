@@ -13,6 +13,8 @@ type Props = {
   preview?: boolean;
   /** Transparent head only — no tile (recent games, picker, etc.). */
   bare?: boolean;
+  /** Show this exact pup (profile picker tiles). */
+  literal?: boolean;
 };
 
 export function DogAvatar({
@@ -25,10 +27,13 @@ export function DogAvatar({
   userData,
   preview,
   bare = false,
+  literal = false,
 }: Props) {
-  const resolved = preview
-    ? resolveDogId(dogId, { username, email })
-    : displayDogId(dogId, { username, email, userData });
+  const resolved = literal
+    ? resolveDogId(dogId)
+    : preview
+      ? resolveDogId(dogId, { username })
+      : displayDogId(dogId, { username, email, userData });
   const dog = dogById(resolved);
   const ring = ringColor ? Math.max(2, Math.round(size * 0.06)) : 0;
 
