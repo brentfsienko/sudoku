@@ -154,7 +154,6 @@ function FactGuessBody({
 
   return (
     <div className="flex flex-col gap-2">
-      <GuessResultChips pick={userGuess.guess} />
       <p
         className={`text-center text-sm font-bold ${
           userGuess.correct ? "text-[#3d9a6a]" : "text-[#d64545]"
@@ -185,29 +184,6 @@ function FactGuessBody({
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function GuessResultChips({ pick }: { pick: FactTopic }) {
-  return (
-    <div className="flex items-center justify-center gap-2 py-0.5">
-      {(["dog", "sudoku"] as const).map((topic) => {
-        const label = guessTopicLabel(topic);
-        const selected = pick === topic;
-        return (
-          <span
-            key={topic}
-            className={`font-display rounded-lg px-3.5 py-1 text-sm font-bold ${
-              selected
-                ? "bg-[var(--primary-soft)] text-[var(--foreground)] ring-2 ring-[var(--primary)]"
-                : "text-[var(--muted)] line-through opacity-45"
-            }`}
-          >
-            {label}
-          </span>
-        );
-      })}
     </div>
   );
 }
