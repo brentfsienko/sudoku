@@ -58,6 +58,8 @@
 html,
 body {
   overscroll-behavior: none;
+  /* viewport-fit: cover — accent on home tab set via MainTab */
+  background-color: var(--background);
 }
 
 body {

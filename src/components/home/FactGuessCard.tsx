@@ -99,7 +99,7 @@ export function FactGuessCard() {
           }`}
         >
           <div className="overflow-hidden">
-            <div className="border-t border-[var(--border)]/70 px-4 pb-4 pt-3">
+            <div className="border-t border-[var(--border)]/70 px-4 pb-3 pt-2">
               <FactGuessBody
                 fact={fact}
                 userGuess={userGuess}
@@ -127,20 +127,16 @@ function FactGuessBody({
 }) {
   if (!userGuess) {
     return (
-      <div className="flex flex-col gap-2.5">
-        <p className="text-center text-[11px] font-semibold text-[var(--muted)]">
-          Is this about dogs or Sudoku?
-        </p>
-        <div className="flex gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-[var(--border)]">
-          <GuessButton label="Dog" onClick={() => onGuess("dog")} />
-          <GuessButton label="Sudoku" onClick={() => onGuess("sudoku")} />
-        </div>
+      <div className="flex items-center justify-center gap-2 py-0.5">
+        <GuessChip label="Dog" onClick={() => onGuess("dog")} />
+        <span className="text-[11px] font-semibold text-[var(--muted)]">or</span>
+        <GuessChip label="Sudoku" onClick={() => onGuess("sudoku")} />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2">
       <p
         className={`text-center text-sm font-bold ${
           userGuess.correct ? "text-[#3d9a6a]" : "text-[#d64545]"
@@ -151,11 +147,11 @@ function FactGuessBody({
           : `It was ${fact.topic === "dog" ? "about dogs" : "about Sudoku"}.`}
       </p>
       {globalPct && (
-        <div className="rounded-2xl bg-white/70 px-3 py-2.5 ring-1 ring-[var(--border)]/60">
-          <p className="mb-1.5 text-center text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+        <div className="rounded-xl bg-[var(--list-panel)]/80 px-3 py-2">
+          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
             Sudogku players worldwide
           </p>
-          <div className="flex h-1.5 overflow-hidden rounded-full bg-[var(--list-panel)]">
+          <div className="flex h-1.5 overflow-hidden rounded-full bg-white/80">
             <div
               className="bg-[#5cc98b] transition-all"
               style={{ width: `${globalPct.correctPct}%` }}
@@ -165,7 +161,7 @@ function FactGuessBody({
               style={{ width: `${globalPct.wrongPct}%` }}
             />
           </div>
-          <div className="mt-1.5 flex justify-between text-[11px] font-semibold text-[var(--muted)]">
+          <div className="mt-1 flex justify-between text-[11px] font-semibold text-[var(--muted)]">
             <span>{globalPct.correctPct}% correct</span>
             <span>{globalPct.wrongPct}% incorrect</span>
           </div>
@@ -175,12 +171,12 @@ function FactGuessBody({
   );
 }
 
-function GuessButton({ label, onClick }: { label: string; onClick: () => void }) {
+function GuessChip({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="font-display flex-1 rounded-full py-2 text-sm font-bold text-[var(--foreground)] transition active:scale-[0.98] active:bg-[var(--primary-soft)]"
+      className="font-display rounded-lg px-3.5 py-1 text-sm font-bold text-[var(--foreground)] underline decoration-[var(--primary)] decoration-2 underline-offset-[3px] transition active:text-[var(--primary)]"
     >
       {label}
     </button>
