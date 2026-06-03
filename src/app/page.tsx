@@ -78,7 +78,15 @@ export default function Home() {
         onClose={() => setSignInGateOpen(false)}
       />
     <AppFrame variant={tab === "main" ? "accent" : "background"}>
-      <main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
+      <main
+        className={`flex min-h-0 flex-1 flex-col overflow-hidden ${
+          tab === "main" ? "bg-[var(--accent)]" : "bg-[var(--background)]"
+        }`}
+        style={{
+          paddingBottom:
+            "calc(4.25rem + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
         {tab === "main" && (
           <MainTab
             data={statsForMe}
@@ -124,8 +132,10 @@ export default function Home() {
         )}
       </main>
 
-      <div className="shrink-0 bg-[var(--surface)]">
-        <BottomNav active={tab} onChange={setTab} />
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md">
+        <div className="pointer-events-auto bg-[var(--surface)]">
+          <BottomNav active={tab} onChange={setTab} />
+        </div>
       </div>
     </AppFrame>
     </>

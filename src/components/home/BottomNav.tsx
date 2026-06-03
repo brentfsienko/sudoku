@@ -22,7 +22,7 @@ type Props = {
 
 export function BottomNav({ active, onChange }: Props) {
   return (
-    <nav className="mt-auto w-full shrink-0 border-t border-[var(--border)] bg-[var(--surface)]">
+    <nav className="w-full border-t border-[var(--border)] bg-[var(--surface)]">
       <div className="mx-auto flex max-w-md items-stretch justify-around pt-2.5 pb-2">
         {TABS.map(({ id, label, Icon }) => {
           const isActive = active === id;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ActiveSoloGames } from "@/components/home/ActiveSoloGames";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
@@ -23,11 +23,13 @@ import { usePullableSheet } from "@/lib/hooks/usePullableSheet";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { UserData } from "@/lib/stats/types";
 
-const ACCENT = "#7ec4cf";
-
 /** Space reserved for pinned title (must match header + scroll padding-top). */
 const PLAY_HEADER_HEIGHT =
   "calc(env(safe-area-inset-top) + 1.25rem + 2.75rem + 0.75rem)";
+
+/** Min height for white sheet so it reaches the nav when content is short. */
+const PLAY_SHEET_MIN_HEIGHT =
+  "calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1.25rem - 2.75rem - 0.75rem - 3.25rem - 4.25rem)";
 
 type Props = {
   data: UserData;
@@ -139,73 +141,72 @@ export function MainTab({ data, userData, onSignIn }: Props) {
         <PlayTabHeader />
       </header>
 
-      <div className="relative z-20 flex min-h-0 flex-1 flex-col">
+      <div
+        ref={sheetRef}
+        className="relative z-20 min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain"
+      >
         <div
-          ref={sheetRef}
-          className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain"
+          className="relative flex flex-col"
+          style={{ ...sheetMotion, paddingTop: PLAY_HEADER_HEIGHT }}
         >
-          <div
-            className="relative flex flex-col"
-            style={{ ...sheetMotion, paddingTop: PLAY_HEADER_HEIGHT }}
-          >
-            {/* Dog saddle — sheet edge only; no negative margin into title zone */}
-            <div className="relative h-[3.25rem] shrink-0">
-              <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
-                <AppDogIcon size={128} />
-              </div>
+          {/* Dog saddle — sheet edge only; no negative margin into title zone */}
+          <div className="relative h-[3.25rem] shrink-0">
+            <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
+              <AppDogIcon size={128} />
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="pointer-events-none absolute right-3 top-0 z-50 -translate-y-1/2 sm:right-5">
+              <StreakBonePill
+                streak={streak}
+                bones={bones}
+                className="pointer-events-auto"
+              />
             </div>
 
-            <div className="relative">
-              <div className="pointer-events-none absolute right-3 top-0 z-50 -translate-y-1/2 sm:right-5">
-                <StreakBonePill
-                  streak={streak}
-                  bones={bones}
-                  className="pointer-events-auto"
-                />
-              </div>
+            <div
+              className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
+              style={{ minHeight: PLAY_SHEET_MIN_HEIGHT }}
+            >
+              <ActiveSoloGames
+                profile={data.profile}
+                userEmail={userData.user?.email}
+              />
 
-              <div className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
-                <ActiveSoloGames
-                  profile={data.profile}
-                  userEmail={userData.user?.email}
-                />
-
-                <section className="mb-5">
-                  <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
-                  <div className="flex flex-col gap-2">
-                    <PlayRow
-                      icon={<PawIcon width={24} height={24} />}
-                      title="Solo play"
-                      subtitle="Pick difficulty when you start"
-                      onClick={openSoloSetup}
-                    />
-                    <PlayRow
-                      icon={<UsersIcon width={24} height={24} />}
-                      title="Multiplayer"
-                      subtitle="Friends, search, and invites"
-                      onClick={() => setStartSheetOpen(true)}
-                    />
-                  </div>
-                </section>
-
-                <div className="mb-5">
-                  <FactGuessCard />
+              <section className="mb-5">
+                <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
+                <div className="flex flex-col gap-2">
+                  <PlayRow
+                    icon={<PawIcon width={24} height={24} />}
+                    title="Solo play"
+                    subtitle="Pick difficulty when you start"
+                    onClick={openSoloSetup}
+                  />
+                  <PlayRow
+                    icon={<UsersIcon width={24} height={24} />}
+                    title="Multiplayer"
+                    subtitle="Friends, search, and invites"
+                    onClick={() => setStartSheetOpen(true)}
+                  />
                 </div>
+              </section>
 
-                <GameHistoryList
-                  history={data.history}
-                  profile={data.profile}
-                  opponents={data.multi.opponents}
-                  userId={userData.user?.id ?? null}
-                  userEmail={userData.user?.email}
-                  authConfigured={userData.authConfigured}
-                />
+              <div className="mb-5">
+                <FactGuessCard />
               </div>
+
+              <GameHistoryList
+                history={data.history}
+                profile={data.profile}
+                opponents={data.multi.opponents}
+                userId={userData.user?.id ?? null}
+                userEmail={userData.user?.email}
+                authConfigured={userData.authConfigured}
+              />
             </div>
           </div>
         </div>
-        {/* Fills gap above nav on mobile (min-h-full in scroll is unreliable on iOS) */}
-        <div className="min-h-0 flex-1 shrink-0 bg-white" aria-hidden />
       </div>
 
       <StartGameSheet
