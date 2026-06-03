@@ -20,14 +20,28 @@ export async function fetchRemote(userId: string): Promise<UserData | null> {
   return normalizeUserData(data.data as Partial<UserData>);
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("remote upsert timeout")), ms);
+    }),
+  ]);
+}
+
 export async function upsertRemote(userId: string, data: UserData): Promise<void> {
   const sb = getSupabase();
   if (!sb) return;
-  const { error } = await sb
-    .from("user_data")
-    .upsert(
-      { user_id: userId, data, updated_at: new Date().toISOString() },
-      { onConflict: "user_id" },
-    );
-  if (error) console.warn("[stats] remote upsert failed:", error.message);
+  try {
+    const upsert = sb
+      .from("user_data")
+      .upsert(
+        { user_id: userId, data, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" },
+      );
+    const result = await withTimeout(Promise.resolve(upsert), 12_000);
+    if (result.error) console.warn("[stats] remote upsert failed:", result.error.message);
+  } catch (err) {
+    console.warn("[stats] remote upsert failed:", err);
+  }
 }

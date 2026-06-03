@@ -84,14 +84,24 @@ export function useUserData(): UseUserData {
     void init();
 
     const sb = getSupabase();
-    const sub = sb?.auth.onAuthStateChange(async (_event, session) => {
-      const u = session?.user;
+    const sub = sb?.auth.onAuthStateChange((event, session) => {
       if (!active) return;
+      const u = session?.user;
       setUser(u ? { id: u.id, email: u.email ?? null } : null);
-      try {
-        const d = await loadUserData();
-        if (active) setDataBoth(d);
-        if (u && active) {
+
+      // Never await heavy I/O in the auth listener — it can block updateUser().
+      void (async () => {
+        try {
+          if (event === "SIGNED_OUT" || !u) {
+            if (active) setDataBoth(loadLocal());
+            return;
+          }
+          if (event === "PASSWORD_RECOVERY" || event === "USER_UPDATED") {
+            return;
+          }
+          const d = await loadUserData();
+          if (!active) return;
+          setDataBoth(d);
           const synced = await syncPublicProfile(u.id, d.profile);
           if (synced.username && active) {
             const merged = {
@@ -99,14 +109,14 @@ export function useUserData(): UseUserData {
               profile: { ...d.profile, username: synced.username },
             };
             setDataBoth(merged);
-            await saveUserData(merged);
+            void saveUserData(merged);
           }
+        } catch {
+          if (active) setDataBoth(loadLocal());
+        } finally {
+          if (active) setLoading(false);
         }
-      } catch {
-        if (active) setDataBoth(loadLocal());
-      } finally {
-        if (active) setLoading(false);
-      }
+      })();
     });
 
     const onVisible = () => {
@@ -191,11 +201,8 @@ export function useUserData(): UseUserData {
   }, []);
 
   const updatePassword = useCallback(async (password: string) => {
-    const sb = getSupabase();
-    if (!sb) return { ok: false, error: "Sign-in is not configured." };
-    const { error } = await sb.auth.updateUser({ password });
-    if (error) return { ok: false, error: error.message };
-    return { ok: true };
+    const { completePasswordReset } = await import("@/lib/auth/password");
+    return completePasswordReset(password);
   }, []);
 
   const signOut = useCallback(async () => {

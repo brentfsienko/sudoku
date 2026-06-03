@@ -5,10 +5,8 @@ import Link from "next/link";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { PwaBrowserHint } from "@/components/pwa/PwaBrowserHint";
 import { getSupabase } from "@/lib/supabase/client";
-import { useUserData } from "@/lib/stats/useUserData";
 
 export default function ResetPasswordPage() {
-  const userData = useUserData();
   const [state, setState] = useState<"loading" | "ready" | "invalid">("loading");
 
   useEffect(() => {
@@ -18,48 +16,45 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    let ready = false;
+    let settled = false;
 
     const finish = () => {
-      if (!ready) {
-        ready = true;
-        setState("ready");
-        window.history.replaceState(null, "", "/auth/reset-password");
-      }
+      if (settled) return;
+      settled = true;
+      setState("ready");
+      window.history.replaceState(null, "", "/auth/reset-password");
+    };
+
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      setState("invalid");
+    };
+
+    const checkSession = async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) finish();
     };
 
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
+      if (event === "PASSWORD_RECOVERY" && session) {
         finish();
         return;
       }
-      const hash = window.location.hash;
       if (
         session &&
-        hash.includes("type=recovery") &&
-        (event === "INITIAL_SESSION" || event === "SIGNED_IN")
+        (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")
       ) {
         finish();
       }
     });
 
-    const hash = window.location.hash;
-    if (hash.includes("access_token") || hash.includes("type=recovery")) {
-      void sb.auth.getSession().then(({ data: { session } }) => {
-        if (session) finish();
-      });
-    } else {
-      void sb.auth.getSession().then(({ data: { session } }) => {
-        if (session) finish();
-        else if (!ready) setState("invalid");
-      });
-    }
-
-    const timeout = setTimeout(() => {
-      if (!ready) setState("invalid");
-    }, 6000);
+    void checkSession();
+    const retry = setTimeout(() => void checkSession(), 400);
+    const timeout = setTimeout(fail, 8000);
 
     return () => {
+      clearTimeout(retry);
       clearTimeout(timeout);
       sub.subscription.unsubscribe();
     };
@@ -82,7 +77,7 @@ export default function ResetPasswordPage() {
       {state === "loading" && (
         <p className="text-sm text-[var(--muted)] animate-pulse">Loading…</p>
       )}
-      {state === "ready" && <ResetPasswordForm userData={userData} />}
+      {state === "ready" && <ResetPasswordForm />}
       {state === "invalid" && (
         <div className="flex flex-col gap-3 text-center">
           <p className="text-sm text-[var(--muted)]">

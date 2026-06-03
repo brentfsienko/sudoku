@@ -1,22 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { passwordsMatch } from "@/lib/auth/password";
+import { completePasswordReset, passwordsMatch } from "@/lib/auth/password";
 import { isStandalonePwa } from "@/lib/pwa/standalone";
-import type { UseUserData } from "@/lib/stats/useUserData";
 
-type Props = {
-  userData: UseUserData;
-};
-
-export function ResetPasswordForm({ userData }: Props) {
-  const router = useRouter();
+export function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
-  const inPwa = isStandalonePwa();
 
   async function submit() {
     const check = passwordsMatch(password, confirm);
@@ -26,12 +18,9 @@ export function ResetPasswordForm({ userData }: Props) {
     }
     setStatus("loading");
     setError(null);
-    const res = await userData.updatePassword(password);
+    const res = await completePasswordReset(password);
     if (res.ok) {
       setStatus("done");
-      if (inPwa) {
-        setTimeout(() => router.replace("/"), 800);
-      }
     } else {
       setStatus("error");
       setError(res.error ?? "Could not update password.");
@@ -39,11 +28,16 @@ export function ResetPasswordForm({ userData }: Props) {
   }
 
   if (status === "done") {
-    if (inPwa) {
+    if (isStandalonePwa()) {
       return (
-        <p className="font-serif-title text-center text-lg text-[var(--foreground)]">
-          Password updated. Taking you home…
-        </p>
+        <div className="flex flex-col gap-4 text-center">
+          <p className="font-serif-title text-lg text-[var(--foreground)]">
+            Password updated
+          </p>
+          <p className="text-sm text-[var(--muted)]">
+            You can sign in with your new password from the Me tab.
+          </p>
+        </div>
       );
     }
     return (
@@ -53,8 +47,7 @@ export function ResetPasswordForm({ userData }: Props) {
         </p>
         <p className="text-sm leading-relaxed text-[var(--muted)]">
           Open <span className="font-bold text-[var(--foreground)]">Floof Sudoku</span>{" "}
-          from your home screen, tap Sign in, and use your email with the new password
-          you just set.
+          from your home screen, tap Sign in, and use your email with your new password.
         </p>
         <p className="text-xs text-[var(--muted)]">
           You can close this browser tab — your home screen app is separate on iPhone.
