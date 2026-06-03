@@ -9,15 +9,6 @@ export function ViewportHeightSync() {
 
     function update() {
       root.style.setProperty("--app-height", `${window.innerHeight}px`);
-
-      const vv = window.visualViewport;
-      if (vv) {
-        const bottomGap = Math.max(
-          0,
-          Math.round(window.innerHeight - vv.height - vv.offsetTop),
-        );
-        root.style.setProperty("--vv-bottom-inset", `${bottomGap}px`);
-      }
     }
 
     update();

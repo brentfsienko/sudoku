@@ -18,32 +18,25 @@ const TABS: {
 type Props = {
   active: HomeTab;
   onChange: (tab: HomeTab) => void;
-  /** Mobile PWA: pin to viewport bottom. Desktop: in-flow at bottom of app card. */
-  variant?: "fixed" | "inline";
+  /** Mobile: docked in viewport root. Desktop: in-flow at bottom of app card. */
+  variant?: "dock" | "inline";
 };
 
-/** Tab row height — keep in sync with page main padding and Play sheet min-height. */
-export const BOTTOM_NAV_ROW = "4rem";
-
-/** Reserve space above fixed nav (tab row + home indicator / PWA inset). */
-export const BOTTOM_NAV_OFFSET = `calc(${BOTTOM_NAV_ROW} + max(env(safe-area-inset-bottom, 0px), var(--vv-bottom-inset, 0px)))`;
+/** Tab row only (safe area is on the nav shell). Used for Play sheet min-height. */
+export const BOTTOM_NAV_ROW = "3.5rem";
 
 function NavTabs({
   active,
   onChange,
-  fixed,
+  compact,
 }: {
   active: HomeTab;
   onChange: (tab: HomeTab) => void;
-  fixed?: boolean;
+  compact?: boolean;
 }) {
   return (
     <div
-      className={`flex items-stretch justify-around pt-2.5 ${
-        fixed
-          ? "pb-[max(env(safe-area-inset-bottom,0px),var(--vv-bottom-inset,0px))]"
-          : "pb-2"
-      }`}
+      className={`flex items-stretch justify-around ${compact ? "pt-2 pb-1" : "pt-2.5 pb-2"}`}
     >
       {TABS.map(({ id, label, Icon }) => {
         const isActive = active === id;
@@ -81,13 +74,13 @@ function NavTabs({
 }
 
 export function BottomNav({ active, onChange, variant = "inline" }: Props) {
-  if (variant === "fixed") {
+  if (variant === "dock") {
     return (
       <nav
-        className="bottom-nav-fixed border-t border-[var(--border)] md:hidden"
+        className="bottom-nav-dock border-t border-[var(--border)] md:hidden"
         aria-label="Main navigation"
       >
-        <NavTabs active={active} onChange={onChange} fixed />
+        <NavTabs active={active} onChange={onChange} compact />
       </nav>
     );
   }

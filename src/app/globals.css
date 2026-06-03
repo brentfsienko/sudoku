@@ -2,7 +2,6 @@
 
 :root {
   --app-height: 100dvh;
-  --vv-bottom-inset: 0px;
 
   /* Floofy, warm dog-park palette */
   --background: #fdf6ec;
@@ -110,14 +109,12 @@ body {
     width: 100%;
   }
 
-  .bottom-nav-fixed {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 50;
+  /* In-flow dock — no absolute/fixed (avoids extra gap on iOS standalone) */
+  .bottom-nav-dock {
     flex-shrink: 0;
+    width: 100%;
     background-color: var(--surface);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 

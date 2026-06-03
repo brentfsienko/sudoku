@@ -76,7 +76,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){var d=document.documentElement,h=window.innerHeight;d.style.setProperty('--app-height',h+'px');var v=window.visualViewport;if(v){var g=Math.max(0,Math.round(h-v.height-v.offsetTop));d.style.setProperty('--vv-bottom-inset',g+'px')}})();",
+              "(function(){document.documentElement.style.setProperty('--app-height',window.innerHeight+'px')})();",
           }}
         />
         <ViewportHeightSync />
