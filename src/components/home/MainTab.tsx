@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ActiveSoloGames } from "@/components/home/ActiveSoloGames";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
+import { AppDogIcon } from "@/components/AppDogIcon";
 import { PlayTabHeader } from "@/components/home/PlayTabHeader";
 import {
   GameSetupSheet,
@@ -135,21 +136,29 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-[var(--accent)]">
       <header
-        className="relative z-20 shrink-0 px-5 pb-3"
+        className="relative z-20 shrink-0 px-5"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
       >
         <PlayTabHeader />
+        <div className="h-2 shrink-0" aria-hidden />
       </header>
 
-      {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}
+      {/* Pull moves sheet, streak pill, and brand dog together */}
       <div
         className="relative z-10 flex min-h-0 flex-1 flex-col overflow-visible"
         style={sheetMotion}
       >
         <div className="relative flex min-h-0 flex-1 flex-col overflow-visible">
+          {/* Blue band: keeps title clear; dog straddles bottom edge onto sheet */}
+          <div className="relative h-[3.25rem] shrink-0">
+            <div className="pointer-events-none absolute bottom-0 left-3 z-40 translate-y-1/2 sm:left-5">
+              <AppDogIcon size={128} />
+            </div>
+          </div>
+
           <div
             ref={sheetRef}
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-6 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
           >
             <ActiveSoloGames
               profile={data.profile}
@@ -188,7 +197,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
             />
           </div>
 
-          <div className="pointer-events-none absolute right-3 top-0 z-40 -translate-y-1/2 sm:right-5">
+          <div className="pointer-events-none absolute right-3 top-[3.25rem] z-40 -translate-y-1/2 sm:right-5">
             <StreakBonePill
               streak={streak}
               bones={bones}

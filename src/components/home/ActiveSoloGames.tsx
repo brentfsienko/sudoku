@@ -11,11 +11,7 @@ import {
   loadActiveSolos,
 } from "@/lib/game/activeSolo";
 import { formatGameClock } from "@/lib/game/format";
-import {
-  elapsedSeconds,
-  wallClockSeconds,
-  type GameSnapshot,
-} from "@/lib/game/store";
+import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
 import { DIFFICULTY_LABELS } from "@/lib/game/types";
 import type { Profile } from "@/lib/stats/types";
 import { dogIdForUsername } from "@/lib/theme/dogs";
@@ -53,8 +49,7 @@ function ActiveSoloRow({
 }) {
   const [now, setNow] = useState(() => Date.now());
   const meName = displayUsername(profile.username);
-  const invested = elapsedSeconds(snapshot, now);
-  const live = wallClockSeconds(snapshot, now);
+  const spent = elapsedSeconds(snapshot, now);
   const paused = snapshot.status === "paused";
 
   useEffect(() => {
@@ -88,14 +83,9 @@ function ActiveSoloRow({
           {paused ? "Paused" : "In progress"} · {DIFFICULTY_LABELS[snapshot.difficulty]}
         </span>
       </div>
-      <div className="flex shrink-0 flex-col items-end justify-center gap-0.5">
-        <span className="text-[10px] font-semibold leading-none text-[var(--foreground)]">
-          {formatGameClock(invested)}
-        </span>
-        <span className="text-[9px] font-semibold leading-none text-[var(--muted)]">
-          {formatGameClock(live)} live
-        </span>
-      </div>
+      <span className="shrink-0 text-[10px] font-semibold leading-none text-[var(--muted)]">
+        {formatGameClock(spent)}
+      </span>
     </button>
   );
 }
