@@ -33,7 +33,7 @@ type Props = {
   onDone: () => void;
 };
 
-const PICKER_DOG_SIZE = 76;
+const PICKER_DOG_SIZE = 92;
 
 function DogPickerButton({
   dogId,
@@ -61,16 +61,15 @@ function DogPickerButton({
       type="button"
       onClick={onSelect}
       title={breed}
-      className={`relative flex aspect-square flex-col items-center justify-center gap-0.5 rounded-2xl p-1 transition active:scale-95 ${
-        selected
-          ? "bg-[var(--primary-soft)] ring-2 ring-[var(--primary)]"
-          : "bg-[var(--surface-soft)]"
+      className={`relative flex aspect-square flex-col items-center justify-center gap-0.5 rounded-2xl transition active:scale-95 ${
+        selected ? "ring-2 ring-[var(--primary)]" : "ring-2 ring-transparent"
       }`}
       aria-label={breed}
     >
       <DogAvatar
         dogId={dogId}
         size={PICKER_DOG_SIZE}
+        bare
         username={username}
         userData={userData}
         preview={!owned && cost != null}

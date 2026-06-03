@@ -10,11 +10,12 @@ type Props = {
   username?: string;
   userData?: UserData;
   preview?: boolean;
-  /** Slightly zoomed head in a circle (game history, etc.). */
-  headCrop?: boolean;
+  /**
+   * Show head only on light panels (e.g. recent games) — no tile or circle;
+   * cream in the PNG is knocked out via multiply blend.
+   */
+  bare?: boolean;
 };
-
-const HEAD_ZOOM = 1.28;
 
 export function DogAvatar({
   dogId,
@@ -24,7 +25,7 @@ export function DogAvatar({
   username,
   userData,
   preview,
-  headCrop = false,
+  bare = false,
 }: Props) {
   const resolved = preview
     ? resolveDogId(dogId, { username })
@@ -32,24 +33,17 @@ export function DogAvatar({
   const dog = dogById(resolved);
   const ring = ringColor ? Math.max(2, Math.round(size * 0.06)) : 0;
 
-  const img = headCrop ? (
-    <span
-      className="relative block overflow-hidden rounded-full bg-[var(--surface-soft)]"
-      style={{ width: size, height: size }}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={dog.image}
-        alt=""
-        className={`absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 object-cover ${className ?? ""}`}
-        style={{
-          width: size * HEAD_ZOOM,
-          height: size * HEAD_ZOOM,
-          imageRendering: "pixelated",
-        }}
-        aria-hidden
-      />
-    </span>
+  const img = bare ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={dog.image}
+      alt=""
+      width={size}
+      height={size}
+      className={`block object-contain mix-blend-multiply ${className ?? ""}`}
+      style={{ imageRendering: "pixelated" }}
+      aria-hidden
+    />
   ) : (
     // eslint-disable-next-line @next/next/no-img-element
     <img

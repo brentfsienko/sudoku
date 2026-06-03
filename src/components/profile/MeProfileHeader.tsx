@@ -109,7 +109,7 @@ export function MeProfileHeader({
             <DogAvatar
               dogId={profile.dogId}
               size={112}
-              ringColor="#7ec4cf"
+              bare
               username={username}
               userData={statsData}
             />
