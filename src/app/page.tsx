@@ -78,9 +78,7 @@ export default function Home() {
         onClose={() => setSignInGateOpen(false)}
       />
     <AppFrame variant={tab === "main" ? "accent" : "background"}>
-      <main
-        className={`flex min-h-0 flex-1 flex-col ${tab === "main" ? "overflow-hidden" : ""}`}
-      >
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {tab === "main" && (
           <MainTab
             data={statsForMe}
@@ -91,7 +89,7 @@ export default function Home() {
 
         {tab === "friends" && (
           <div
-            className="flex flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
+            className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
             style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
           >
             <FriendsTab userData={userData} onSignIn={() => setSignInGateOpen(true)} />
@@ -100,7 +98,7 @@ export default function Home() {
 
         {tab === "me" && (
           <div
-            className="flex flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
+            className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
             style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
           >
           {userData.loading ? (

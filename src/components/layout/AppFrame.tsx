@@ -20,10 +20,10 @@ export function AppFrame({ children, variant = "background" }: Props) {
 
   return (
     <div
-      className={`flex min-h-dvh flex-col ${mobileBg} md:items-center md:justify-center md:bg-[var(--background)] md:p-6`}
+      className={`flex h-dvh max-h-dvh flex-col overflow-hidden ${mobileBg} md:h-auto md:max-h-none md:min-h-dvh md:items-center md:justify-center md:bg-[var(--background)] md:p-6`}
     >
       <div
-        className={`mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col md:min-h-0 md:h-[min(90dvh,880px)] md:flex-none md:overflow-hidden md:rounded-[2rem] md:shadow-[0_12px_48px_rgba(74,59,47,0.14)] md:ring-1 md:ring-black/[0.06] ${mobileBg}`}
+        className={`mx-auto flex h-full min-h-0 w-full max-w-md flex-col overflow-hidden md:h-[min(90dvh,880px)] md:max-h-[min(90dvh,880px)] md:flex-none md:rounded-[2rem] md:shadow-[0_12px_48px_rgba(74,59,47,0.14)] md:ring-1 md:ring-black/[0.06] ${mobileBg}`}
         style={{ backgroundColor: bg }}
       >
         {children}

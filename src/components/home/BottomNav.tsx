@@ -22,7 +22,7 @@ type Props = {
 
 export function BottomNav({ active, onChange }: Props) {
   return (
-    <nav className="sticky bottom-0 z-10 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur">
+    <nav className="z-10 shrink-0 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur">
       <div
         className="mx-auto flex max-w-md items-stretch justify-around"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}

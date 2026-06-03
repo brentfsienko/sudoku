@@ -79,17 +79,11 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   useEffect(() => {
     const prevHtml = document.documentElement.style.backgroundColor;
     const prevBody = document.body.style.backgroundColor;
-    const prevBodyOverflow = document.body.style.overflow;
-    const prevHtmlOverflow = document.documentElement.style.overflow;
     document.documentElement.style.backgroundColor = ACCENT;
     document.body.style.backgroundColor = ACCENT;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
     return () => {
       document.documentElement.style.backgroundColor = prevHtml;
       document.body.style.backgroundColor = prevBody;
-      document.documentElement.style.overflow = prevHtmlOverflow;
-      document.body.style.overflow = prevBodyOverflow;
     };
   }, []);
 
@@ -142,7 +136,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
       <header
-        className="sticky top-0 z-30 shrink-0 bg-[var(--accent)] px-5"
+        className="relative z-30 shrink-0 bg-[var(--accent)] px-5"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
       >
         <PlayTabHeader />
