@@ -5,7 +5,7 @@ import { SignInGate } from "@/components/auth/SignInGate";
 import { AppFrame } from "@/components/layout/AppFrame";
 import { MainTab } from "@/components/home/MainTab";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
-import { BottomNav, BOTTOM_NAV_OFFSET, type HomeTab } from "@/components/home/BottomNav";
+import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
 import { FriendsTab } from "@/components/home/FriendsTab";
 import { MeProfileHeader } from "@/components/profile/MeProfileHeader";
 import { DogAvatar } from "@/components/DogAvatar";
@@ -79,10 +79,9 @@ export default function Home() {
       />
     <AppFrame variant={tab === "main" ? "accent" : "background"}>
       <main
-        className={`flex min-h-0 flex-1 flex-col overflow-hidden ${
+        className={`flex min-h-0 flex-1 flex-col overflow-hidden max-md:pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] md:pb-0 ${
           tab === "main" ? "bg-[var(--accent)]" : "bg-[var(--background)]"
         }`}
-        style={{ paddingBottom: BOTTOM_NAV_OFFSET }}
       >
         {tab === "main" && (
           <MainTab
@@ -128,8 +127,9 @@ export default function Home() {
           </div>
         )}
       </main>
+      <BottomNav active={tab} onChange={setTab} variant="inline" />
     </AppFrame>
-    <BottomNav active={tab} onChange={setTab} />
+    <BottomNav active={tab} onChange={setTab} variant="fixed" />
     </>
   );
 }
