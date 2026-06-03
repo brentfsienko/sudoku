@@ -133,24 +133,20 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
-      {/* Anchored brand row — only the white sheet scrolls below */}
+    <div className="relative flex min-h-0 flex-1 flex-col bg-[var(--accent)]">
       <header
-        className="sticky top-0 z-30 shrink-0 bg-[var(--accent)] px-5 pb-3"
-        style={{
-          paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)",
-          paddingLeft: "max(1.25rem, calc(env(safe-area-inset-left, 0px) + 1.25rem))",
-          paddingRight: "max(1.25rem, calc(env(safe-area-inset-right, 0px) + 1.25rem))",
-        }}
+        className="relative z-20 shrink-0 px-5 pb-3"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
       >
         <PlayTabHeader />
       </header>
 
+      {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}
       <div
-        className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden"
+        className="relative z-10 flex min-h-0 flex-1 flex-col overflow-visible"
         style={sheetMotion}
       >
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-visible">
           <div
             ref={sheetRef}
             className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-6 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
