@@ -135,27 +135,24 @@ export function MainTab({ data, userData, onSignIn }: Props) {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
-      <header
-        className="relative z-30 shrink-0 bg-[var(--accent)] px-5"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
-      >
-        <PlayTabHeader />
-        <div className="h-2 shrink-0" aria-hidden />
-      </header>
-
-      {/* Title stays fixed; dog, pill, and sheet scroll together */}
       <div
         ref={sheetRef}
         className="flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-y-contain"
       >
         <div className="relative flex flex-col" style={sheetMotion}>
-          <div className="relative h-[3.25rem] shrink-0">
-            <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
-              <AppDogIcon size={128} />
-            </div>
+          {/* Title scrolls away; white sheet (z-20) passes over it when scrolling up */}
+          <div
+            className="relative z-0 shrink-0 bg-[var(--accent)] px-5 pb-10"
+            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+          >
+            <PlayTabHeader />
           </div>
 
-          <div className="relative">
+          <div className="relative z-20 -mt-6">
+            <div className="pointer-events-none absolute bottom-full left-3 z-30 mb-[-2.5rem] translate-y-1/2 sm:left-5">
+              <AppDogIcon size={128} />
+            </div>
+
             <div className="pointer-events-none absolute right-3 top-0 z-50 -translate-y-1/2 sm:right-5">
               <StreakBonePill
                 streak={streak}
@@ -164,7 +161,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
               />
             </div>
 
-            <div className="rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
+            <div className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
               <ActiveSoloGames
                 profile={data.profile}
                 userEmail={userData.user?.email}
