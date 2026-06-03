@@ -162,7 +162,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
 
       {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}
       <div
-        className="relative z-10 mt-[1.5dvh] flex min-h-0 flex-1 flex-col overflow-visible"
+        className="relative z-10 mt-[0.75dvh] flex min-h-0 flex-1 flex-col overflow-visible"
         style={sheetMotion}
       >
         <div className="relative flex min-h-0 flex-1 flex-col overflow-visible">

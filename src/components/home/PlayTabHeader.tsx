@@ -5,7 +5,7 @@ import type { DogId } from "@/lib/theme/dogs";
 
 const ICON_SIZE = 128;
 /** Extra space below the status bar before the brand row. */
-const HEADER_TOP_OFFSET = "5dvh";
+const HEADER_TOP_OFFSET = "2.5dvh";
 
 type Props = {
   dogId: DogId;
@@ -13,7 +13,7 @@ type Props = {
   profileIcon?: boolean;
 };
 
-/** Play tab brand: dog on the left, title starting ~30% from screen left, vertically centered. */
+/** Play tab brand: dog on the left, title to its right (no overlap), vertically centered. */
 export function PlayTabHeader({ dogId, appIcon, profileIcon }: Props) {
   const icon = profileIcon ? (
     <DogAvatar dogId={dogId} size={ICON_SIZE} bare literal />
@@ -25,20 +25,16 @@ export function PlayTabHeader({ dogId, appIcon, profileIcon }: Props) {
 
   return (
     <div
-      className="relative w-full pr-28 pb-3"
+      className="relative flex w-full items-center gap-3 pr-28 pl-3 pb-1.5"
       style={{
         paddingTop: `calc(env(safe-area-inset-top) + ${HEADER_TOP_OFFSET})`,
+        minHeight: ICON_SIZE,
       }}
     >
-      <div className="relative w-full" style={{ minHeight: ICON_SIZE }}>
-        <div className="absolute left-3 top-1/2 -translate-y-1/2">{icon}</div>
-        <h1
-          className="font-serif-title absolute top-1/2 -translate-y-1/2 text-[2.75rem] leading-none text-white"
-          style={{ left: "30%" }}
-        >
-          {APP_NAME}
-        </h1>
-      </div>
+      <div className="shrink-0">{icon}</div>
+      <h1 className="font-serif-title min-w-0 text-[2.75rem] leading-none text-white">
+        {APP_NAME}
+      </h1>
     </div>
   );
 }
