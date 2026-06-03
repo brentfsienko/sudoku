@@ -58,22 +58,26 @@ export default function OgImage() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 48,
+            gap: 40,
+            background: "#fdf6ec",
+            borderRadius: 40,
+            padding: "56px 72px",
+            boxShadow: "0 24px 48px rgba(74, 59, 47, 0.15)",
           }}
         >
-          <OgDogIcon size={160} />
+          <OgDogIcon size={140} />
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 16,
+              gap: 12,
             }}
           >
             <div
               style={{
-                fontSize: 96,
+                fontSize: 88,
                 fontWeight: 700,
-                color: "#ffffff",
+                color: "#4a3b2f",
                 letterSpacing: "-0.02em",
               }}
             >
@@ -81,8 +85,8 @@ export default function OgImage() {
             </div>
             <div
               style={{
-                fontSize: 36,
-                color: "rgba(255, 255, 255, 0.88)",
+                fontSize: 32,
+                color: "#9a8a79",
               }}
             >
               Sudoku with friends
