@@ -11,11 +11,14 @@ import {
 import {
   fetchFactStats,
   globalPercentages,
-  loadUserGuesses,
   recordGuess,
   type GlobalTriviaStats,
-  type UserGuess,
 } from "@/lib/trivia/stats";
+import {
+  guessTopicLabel,
+  loadGuessForFact,
+  type UserGuess,
+} from "@/lib/trivia/userGuess";
 
 function useDailyFact() {
   const [dayKey, setDayKey] = useState(todayDateKey);
@@ -41,10 +44,19 @@ export function FactGuessCard() {
   const [global, setGlobal] = useState<GlobalTriviaStats | null>(null);
 
   useEffect(() => {
+    let active = true;
     setExpanded(false);
-    const saved = loadUserGuesses()[fact.id];
-    setUserGuess(saved ?? null);
-    void fetchFactStats(fact.id).then(setGlobal);
+    setUserGuess(null);
+    void loadGuessForFact(fact.id).then((saved) => {
+      if (!active) return;
+      setUserGuess(saved);
+    });
+    void fetchFactStats(fact.id).then((stats) => {
+      if (active) setGlobal(stats);
+    });
+    return () => {
+      active = false;
+    };
   }, [fact.id]);
 
   async function submit(guess: FactTopic) {
@@ -84,7 +96,7 @@ export function FactGuessCard() {
               {expanded
                 ? "tap to collapse"
                 : userGuess
-                  ? "tap to see result"
+                  ? `you picked ${guessTopicLabel(userGuess.guess)} · tap to see result`
                   : "dog or Sudoku?"}
             </p>
           </div>
@@ -103,7 +115,7 @@ export function FactGuessCard() {
             expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           }`}
         >
-          <div className="overflow-hidden">
+          <div className="min-h-0 overflow-hidden">
             <div className="border-t border-[var(--border)]/70 px-4 pb-3 pt-2">
               <FactGuessBody
                 fact={fact}
@@ -142,14 +154,15 @@ function FactGuessBody({
 
   return (
     <div className="flex flex-col gap-2">
+      <GuessResultChips pick={userGuess.guess} />
       <p
         className={`text-center text-sm font-bold ${
           userGuess.correct ? "text-[#3d9a6a]" : "text-[#d64545]"
         }`}
       >
         {userGuess.correct
-          ? "Nice — you got it!"
-          : `It was ${fact.topic === "dog" ? "about dogs" : "about Sudoku"}.`}
+          ? `Nice — you picked ${guessTopicLabel(userGuess.guess)}!`
+          : `You picked ${guessTopicLabel(userGuess.guess)} · it was ${fact.topic === "dog" ? "about dogs" : "about Sudoku"}.`}
       </p>
       {globalPct && (
         <div className="rounded-xl bg-[var(--list-panel)]/80 px-3 py-2">
@@ -172,6 +185,29 @@ function FactGuessBody({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function GuessResultChips({ pick }: { pick: FactTopic }) {
+  return (
+    <div className="flex items-center justify-center gap-2 py-0.5">
+      {(["dog", "sudoku"] as const).map((topic) => {
+        const label = guessTopicLabel(topic);
+        const selected = pick === topic;
+        return (
+          <span
+            key={topic}
+            className={`font-display rounded-lg px-3.5 py-1 text-sm font-bold ${
+              selected
+                ? "bg-[var(--primary-soft)] text-[var(--foreground)] ring-2 ring-[var(--primary)]"
+                : "text-[var(--muted)] line-through opacity-45"
+            }`}
+          >
+            {label}
+          </span>
+        );
+      })}
     </div>
   );
 }

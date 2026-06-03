@@ -67,6 +67,14 @@ export type GameLog = {
   tied?: boolean;
 };
 
+/** Daily fact guess stored per account (synced with localStorage). */
+export type TriviaUserGuess = {
+  factId: string;
+  guess: "dog" | "sudoku";
+  correct: boolean;
+  at: number;
+};
+
 export type UserData = {
   profile: Profile;
   solo: SoloStats;
@@ -74,6 +82,7 @@ export type UserData = {
   history: GameLog[];
   bones: number;
   ownedExclusiveDogs: ExclusiveDogId[];
+  triviaGuesses?: Record<string, TriviaUserGuess>;
 };
 
 /** "Elevation" analog: harder puzzles climb higher. */
@@ -198,6 +207,10 @@ export function mergeUserData(local: UserData, remote: UserData): UserData {
         ...(remote.ownedExclusiveDogs ?? []),
       ]),
     ],
+    triviaGuesses: mergeTriviaGuesses(
+      local.triviaGuesses ?? {},
+      remote.triviaGuesses ?? {},
+    ),
   });
 }
 
@@ -252,7 +265,38 @@ export function emptyUserData(profile?: Partial<Profile> & { name?: string }): U
     history: [],
     bones: 0,
     ownedExclusiveDogs: [],
+    triviaGuesses: {},
   };
+}
+
+function normalizeTriviaGuesses(
+  raw: Record<string, TriviaUserGuess> | undefined,
+): Record<string, TriviaUserGuess> {
+  if (!raw || typeof raw !== "object") return {};
+  const out: Record<string, TriviaUserGuess> = {};
+  for (const [id, entry] of Object.entries(raw)) {
+    const guess = entry?.guess;
+    if (guess !== "dog" && guess !== "sudoku") continue;
+    out[id] = {
+      factId: entry.factId ?? id,
+      guess,
+      correct: Boolean(entry.correct),
+      at: typeof entry.at === "number" ? entry.at : 0,
+    };
+  }
+  return out;
+}
+
+function mergeTriviaGuesses(
+  a: Record<string, TriviaUserGuess>,
+  b: Record<string, TriviaUserGuess>,
+): Record<string, TriviaUserGuess> {
+  const out = { ...a };
+  for (const [id, guess] of Object.entries(b)) {
+    const prev = out[id];
+    if (!prev || guess.at >= prev.at) out[id] = guess;
+  }
+  return out;
 }
 
 /** Defensively fill any missing fields after loading from storage/remote. */
@@ -299,6 +343,7 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
     ownedExclusiveDogs: Array.isArray(raw.ownedExclusiveDogs)
       ? (raw.ownedExclusiveDogs as ExclusiveDogId[])
       : [],
+    triviaGuesses: normalizeTriviaGuesses(raw.triviaGuesses),
   };
   return {
     ...data,

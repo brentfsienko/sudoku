@@ -6,12 +6,10 @@ import type { FactTopic } from "./facts";
 const USER_GUESSES_KEY = "floof-trivia-user";
 const LOCAL_FACT_PREFIX = "floof-trivia-fact-";
 
-export type UserGuess = {
-  factId: string;
-  guess: FactTopic;
-  correct: boolean;
-  at: number;
-};
+import { loadUserData, saveUserData } from "@/lib/stats/store";
+import type { TriviaUserGuess } from "@/lib/stats/types";
+
+export type UserGuess = TriviaUserGuess;
 
 export type GlobalTriviaStats = {
   correct: number;
@@ -54,11 +52,31 @@ function mergeStats(
   };
 }
 
+function normalizeStoredGuesses(
+  raw: Record<string, unknown>,
+): Record<string, UserGuess> {
+  const out: Record<string, UserGuess> = {};
+  for (const [id, entry] of Object.entries(raw)) {
+    const guess =
+      entry && typeof entry === "object" && "guess" in entry
+        ? (entry as UserGuess).guess
+        : null;
+    if (guess !== "dog" && guess !== "sudoku") continue;
+    out[id] = {
+      factId: (entry as UserGuess).factId ?? id,
+      guess,
+      correct: Boolean((entry as UserGuess).correct),
+      at: typeof (entry as UserGuess).at === "number" ? (entry as UserGuess).at : 0,
+    };
+  }
+  return out;
+}
+
 export function loadUserGuesses(): Record<string, UserGuess> {
   if (typeof window === "undefined") return {};
   try {
     const raw = window.localStorage.getItem(USER_GUESSES_KEY);
-    if (raw) return JSON.parse(raw) as Record<string, UserGuess>;
+    if (raw) return normalizeStoredGuesses(JSON.parse(raw) as Record<string, unknown>);
   } catch {
     // ignore
   }
@@ -99,12 +117,26 @@ export async function fetchFactStats(
   }
 }
 
+async function syncGuessToAccount(guess: UserGuess): Promise<void> {
+  try {
+    const data = await loadUserData();
+    await saveUserData({
+      ...data,
+      triviaGuesses: { ...data.triviaGuesses, [guess.factId]: guess },
+    });
+  } catch {
+    // local-only when offline
+  }
+}
+
 export async function recordGuess(
   factId: string,
   guess: FactTopic,
   wasCorrect: boolean,
 ): Promise<GlobalTriviaStats> {
-  saveUserGuess({ factId, guess, correct: wasCorrect, at: Date.now() });
+  const entry: UserGuess = { factId, guess, correct: wasCorrect, at: Date.now() };
+  saveUserGuess(entry);
+  await syncGuessToAccount(entry);
 
   const local = loadLocalFactStats(factId);
   const next: GlobalTriviaStats = {
