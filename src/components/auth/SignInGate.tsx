@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PawIcon } from "@/components/icons";
 import { markAuthIntroCompleted } from "@/lib/auth/onboarding";
+import { passwordsMatch } from "@/lib/auth/password";
 import type { UseUserData } from "@/lib/stats/useUserData";
 
 type Mode = "signin" | "signup" | "forgot";
@@ -17,6 +18,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
       const res = await userData.resetPassword(email);
       if (res.ok) {
         setStatus("sent");
-        setInfo("Check your email for a link to reset your password.");
+        setInfo("Check your email for a link to set a new password.");
       } else {
         setStatus("error");
         setError(res.error ?? "Something went wrong.");
@@ -48,6 +50,12 @@ export function SignInGate({ open, userData, onClose }: Props) {
     }
 
     if (mode === "signup") {
+      const check = passwordsMatch(password, confirmPassword);
+      if (!check.ok) {
+        setStatus("error");
+        setError(check.error);
+        return;
+      }
       const res = await userData.signUp(email, password);
       if (!res.ok) {
         setStatus("error");
@@ -55,9 +63,10 @@ export function SignInGate({ open, userData, onClose }: Props) {
         return;
       }
       if (res.needsConfirmation) {
-        setStatus("sent");
         setInfo("Account created. Check your email to confirm, then sign in.");
         setMode("signin");
+        setPassword("");
+        setConfirmPassword("");
         setStatus("idle");
         return;
       }
@@ -81,6 +90,15 @@ export function SignInGate({ open, userData, onClose }: Props) {
     onClose();
   }
 
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError(null);
+    setInfo(null);
+    setPassword("");
+    setConfirmPassword("");
+    setStatus("idle");
+  }
+
   const title =
     mode === "signup"
       ? "Create account"
@@ -102,7 +120,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
           </span>
           <h2
             id="sign-in-gate-title"
-            className="font-display text-lg font-extrabold text-[var(--foreground)]"
+            className="font-serif-title text-xl text-[var(--foreground)]"
           >
             {title}
           </h2>
@@ -111,7 +129,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
         {info ? (
           <p className="mb-3 text-sm text-[var(--muted)]">{info}</p>
         ) : (
-          <p className="mb-3 text-xs text-[var(--muted)]">
+          <p className="mb-3 font-serif-title text-sm text-[var(--foreground)]">
             {mode === "forgot"
               ? "Enter your email and we'll send a reset link."
               : "Sign in with email and password to sync stats and play with friends."}
@@ -125,7 +143,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             autoComplete="email"
-            className="w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--primary)]"
+            className="ui-input w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
           />
           {mode !== "forgot" && (
             <input
@@ -134,14 +152,24 @@ export function SignInGate({ open, userData, onClose }: Props) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              className="w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--primary)]"
+              className="ui-input w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
+            />
+          )}
+          {mode === "signup" && (
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm password"
+              autoComplete="new-password"
+              className="ui-input w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
             />
           )}
           <button
             type="button"
             onClick={submit}
             disabled={status === "loading"}
-            className="font-display rounded-full bg-[var(--primary)] py-2.5 text-sm font-extrabold text-white active:scale-95 disabled:opacity-60"
+            className="ui-button rounded-full bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95 disabled:opacity-60"
           >
             {status === "loading"
               ? "…"
@@ -158,22 +186,14 @@ export function SignInGate({ open, userData, onClose }: Props) {
               <>
                 <button
                   type="button"
-                  onClick={() => {
-                    setMode("signup");
-                    setError(null);
-                    setInfo(null);
-                  }}
+                  onClick={() => switchMode("signup")}
                   className="text-[var(--primary)] underline underline-offset-2"
                 >
                   Create account
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setMode("forgot");
-                    setError(null);
-                    setInfo(null);
-                  }}
+                  onClick={() => switchMode("forgot")}
                   className="text-[var(--muted)] underline underline-offset-2"
                 >
                   Forgot password?
@@ -183,11 +203,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
             {mode !== "signin" && (
               <button
                 type="button"
-                onClick={() => {
-                  setMode("signin");
-                  setError(null);
-                  setInfo(null);
-                }}
+                onClick={() => switchMode("signin")}
                 className="text-[var(--primary)] underline underline-offset-2"
               >
                 Back to sign in

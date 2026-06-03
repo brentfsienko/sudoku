@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { syncPublicProfile } from "@/lib/friends/api";
+import { resetPasswordRedirectUrl } from "@/lib/auth/password";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadLocal } from "./local";
 import { loadUserData, saveUserData } from "./store";
@@ -26,6 +27,7 @@ export type UseUserData = {
     password: string,
   ) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
   resetPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  updatePassword: (password: string) => Promise<{ ok: boolean; error?: string }>;
   signOut: () => Promise<void>;
 };
 
@@ -156,8 +158,16 @@ export function useUserData(): UseUserData {
     const clean = email.trim();
     if (!clean) return { ok: false, error: "Enter your email." };
     const { error } = await sb.auth.resetPasswordForEmail(clean, {
-      redirectTo: window.location.origin,
+      redirectTo: resetPasswordRedirectUrl(),
     });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    const sb = getSupabase();
+    if (!sb) return { ok: false, error: "Sign-in is not configured." };
+    const { error } = await sb.auth.updateUser({ password });
     if (error) return { ok: false, error: error.message };
     return { ok: true };
   }, []);
@@ -180,6 +190,7 @@ export function useUserData(): UseUserData {
     signInWithPassword,
     signUp,
     resetPassword,
+    updatePassword,
     signOut,
   };
 }

@@ -9,6 +9,7 @@ import {
   FriendListRow,
   FriendPillButton,
 } from "@/components/home/FriendListPanel";
+import { AddFriendSheet } from "@/components/home/AddFriendSheet";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { SearchIcon, UserPlusIcon } from "@/components/icons";
 import type { DogId } from "@/lib/theme/dogs";
@@ -47,6 +48,7 @@ export function FriendsTab({ userData, onSignIn }: Props) {
   const [inviteFriend, setInviteFriend] = useState<PublicProfile | null>(null);
   const [inviteMode, setInviteMode] = useState<GameMode>("coop");
   const [inviteDiff, setInviteDiff] = useState<Difficulty>("medium");
+  const [addFriendOpen, setAddFriendOpen] = useState(false);
 
   if (!userData.authConfigured) {
     return (
@@ -69,7 +71,7 @@ export function FriendsTab({ userData, onSignIn }: Props) {
           <button
             type="button"
             onClick={onSignIn}
-            className="font-display rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-extrabold text-white"
+            className="ui-button rounded-full bg-[var(--foreground)] px-6 py-3 text-sm font-bold text-white"
           >
             Sign in
           </button>
@@ -128,7 +130,7 @@ export function FriendsTab({ userData, onSignIn }: Props) {
         action={
           <button
             type="button"
-            onClick={() => searchRef.current?.focus()}
+            onClick={() => setAddFriendOpen(true)}
             className="rounded-full p-2 text-[var(--foreground)] active:bg-[var(--surface-soft)]"
             aria-label="Add friend"
           >
@@ -259,6 +261,15 @@ export function FriendsTab({ userData, onSignIn }: Props) {
           />
         ))}
       </FriendListPanel>
+
+      <AddFriendSheet
+        open={addFriendOpen}
+        onClose={() => setAddFriendOpen(false)}
+        myUsername={friends.myProfile?.username ?? null}
+        onSearch={friends.search}
+        onAddFriend={(p) => friends.requestFriend(p.userId)}
+        friendIds={friendIds}
+      />
 
       {inviteFriend && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4">

@@ -71,7 +71,7 @@ export function FriendPillButton({
       onClick={onClick}
       className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-bold transition active:scale-95 ${
         variant === "primary"
-          ? "bg-[var(--primary)] text-white"
+          ? "bg-[var(--foreground)] text-white"
           : "border border-[var(--border)] bg-white text-[var(--foreground)]"
       }`}
     >

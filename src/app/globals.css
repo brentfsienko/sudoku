@@ -67,14 +67,22 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.font-display {
-  font-family: var(--font-display), var(--font-sans), sans-serif;
-}
-
+/* Serif headings & stat numbers (Friends / Me tab style) */
+.font-display,
 .font-serif-title {
   font-family: var(--serif);
   font-weight: 400;
   letter-spacing: -0.02em;
+}
+
+/* Sans UI: buttons, inputs, labels */
+.ui-button,
+.ui-input,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
 
 /* prevent text selection on tappy UI */

@@ -198,7 +198,7 @@ export function ProfileEditForm({
         type="button"
         onClick={handleDone}
         disabled={saving || usernameStatus === "checking"}
-        className="font-display rounded-full bg-[var(--primary)] py-2.5 text-sm font-extrabold text-white active:scale-95 disabled:opacity-60"
+        className="ui-button w-full rounded-full bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95 disabled:opacity-60"
       >
         {saving ? "Saving…" : "Save profile"}
       </button>

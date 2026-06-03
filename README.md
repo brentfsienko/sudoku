@@ -54,7 +54,9 @@ Stats work without this — they're stored in the browser's `localStorage`. To l
    ```
 
 3. In **Authentication → Providers → Email**, keep email enabled and turn on **Confirm email** only if you want verification on sign-up (otherwise new users can sign in immediately). Password sign-in uses the Email provider's password option (enabled by default).
-4. In **Authentication → URL Configuration**, set the **Site URL** to your app's origin (e.g. `http://localhost:3000` for dev and your Vercel URL for prod) and add both to **Redirect URLs** (needed for password reset links only).
+4. In **Authentication → URL Configuration**, set the **Site URL** to your app's origin (e.g. `http://localhost:3000` for dev and your Vercel URL for prod) and add these to **Redirect URLs**:
+   - `http://localhost:3000/auth/reset-password` (dev)
+   - `https://your-vercel-domain/auth/reset-password` (prod)
 5. Add the same two `NEXT_PUBLIC_*` variables in Vercel (Settings → Environment Variables).
 
 Signed-out players keep stats locally; on first sign-in the device's stats seed the account, after which everything syncs.

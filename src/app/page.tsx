@@ -106,7 +106,7 @@ export default function Home() {
             <span className="text-[var(--primary)]">
               <PawIcon width={26} height={26} />
             </span>
-            <h1 className="font-display text-2xl font-extrabold text-[var(--foreground)]">
+            <h1 className="font-serif-title text-3xl text-[var(--foreground)]">
               Floof Sudoku
             </h1>
           </div>

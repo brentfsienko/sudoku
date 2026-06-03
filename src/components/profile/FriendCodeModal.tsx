@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { copyToClipboard } from "@/lib/clipboard";
+
 type Props = {
   username: string;
   onClose: () => void;
@@ -7,12 +10,13 @@ type Props = {
 
 export function FriendCodeModal({ username, onClose }: Props) {
   const handle = `@${username}`;
+  const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
 
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(handle);
-    } catch {
-      // ignore
+    const ok = await copyToClipboard(handle);
+    setStatus(ok ? "copied" : "failed");
+    if (ok) {
+      window.setTimeout(() => setStatus("idle"), 2000);
     }
   }
 
@@ -31,17 +35,28 @@ export function FriendCodeModal({ username, onClose }: Props) {
         <p className="mb-4 text-sm text-[var(--muted)]">
           Share this so friends can find you in search.
         </p>
-        <div className="font-display mb-4 text-2xl font-extrabold text-[var(--foreground)]">
+        <button
+          type="button"
+          onClick={() => void copy()}
+          className="font-display mb-1 w-full text-2xl text-[var(--foreground)] underline decoration-dotted underline-offset-4 active:opacity-70"
+          title="Tap to copy"
+        >
           {handle}
-        </div>
+        </button>
+        <p className="mb-4 text-[11px] text-[var(--muted)]">Tap the code or Copy below</p>
         <div className="flex flex-col gap-2">
           <button
             type="button"
             onClick={() => void copy()}
-            className="font-display rounded-full bg-[var(--primary)] py-3 text-sm font-extrabold text-white"
+            className="ui-button w-full rounded-full bg-[var(--primary)] py-3 text-sm font-bold text-white active:scale-[0.98]"
           >
-            Copy
+            {status === "copied" ? "Copied!" : status === "failed" ? "Copy failed — tap code" : "Copy"}
           </button>
+          {status === "failed" && (
+            <p className="text-xs text-[#ef6f6c]">
+              Couldn&apos;t access clipboard. Long-press the code to copy manually.
+            </p>
+          )}
           <button
             type="button"
             onClick={onClose}
