@@ -60,16 +60,20 @@ export function FriendPillButton({
   children,
   onClick,
   variant = "neutral",
+  compact = false,
 }: {
   children: ReactNode;
   onClick: () => void;
   variant?: "neutral" | "primary";
+  compact?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-bold transition active:scale-95 ${
+      className={`shrink-0 rounded-full font-bold transition active:scale-95 ${
+        compact ? "px-2.5 py-0.5 text-[11px]" : "px-4 py-1.5 text-sm"
+      } ${
         variant === "primary"
           ? "bg-[var(--foreground)] text-white"
           : "border border-[var(--border)] bg-white text-[var(--foreground)]"

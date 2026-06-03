@@ -84,7 +84,7 @@ function ModeBadge({ log }: { log: GameLog }) {
   const accent = modeAccent(log.mode);
   return (
     <span
-      className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+      className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
       style={{ backgroundColor: accent }}
     >
       {log.mode === "solo" ? "Solo" : GAME_MODE_LABELS[log.mode]}
@@ -92,45 +92,65 @@ function ModeBadge({ log }: { log: GameLog }) {
   );
 }
 
-function PlayerColumn({
+function RowActions({
+  when,
+  onPlayAgain,
+  rematchBusy,
+  showAgain,
+}: {
+  when: string;
+  onPlayAgain?: () => void;
+  rematchBusy?: boolean;
+  showAgain?: boolean;
+}) {
+  return (
+    <div className="flex shrink-0 flex-col items-end justify-center gap-1">
+      <span className="text-[10px] font-semibold leading-none text-[var(--muted)]">
+        {when}
+      </span>
+      {showAgain && onPlayAgain && (
+        <FriendPillButton compact variant="neutral" onClick={onPlayAgain}>
+          {rematchBusy ? "…" : "Again"}
+        </FriendPillButton>
+      )}
+    </div>
+  );
+}
+
+function PlayerChip({
   dogId,
   username,
   percent,
   crowned,
-  showPercent = true,
 }: {
   dogId: DogId;
   username: string;
-  percent: number | null;
+  percent?: number | null;
   crowned?: boolean;
-  showPercent?: boolean;
 }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
-      <div className="relative mb-0.5">
+    <div className="flex min-w-0 max-w-[7.5rem] items-center gap-1.5">
+      <div className="relative shrink-0">
         {crowned && (
           <span
-            className="absolute -top-3 left-1/2 -translate-x-1/2 text-[var(--primary)]"
+            className="absolute -top-2 left-1/2 -translate-x-1/2 text-[var(--primary)]"
             aria-hidden
           >
-            <CrownIcon width={14} height={14} />
+            <CrownIcon width={10} height={10} />
           </span>
         )}
-        <DogAvatar dogId={dogId} size={48} />
+        <DogAvatar dogId={dogId} size={32} />
       </div>
-      {showPercent &&
-        (percent != null ? (
-          <span className="font-display text-xl font-extrabold leading-none text-[var(--foreground)]">
+      <div className="min-w-0 leading-tight">
+        {percent != null && (
+          <span className="font-display block text-sm font-extrabold text-[var(--foreground)]">
             {percent}%
           </span>
-        ) : (
-          <span className="font-display text-lg font-extrabold leading-none text-[var(--muted)]">
-            —
-          </span>
-        ))}
-      <span className="max-w-[5.5rem] truncate text-center text-xs font-bold text-[var(--foreground)]">
-        @{username}
-      </span>
+        )}
+        <span className="block truncate text-xs font-bold text-[var(--foreground)]">
+          @{username}
+        </span>
+      </div>
     </div>
   );
 }
@@ -159,49 +179,41 @@ function MultiplayerHistoryRow({
 
   return (
     <div
-      className={`px-4 py-4 ${
+      className={`flex items-center gap-2.5 px-3 py-2 ${
         divider ? "border-b border-white/70" : ""
       }`}
     >
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <ModeBadge log={log} />
-        <span className="text-xs font-semibold text-[var(--muted)]">
-          {DIFFICULTY_LABELS[log.difficulty]} · {outcomeText(log)}
-        </span>
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center gap-1.5">
+          <ModeBadge log={log} />
+          <span className="truncate text-[10px] font-semibold text-[var(--muted)]">
+            {DIFFICULTY_LABELS[log.difficulty]} · {outcomeText(log)}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <PlayerChip
+            dogId={profile.dogId}
+            username={meName}
+            percent={competitive ? (share?.mine ?? null) : undefined}
+            crowned={youWon}
+          />
+          <span className="shrink-0 text-[10px] font-bold uppercase text-[var(--muted)]">
+            {log.mode === "coop" ? "with" : "vs"}
+          </span>
+          <PlayerChip
+            dogId={opp.dogId as DogId}
+            username={opp.name}
+            percent={competitive ? (share?.theirs ?? null) : undefined}
+            crowned={theyWon}
+          />
+        </div>
       </div>
-
-      <div className="flex max-w-[17rem] items-start gap-3">
-        <PlayerColumn
-          dogId={profile.dogId}
-          username={meName}
-          percent={share?.mine ?? null}
-          crowned={youWon}
-          showPercent={competitive}
-        />
-        <span
-          className={`text-[11px] font-bold uppercase tracking-wide text-[var(--muted)] ${
-            competitive ? "pt-7" : "pt-4"
-          }`}
-        >
-          {log.mode === "coop" ? "with" : "vs"}
-        </span>
-        <PlayerColumn
-          dogId={opp.dogId as DogId}
-          username={opp.name}
-          percent={share?.theirs ?? null}
-          crowned={theyWon}
-          showPercent={competitive}
-        />
-      </div>
-
-      <div className="mt-3 flex items-center justify-between border-t border-white/60 pt-2.5">
-        <span className="text-xs font-semibold text-[var(--muted)]">
-          {formatWhen(log.t)}
-        </span>
-        <FriendPillButton variant="neutral" onClick={onPlayAgain}>
-          {rematchBusy ? "…" : "Again"}
-        </FriendPillButton>
-      </div>
+      <RowActions
+        when={formatWhen(log.t)}
+        showAgain
+        onPlayAgain={onPlayAgain}
+        rematchBusy={rematchBusy}
+      />
     </div>
   );
 }
@@ -218,24 +230,25 @@ function SoloHistoryRow({
   const meName = displayUsername(profile.username);
 
   return (
-    <FriendListRow
-      divider={divider}
-      avatar={<DogAvatar dogId={profile.dogId} size={44} />}
-      primary={
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[15px] font-bold text-[var(--foreground)]">
+    <div
+      className={`flex items-center gap-2.5 px-3 py-2 ${
+        divider ? "border-b border-white/70" : ""
+      }`}
+    >
+      <DogAvatar dogId={profile.dogId} size={36} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span className="truncate text-sm font-bold text-[var(--foreground)]">
             @{meName}
           </span>
           <ModeBadge log={log} />
         </div>
-      }
-      secondary={`${outcomeText(log)} · ${DIFFICULTY_LABELS[log.difficulty]}`}
-      action={
-        <span className="text-[11px] font-semibold text-[var(--muted)]">
-          {formatWhen(log.t)}
+        <span className="text-[10px] font-semibold text-[var(--muted)]">
+          {outcomeText(log)} · {DIFFICULTY_LABELS[log.difficulty]}
         </span>
-      }
-    />
+      </div>
+      <RowActions when={formatWhen(log.t)} />
+    </div>
   );
 }
 
