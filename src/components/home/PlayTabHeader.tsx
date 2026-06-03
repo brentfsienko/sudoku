@@ -4,6 +4,8 @@ import { APP_NAME } from "@/lib/brand";
 import type { DogId } from "@/lib/theme/dogs";
 
 const ICON_SIZE = 128;
+/** Extra space below the status bar before the brand row. */
+const HEADER_TOP_OFFSET = "5dvh";
 
 type Props = {
   dogId: DogId;
@@ -23,20 +25,20 @@ export function PlayTabHeader({ dogId, appIcon, profileIcon }: Props) {
 
   return (
     <div
-      className="relative w-full pr-28"
+      className="relative w-full pr-28 pb-3"
       style={{
-        minHeight: ICON_SIZE,
-        paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)",
-        paddingBottom: "0.75rem",
+        paddingTop: `calc(env(safe-area-inset-top) + ${HEADER_TOP_OFFSET})`,
       }}
     >
-      <div className="absolute left-3 top-1/2 -translate-y-1/2">{icon}</div>
-      <h1
-        className="font-serif-title absolute top-1/2 -translate-y-1/2 text-[2.75rem] leading-none text-white"
-        style={{ left: "30%" }}
-      >
-        {APP_NAME}
-      </h1>
+      <div className="relative w-full" style={{ minHeight: ICON_SIZE }}>
+        <div className="absolute left-3 top-1/2 -translate-y-1/2">{icon}</div>
+        <h1
+          className="font-serif-title absolute top-1/2 -translate-y-1/2 text-[2.75rem] leading-none text-white"
+          style={{ left: "30%" }}
+        >
+          {APP_NAME}
+        </h1>
+      </div>
     </div>
   );
 }
