@@ -97,11 +97,13 @@ function PlayerColumn({
   username,
   percent,
   crowned,
+  showPercent = true,
 }: {
   dogId: DogId;
   username: string;
   percent: number | null;
   crowned?: boolean;
+  showPercent?: boolean;
 }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
@@ -116,15 +118,16 @@ function PlayerColumn({
         )}
         <DogAvatar dogId={dogId} size={48} />
       </div>
-      {percent != null ? (
-        <span className="font-display text-xl font-extrabold leading-none text-[var(--foreground)]">
-          {percent}%
-        </span>
-      ) : (
-        <span className="font-display text-lg font-extrabold leading-none text-[var(--muted)]">
-          —
-        </span>
-      )}
+      {showPercent &&
+        (percent != null ? (
+          <span className="font-display text-xl font-extrabold leading-none text-[var(--foreground)]">
+            {percent}%
+          </span>
+        ) : (
+          <span className="font-display text-lg font-extrabold leading-none text-[var(--muted)]">
+            —
+          </span>
+        ))}
       <span className="max-w-[5.5rem] truncate text-center text-xs font-bold text-[var(--foreground)]">
         @{username}
       </span>
@@ -148,10 +151,11 @@ function MultiplayerHistoryRow({
   rematchBusy: boolean;
 }) {
   const opp = resolveOpponent(log, opponents);
-  const share = boardSharePercents(log);
+  const competitive = log.mode === "competitive";
+  const share = competitive ? boardSharePercents(log) : null;
   const meName = displayUsername(profile.username);
-  const youWon = log.mode === "competitive" && log.won && !log.tied;
-  const theyWon = log.mode === "competitive" && !log.won && !log.tied;
+  const youWon = competitive && log.won && !log.tied;
+  const theyWon = competitive && !log.won && !log.tied;
 
   return (
     <div
@@ -172,8 +176,13 @@ function MultiplayerHistoryRow({
           username={meName}
           percent={share?.mine ?? null}
           crowned={youWon}
+          showPercent={competitive}
         />
-        <span className="pt-7 text-[11px] font-bold uppercase tracking-wide text-[var(--muted)]">
+        <span
+          className={`text-[11px] font-bold uppercase tracking-wide text-[var(--muted)] ${
+            competitive ? "pt-7" : "pt-4"
+          }`}
+        >
           {log.mode === "coop" ? "with" : "vs"}
         </span>
         <PlayerColumn
@@ -181,6 +190,7 @@ function MultiplayerHistoryRow({
           username={opp.name}
           percent={share?.theirs ?? null}
           crowned={theyWon}
+          showPercent={competitive}
         />
       </div>
 
