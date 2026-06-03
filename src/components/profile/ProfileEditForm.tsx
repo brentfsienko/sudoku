@@ -176,14 +176,14 @@ export function ProfileEditForm({
             key={d.id}
             type="button"
             onClick={() => void onSaveDog(d.id as DogId)}
-            className={`rounded-2xl p-1 transition ${
+            className={`flex aspect-square items-center justify-center rounded-2xl p-1 transition ${
               profile.dogId === d.id
                 ? "bg-[var(--primary-soft)] ring-2 ring-[var(--primary)]"
                 : "bg-[var(--surface-soft)]"
             }`}
             aria-label={d.breed}
           >
-            <DogAvatar dogId={d.id} size={48} />
+            <DogAvatar dogId={d.id} size={48} className="block shrink-0" />
           </button>
         ))}
       </div>
