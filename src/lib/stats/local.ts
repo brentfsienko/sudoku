@@ -3,6 +3,7 @@
 import {
   emptyUserData,
   normalizeUserData,
+  sumHistorySquares,
   type Profile,
   type UserData,
 } from "./types";
@@ -55,7 +56,17 @@ export function loadLocal(): UserData {
   if (typeof window === "undefined") return emptyUserData();
   try {
     const raw = window.localStorage.getItem(DATA_KEY);
-    if (raw) return normalizeUserData(JSON.parse(raw));
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<UserData>;
+      const normalized = normalizeUserData(parsed);
+      const needsRepair =
+        sumHistorySquares(parsed.history) < sumHistorySquares(normalized.history) ||
+        JSON.stringify(parsed.history ?? []) !== JSON.stringify(normalized.history);
+      if (needsRepair) {
+        saveLocal(normalized);
+      }
+      return normalized;
+    }
     const migrated = migrateLegacy();
     if (migrated) {
       saveLocal(migrated);

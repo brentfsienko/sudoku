@@ -33,7 +33,7 @@ function chartAxis(
   let max: number;
   if (dataMax <= 0) max = 2;
   else if (dataMax <= 2) max = 2;
-  else max = niceMax(dataMax);
+  else max = Math.max(3, niceMax(dataMax));
 
   const mid = Math.max(1, Math.round(max / 2));
   const ticks = [...new Set([0, mid, max])].sort((a, b) => a - b);

@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SignInGate } from "@/components/auth/SignInGate";
 import { DifficultySelect } from "@/components/home/DifficultySelect";
+import { CreateRoomPanel } from "@/components/home/CreateRoomPanel";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
 import { ModeSelect } from "@/components/home/ModeSelect";
+import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
 import { FriendsTab } from "@/components/home/FriendsTab";
 import { MeProfileHeader } from "@/components/profile/MeProfileHeader";
@@ -112,90 +114,52 @@ export default function Home() {
         onClose={() => setSignInGateOpen(false)}
       />
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--background)]">
-      {tab === "main" && (
-        <header
-          className="flex items-center justify-between px-5 pb-3 pt-5"
-          style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--primary)]">
-              <PawIcon width={26} height={26} />
-            </span>
-            <h1 className="font-serif-title text-3xl text-[var(--foreground)]">
-              Floof Sudoku
-            </h1>
-          </div>
-          <div className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 shadow-sm">
-            <span className="text-[var(--primary)]">
-              <FlameIcon width={18} height={18} />
-            </span>
-            <span className="font-display font-bold text-[var(--foreground)]">
-              {data?.solo.streak ?? 0}
-            </span>
-          </div>
-        </header>
-      )}
-
       <main
-        className={`flex flex-1 flex-col gap-4 px-5 pb-6 ${
-          tab !== "main" ? "pt-5" : ""
-        }`}
-        style={
-          tab !== "main"
-            ? { paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }
-            : undefined
-        }
+        className="flex flex-1 flex-col gap-5 px-5 pb-6"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
       >
         {tab === "main" && (
-          <>
+          <div className="flex flex-col gap-5">
+            <TabScreenHeader
+              title="Floof Sudoku"
+              action={
+                <div className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 shadow-sm">
+                  <span className="text-[var(--primary)]">
+                    <FlameIcon width={18} height={18} />
+                  </span>
+                  <span className="font-display font-bold text-[var(--foreground)]">
+                    {data?.solo.streak ?? 0}
+                  </span>
+                </div>
+              }
+            />
+
             <DifficultySelect value={difficulty} onChange={setDifficulty} />
             <ModeSelect value={mode} onChange={setMode} />
-
-            <GameHistoryList
-              history={statsForMe.history}
-              profile={statsForMe.profile}
-            />
 
             {mode === "single" ? (
               <button
                 type="button"
                 onClick={startGame}
-                className="font-display mt-1 rounded-full border-2 border-[var(--border)] bg-white py-4 text-xl font-extrabold text-[var(--foreground)] transition active:scale-[0.98]"
+                className="font-display rounded-full border-2 border-[var(--border)] bg-white py-4 text-xl font-extrabold text-[var(--foreground)] shadow-sm transition active:scale-[0.98]"
               >
                 Solo Practice
               </button>
             ) : (
-              <div className="mt-1 flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm">
-                <p className="text-center text-sm text-[var(--muted)]">
-                  Create a room and share the code, invite from the Friends tab,
-                  or join a friend&apos;s game.
-                </p>
-                <button
-                  type="button"
-                  onClick={startGame}
-                  className="font-display rounded-full bg-[var(--primary)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
-                >
-                  Create Room
-                </button>
-                <div className="flex items-center gap-2">
-                  <input
-                    value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                    placeholder="CODE"
-                    maxLength={4}
-                    className="font-display w-full rounded-full border-2 border-[var(--border)] bg-[var(--background)] px-4 py-3 text-center text-lg font-bold tracking-[0.3em] outline-none focus:border-[var(--accent)]"
-                  />
-                  <button
-                    type="button"
-                    onClick={joinGame}
-                    className="font-display rounded-full bg-[var(--accent)] px-6 py-3 text-lg font-extrabold text-white transition active:scale-95"
-                  >
-                    Join
-                  </button>
-                </div>
-              </div>
+              <CreateRoomPanel
+                joinCode={joinCode}
+                onJoinCodeChange={setJoinCode}
+                onCreateRoom={startGame}
+                onJoin={joinGame}
+              />
             )}
-          </>
+
+            <GameHistoryList
+              history={statsForMe.history}
+              profile={statsForMe.profile}
+              opponents={statsForMe.multi.opponents}
+            />
+          </div>
         )}
 
         {tab === "friends" && (
@@ -389,8 +353,13 @@ function ProgressSection({
       <div className="grid grid-cols-3 gap-2">
         <WeekStat label="Games" value={week.games.toLocaleString()} />
         <WeekStat label="Time" value={formatDuration(week.seconds)} />
-        <WeekStat label="Squares" value={lifetimeTotal.toLocaleString()} />
+        <WeekStat label="Squares" value={week.squares.toLocaleString()} />
       </div>
+      {metric === "squares" && (
+        <p className="text-xs font-semibold text-[var(--muted)]">
+          {lifetimeTotal.toLocaleString()} lifetime · chart shows squares per week
+        </p>
+      )}
 
       <div className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
         Past 12 weeks

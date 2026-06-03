@@ -23,7 +23,7 @@ export function FriendListPanel({ title, children, empty }: Props) {
 
 type RowProps = {
   avatar: ReactNode;
-  primary: string;
+  primary: ReactNode;
   secondary?: string;
   action: ReactNode;
   divider?: boolean;
@@ -44,7 +44,7 @@ export function FriendListRow({
     >
       {avatar}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[15px] font-bold text-[var(--foreground)]">
+        <div className="text-[15px] font-bold leading-snug text-[var(--foreground)]">
           {primary}
         </div>
         {secondary && (

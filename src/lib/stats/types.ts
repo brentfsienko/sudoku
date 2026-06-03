@@ -126,6 +126,11 @@ export function lifetimeSquares(data: UserData): number {
   );
 }
 
+export function sumHistorySquares(history: GameLog[] | undefined): number {
+  if (!Array.isArray(history)) return 0;
+  return history.reduce((s, log) => s + (log.squares ?? 0), 0);
+}
+
 export function emptyUserData(profile?: Partial<Profile> & { name?: string }): UserData {
   return {
     profile: coerceProfile(profile),
@@ -165,7 +170,14 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
     }),
     solo: { ...base.solo, ...raw.solo, totalSquares: raw.solo?.totalSquares ?? 0 },
     multi: normalizeMulti(raw.multi),
-    history: normalizeHistory(raw.history),
+    history: backfillHistoryOpponents(
+      backfillHistorySquares(
+        normalizeHistory(raw.history),
+        { ...base.solo, ...raw.solo, totalSquares: raw.solo?.totalSquares ?? 0 },
+        normalizeMulti(raw.multi),
+      ),
+      normalizeMulti(raw.multi).opponents,
+    ),
   };
 }
 
@@ -176,6 +188,67 @@ function normalizeHistory(raw: GameLog[] | undefined): GameLog[] {
     squares: log.squares ?? 0,
     tied: log.tied ?? false,
   }));
+}
+
+/** Match per-game history squares to stored lifetime totals (pre-tracking migration). */
+function backfillHistorySquares(
+  history: GameLog[],
+  solo: SoloStats,
+  multi: MultiStats,
+): GameLog[] {
+  if (history.length === 0) return history;
+
+  const next = history.map((log) => ({ ...log }));
+
+  const sumForMode = (mode: GameLog["mode"]) =>
+    next
+      .filter((l) => l.mode === mode)
+      .reduce((s, l) => s + (l.squares ?? 0), 0);
+
+  const assignOrphan = (mode: GameLog["mode"], target: number) => {
+    let orphan = target - sumForMode(mode);
+    if (orphan <= 0) return;
+    for (let i = next.length - 1; i >= 0 && orphan > 0; i--) {
+      if (next[i].mode !== mode) continue;
+      if ((next[i].squares ?? 0) > 0) continue;
+      next[i] = { ...next[i], squares: orphan };
+      orphan = 0;
+    }
+  };
+
+  assignOrphan("solo", solo.totalSquares);
+  assignOrphan("coop", multi.coopSquares);
+  assignOrphan("competitive", multi.compSquares);
+
+  return next;
+}
+
+/** Fill missing opponent names on older multiplayer history rows. */
+function backfillHistoryOpponents(
+  history: GameLog[],
+  opponents: MultiStats["opponents"],
+): GameLog[] {
+  const records = Object.values(opponents);
+  if (records.length === 0) return history;
+
+  const pickOpponent = (mode: "coop" | "competitive") => {
+    const eligible = records.filter((r) =>
+      mode === "coop" ? r.coopGames > 0 : r.compGames > 0,
+    );
+    const pool = eligible.length > 0 ? eligible : records;
+    return pool.sort((a, b) => b.games - a.games)[0] ?? null;
+  };
+
+  return history.map((log) => {
+    if (log.mode === "solo" || log.opponentName?.trim()) return log;
+    const rec = records.length === 1 ? records[0] : pickOpponent(log.mode);
+    if (!rec) return log;
+    return {
+      ...log,
+      opponentName: rec.name,
+      opponentDogId: log.opponentDogId || rec.dogId,
+    };
+  });
 }
 
 function normalizeMulti(raw: Partial<MultiStats> | undefined): MultiStats {
@@ -338,7 +411,8 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     squares: r.mySquares,
     difficulty: r.difficulty,
     score: r.score,
-    opponentName: r.opponentName || undefined,
+    opponentName:
+      r.opponentName.replace(/^@/, "").trim() || undefined,
     opponentDogId: r.opponentDogId || undefined,
     tied: r.mode === "competitive" ? tie : undefined,
   });

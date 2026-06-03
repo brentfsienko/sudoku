@@ -1,7 +1,11 @@
 "use client";
 
 import { getSupabase } from "@/lib/supabase/client";
-import { normalizeUserData, type UserData } from "./types";
+import {
+  normalizeUserData,
+  sumHistorySquares,
+  type UserData,
+} from "./types";
 
 /** Reads the signed-in user's saved data row, or null if none exists yet. */
 export async function fetchRemote(userId: string): Promise<UserData | null> {
@@ -17,7 +21,15 @@ export async function fetchRemote(userId: string): Promise<UserData | null> {
     return null;
   }
   if (!data) return null;
-  return normalizeUserData(data.data as Partial<UserData>);
+  const raw = data.data as Partial<UserData>;
+  const normalized = normalizeUserData(raw);
+  const needsRepair =
+    sumHistorySquares(raw.history) < sumHistorySquares(normalized.history) ||
+    JSON.stringify(raw.history ?? []) !== JSON.stringify(normalized.history);
+  if (needsRepair) {
+    void upsertRemote(userId, normalized);
+  }
+  return normalized;
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
