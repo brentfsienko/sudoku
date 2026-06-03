@@ -15,7 +15,7 @@ import { ChevronLeftIcon, PawIcon } from "@/components/icons";
 import { LoadingPaws } from "@/app/play/page";
 import { getProfile, type Profile } from "@/lib/profile";
 import { cellContributions } from "@/lib/game/engine";
-import { recordMultiGame } from "@/lib/stats/store";
+import { loadUserData, recordMultiGame } from "@/lib/stats/store";
 import {
   DIFFICULTIES,
   DIFFICULTY_LABELS,
@@ -93,6 +93,14 @@ function RoomInner({
 }) {
   const router = useRouter();
   const connection = useStatus();
+  const [wallet, setWallet] = useState({ streak: 0, bones: 0 });
+
+  useEffect(() => {
+    void loadUserData().then((d) => {
+      setWallet({ streak: d.solo.streak, bones: d.bones ?? 0 });
+    });
+  }, []);
+
   const game = useLiveGame({
     isHost,
     seedDifficulty,
@@ -128,7 +136,15 @@ function RoomInner({
       peers={game.peers}
       onExit={exit}
       onRematch={game.rematch}
-      onFinish={({ solved, score, elapsedSeconds, mistakes }) => {
+      streak={wallet.streak}
+      savedBones={wallet.bones}
+      onFinish={({
+        solved,
+        score,
+        elapsedSeconds,
+        mistakes,
+        bonesFound,
+      }) => {
         const snap = game.controller?.snapshot;
         if (!snap) return;
         const contrib = cellContributions(snap.puzzle, snap.solution, snap.cells);
@@ -144,6 +160,7 @@ function RoomInner({
           elapsedSeconds,
           mistakes,
           score,
+          bonesFound,
         });
       }}
     />

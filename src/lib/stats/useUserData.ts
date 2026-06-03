@@ -6,6 +6,9 @@ import { resetPasswordRedirectUrl } from "@/lib/auth/password";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadLocal } from "./local";
 import { loadUserData, saveUserData } from "./store";
+import { EXCLUSIVE_BONE_COSTS } from "@/lib/bones/config";
+import { ownsExclusiveDog } from "@/lib/bones/ownership";
+import type { ExclusiveDogId } from "@/lib/theme/dogs";
 import { coerceProfile } from "./profile";
 import { emptyUserData, type Profile, type UserData } from "./types";
 
@@ -18,6 +21,9 @@ export type UseUserData = {
   authConfigured: boolean;
   refresh: () => Promise<void>;
   updateProfile: (next: Partial<Profile>) => Promise<void>;
+  purchaseExclusiveDog: (
+    dogId: ExclusiveDogId,
+  ) => Promise<{ ok: boolean; error?: string }>;
   reset: () => Promise<void>;
   signInWithPassword: (
     email: string,
@@ -157,6 +163,50 @@ export function useUserData(): UseUserData {
     [setDataBoth],
   );
 
+  const purchaseExclusiveDog = useCallback(
+    async (dogId: ExclusiveDogId) => {
+      const current = dataRef.current ?? (await loadUserData());
+      const cost = EXCLUSIVE_BONE_COSTS[dogId];
+      if ((current.bones ?? 0) < cost) {
+        return { ok: false, error: "Need more bones." };
+      }
+      const owned = current.ownedExclusiveDogs ?? [];
+      const nextOwned = ownsExclusiveDog(dogId, current)
+        ? owned
+        : [...owned, dogId];
+      const merged: UserData = {
+        ...current,
+        bones: ownsExclusiveDog(dogId, current)
+          ? current.bones
+          : current.bones - cost,
+        ownedExclusiveDogs: nextOwned,
+        profile: coerceProfile(
+          { ...current.profile, dogId },
+          {
+            ...current,
+            bones: ownsExclusiveDog(dogId, current)
+              ? current.bones
+              : current.bones - cost,
+            ownedExclusiveDogs: nextOwned,
+          },
+        ),
+      };
+      setDataBoth(merged);
+      await saveUserData(merged);
+      const uid = (await getSupabase()?.auth.getSession())?.data.session?.user
+        ?.id;
+      if (uid) {
+        const synced = await syncPublicProfile(uid, merged.profile);
+        if (synced.username) {
+          merged.profile.username = synced.username;
+          setDataBoth(merged);
+        }
+      }
+      return { ok: true };
+    },
+    [setDataBoth],
+  );
+
   const reset = useCallback(async () => {
     const current = dataRef.current ?? (await loadUserData());
     const fresh = emptyUserData(current.profile);
@@ -223,6 +273,7 @@ export function useUserData(): UseUserData {
     authConfigured: isSupabaseConfigured,
     refresh,
     updateProfile,
+    purchaseExclusiveDog,
     reset,
     signInWithPassword,
     signUp,

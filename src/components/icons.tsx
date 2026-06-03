@@ -229,3 +229,13 @@ export function MountainIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function ShareIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+      <path d="M12 3v12" />
+      <path d="m8 7 4-4 4 4" />
+    </svg>
+  );
+}

@@ -125,3 +125,22 @@ textarea {
 .animate-float-in {
   animation: float-in 0.3s ease-out both;
 }
+
+@keyframes bone-pop {
+  0% {
+    transform: scale(0.4) translateY(4px);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.15) translateY(-6px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9) translateY(-12px);
+    opacity: 0;
+  }
+}
+
+.animate-bone-pop {
+  animation: bone-pop 0.55s ease-out forwards;
+}

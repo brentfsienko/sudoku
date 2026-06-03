@@ -7,6 +7,9 @@ import { ActionBar } from "./ActionBar";
 import { StatsBar } from "./StatsBar";
 import { ResultsOverlay } from "./ResultsOverlay";
 import { PlayerBadge } from "@/components/PlayerBadge";
+import { StreakBonePill } from "@/components/home/StreakBonePill";
+import { useGameBones } from "@/lib/bones/useGameBones";
+import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { ChevronLeftIcon, PlayIcon } from "@/components/icons";
 import type { GameController } from "@/lib/game/store";
 import { elapsedSeconds } from "@/lib/game/store";
@@ -35,6 +38,8 @@ type Props = {
   onExit: () => void;
   onRematch?: () => void;
   /** Called once when the game reaches a finished state. */
+  streak?: number;
+  savedBones?: number;
   onFinish?: (info: {
     solved: boolean;
     score: number;
@@ -42,6 +47,8 @@ type Props = {
     mistakes: number;
     hintsUsed: number;
     squaresFilled: number;
+    bonesFound: number;
+    winBoneBonus: number;
   }) => void;
 };
 
@@ -63,8 +70,16 @@ export function GameScreen({
   onExit,
   onRematch,
   onFinish,
+  streak = 0,
+  savedBones = 0,
 }: Props) {
   const { snapshot } = controller;
+  const bonePlay = useGameBones(
+    controller,
+    snapshot.puzzle,
+    snapshot.difficulty,
+    savedBones,
+  );
   const mode = snapshot.mode;
   const isMulti = mode !== "single";
   const done = snapshot.status === "done";
@@ -103,6 +118,18 @@ export function GameScreen({
     : score;
 
   // Notify parent once when finished.
+  const winBoneBonus = useMemo(() => {
+    if (!solved) return 0;
+    if (mode === "single") return GAME_WIN_BONE_BONUS;
+    if (mode === "coop") return GAME_WIN_BONE_BONUS;
+    if (mode === "competitive" && opponent) {
+      const myCount = contrib[me.role];
+      const oppCount = contrib[opponent.role];
+      return myCount > oppCount ? GAME_WIN_BONE_BONUS : 0;
+    }
+    return 0;
+  }, [solved, mode, opponent, contrib, me.role]);
+
   useEffect(() => {
     if (done && onFinish)
       onFinish({
@@ -112,6 +139,8 @@ export function GameScreen({
         mistakes: snapshot.mistakes,
         hintsUsed: snapshot.hintsUsed,
         squaresFilled: contrib[me.role] ?? contrib.total,
+        bonesFound: bonePlay.sessionBones,
+        winBoneBonus,
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
@@ -148,7 +177,11 @@ export function GameScreen({
         <div className="font-display text-base font-extrabold text-[var(--foreground)]">
           {isMulti ? GAME_MODE_LABELS[mode] : DIFFICULTY_LABELS[snapshot.difficulty]}
         </div>
-        <div className="h-9 w-9" />
+        <StreakBonePill
+          streak={streak}
+          bones={bonePlay.displayBones}
+          className="scale-[0.88] origin-top-right"
+        />
       </div>
 
       {/* Players strip (multiplayer) */}
@@ -199,6 +232,9 @@ export function GameScreen({
           snapshot={snapshot}
           selectedCell={controller.selectedCell}
           peers={peers}
+          boneCells={bonePlay.boneCells}
+          collectedBones={bonePlay.collectedBones}
+          popCell={bonePlay.popCell}
           onSelect={controller.select}
         />
         {paused && (
@@ -248,6 +284,8 @@ export function GameScreen({
           solved={solved}
           onRematch={onRematch}
           onHome={onExit}
+          winBoneBonus={winBoneBonus}
+          bonesFound={bonePlay.sessionBones}
         />
       )}
     </div>

@@ -16,10 +16,21 @@ type Props = {
   snapshot: GameSnapshot;
   selectedCell: number | null;
   peers: PeerCursor[];
+  boneCells?: Set<number>;
+  collectedBones?: Set<number>;
+  popCell?: number | null;
   onSelect: (index: number) => void;
 };
 
-export function Board({ snapshot, selectedCell, peers, onSelect }: Props) {
+export function Board({
+  snapshot,
+  selectedCell,
+  peers,
+  boneCells,
+  collectedBones,
+  popCell,
+  onSelect,
+}: Props) {
   const { puzzle, solution, cells } = snapshot;
 
   const relatedSet = useMemo(() => {
@@ -49,6 +60,12 @@ export function Board({ snapshot, selectedCell, peers, onSelect }: Props) {
         value != null && value === solutionDigit(solution, index);
       const error = !given && value != null && !correct;
 
+      const hasBone =
+        boneCells?.has(index) &&
+        !collectedBones?.has(index) &&
+        !given &&
+        !entry?.correct;
+
       return {
         index,
         value,
@@ -63,6 +80,8 @@ export function Board({ snapshot, selectedCell, peers, onSelect }: Props) {
           selectedCell !== index,
         error,
         peerRingColor: peerByCell.get(index) ?? null,
+        hasBone,
+        bonePop: popCell === index,
       } satisfies CellView;
     });
   }, [
@@ -73,6 +92,9 @@ export function Board({ snapshot, selectedCell, peers, onSelect }: Props) {
     selectedValue,
     relatedSet,
     peerByCell,
+    boneCells,
+    collectedBones,
+    popCell,
   ]);
 
   return (

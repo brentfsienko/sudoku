@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BoneIcon } from "@/components/BoneIcon";
 import { DogAvatar } from "@/components/DogAvatar";
+import { NeedMoreBonesDialog } from "@/components/profile/NeedMoreBonesDialog";
+import { EXCLUSIVE_BONE_COSTS } from "@/lib/bones/config";
+import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import { displayDogId } from "@/lib/dogs/display";
-import {
-  challengeForExclusiveDog,
-  isExclusiveDogUnlocked,
-} from "@/lib/dogs/challenges";
 import { isUsernameAvailable } from "@/lib/friends/api";
 import { normalizeUsername, validateUsername } from "@/lib/friends/username";
 import {
   EXCLUSIVE_DOGS,
   STANDARD_DOGS,
+  isExclusiveDogId,
   type DogId,
   type ExclusiveDogId,
 } from "@/lib/theme/dogs";
@@ -26,15 +27,20 @@ type Props = {
   userData: UserData;
   onSaveUsername: (username: string) => Promise<{ ok: boolean; error?: string }>;
   onSaveDog: (dogId: DogId) => Promise<void>;
+  onPurchaseExclusiveDog: (
+    dogId: ExclusiveDogId,
+  ) => Promise<{ ok: boolean; error?: string }>;
   onDone: () => void;
 };
+
+const PICKER_DOG_SIZE = 58;
 
 function DogPickerButton({
   dogId,
   breed,
   selected,
-  locked,
-  lockHint,
+  owned,
+  cost,
   onSelect,
   username,
   userData,
@@ -42,39 +48,45 @@ function DogPickerButton({
   dogId: DogId;
   breed: string;
   selected: boolean;
-  locked?: boolean;
-  lockHint?: string;
+  owned: boolean;
+  cost?: number;
   onSelect: () => void;
   username: string;
   userData: UserData;
 }) {
+  const showCost = cost != null && !owned;
+
   return (
     <button
       type="button"
-      onClick={locked ? undefined : onSelect}
-      disabled={locked}
-      title={locked ? lockHint : breed}
-      className={`relative flex aspect-square items-center justify-center rounded-2xl p-1 transition ${
+      onClick={onSelect}
+      title={breed}
+      className={`relative flex aspect-square flex-col items-center justify-center gap-0.5 rounded-2xl p-1 transition active:scale-95 ${
         selected
           ? "bg-[var(--primary-soft)] ring-2 ring-[var(--primary)]"
           : "bg-[var(--surface-soft)]"
-      } ${locked ? "cursor-not-allowed opacity-55" : "active:scale-95"}`}
-      aria-label={locked ? `${breed} locked` : breed}
+      }`}
+      aria-label={breed}
     >
       <DogAvatar
         dogId={dogId}
-        size={48}
+        size={PICKER_DOG_SIZE}
         username={username}
         userData={userData}
+        preview={!owned && cost != null}
         className="block shrink-0"
       />
-      {locked && (
-        <span
-          className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/25 text-lg"
-          aria-hidden
-        >
-          🔒
+      {showCost && (
+        <span className="flex items-center gap-0.5 text-[10px] font-bold text-[var(--foreground)]">
+          <BoneIcon size={12} />
+          {cost}
         </span>
+      )}
+      {!owned && cost != null && (
+        <span
+          className="pointer-events-none absolute inset-0 rounded-2xl bg-white/55"
+          aria-hidden
+        />
       )}
     </button>
   );
@@ -87,6 +99,7 @@ export function ProfileEditForm({
   userData,
   onSaveUsername,
   onSaveDog,
+  onPurchaseExclusiveDog,
   onDone,
 }: Props) {
   const [username, setUsername] = useState(currentUsername ?? profile.username);
@@ -94,6 +107,10 @@ export function ProfileEditForm({
   const [usernameHint, setUsernameHint] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [needBones, setNeedBones] = useState<{
+    cost: number;
+    balance: number;
+  } | null>(null);
 
   const displayUsername = normalizeUsername(
     currentUsername ?? profile.username,
@@ -102,6 +119,7 @@ export function ProfileEditForm({
     username: displayUsername,
     userData,
   });
+  const bones = userData.bones ?? 0;
 
   useEffect(() => {
     setUsername(currentUsername ?? profile.username);
@@ -152,6 +170,27 @@ export function ProfileEditForm({
 
     return () => clearTimeout(timer);
   }, [username, userId, currentUsername]);
+
+  async function handleDogPick(dogId: DogId) {
+    if (isExclusiveDogId(dogId)) {
+      const owned = ownsExclusiveDog(dogId, userData);
+      if (owned) {
+        await onSaveDog(dogId);
+        return;
+      }
+      const cost = EXCLUSIVE_BONE_COSTS[dogId];
+      if (bones < cost) {
+        setNeedBones({ cost, balance: bones });
+        return;
+      }
+      const res = await onPurchaseExclusiveDog(dogId);
+      if (!res.ok) {
+        setSaveError(res.error ?? "Could not unlock this pup.");
+      }
+      return;
+    }
+    await onSaveDog(dogId);
+  }
 
   async function handleDone() {
     setSaveError(null);
@@ -252,59 +291,40 @@ export function ProfileEditForm({
               dogId={d.id}
               breed={d.breed}
               selected={resolvedDogId === d.id}
-              onSelect={() => void onSaveDog(d.id)}
+              owned
+              onSelect={() => void handleDogPick(d.id)}
               username={displayUsername}
               userData={userData}
             />
           ))}
         </div>
         <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--muted)]">
-          Exclusive — complete challenges to unlock
+          Exclusive — unlock with bones
         </p>
         <div className="grid grid-cols-4 gap-2">
           {EXCLUSIVE_DOGS.map((d) => {
             const id = d.id as ExclusiveDogId;
-            const unlocked = isExclusiveDogUnlocked(id, userData);
-            const challenge = challengeForExclusiveDog(id);
+            const owned = ownsExclusiveDog(id, userData);
+            const cost = EXCLUSIVE_BONE_COSTS[id];
             return (
               <DogPickerButton
                 key={d.id}
                 dogId={d.id}
                 breed={d.breed}
                 selected={resolvedDogId === d.id}
-                locked={!unlocked}
-                lockHint={
-                  challenge
-                    ? `${challenge.title}: ${challenge.description}`
-                    : undefined
-                }
-                onSelect={() => void onSaveDog(d.id)}
+                owned={owned}
+                cost={cost}
+                onSelect={() => void handleDogPick(d.id)}
                 username={displayUsername}
                 userData={userData}
               />
             );
           })}
         </div>
-        {EXCLUSIVE_DOGS.some(
-          (d) => !isExclusiveDogUnlocked(d.id as ExclusiveDogId, userData),
-        ) && (
-          <ul className="space-y-1 text-[11px] text-[var(--muted)]">
-            {EXCLUSIVE_DOGS.map((d) => {
-              const id = d.id as ExclusiveDogId;
-              const challenge = challengeForExclusiveDog(id);
-              if (!challenge) return null;
-              const done = isExclusiveDogUnlocked(id, userData);
-              return (
-                <li key={d.id} className={done ? "text-[#5cc98b]" : undefined}>
-                  <span className="font-bold text-[var(--foreground)]">
-                    {challenge.title}
-                  </span>
-                  {done ? " ✓" : ` — ${challenge.progressHint(userData)}`}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <p className="flex items-center justify-center gap-1 text-xs text-[var(--muted)]">
+          Your balance: <BoneIcon size={14} />
+          <span className="font-bold text-[var(--foreground)]">{bones}</span>
+        </p>
       </div>
 
       {saveError && <p className="text-center text-xs text-[#ef6f6c]">{saveError}</p>}
@@ -317,6 +337,15 @@ export function ProfileEditForm({
       >
         {saving ? "Saving…" : "Save profile"}
       </button>
+
+      {needBones && (
+        <NeedMoreBonesDialog
+          open
+          cost={needBones.cost}
+          balance={needBones.balance}
+          onClose={() => setNeedBones(null)}
+        />
+      )}
     </div>
   );
 }

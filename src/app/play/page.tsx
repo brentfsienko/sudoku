@@ -1,13 +1,13 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GameScreen } from "@/components/board/GameScreen";
 import { createSnapshot, useLocalGame } from "@/lib/game/store";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
 import { getProfile } from "@/lib/profile";
-import { recordSoloGame } from "@/lib/stats/store";
+import { loadUserData, recordSoloGame } from "@/lib/stats/store";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -17,10 +17,14 @@ function parseDifficulty(value: string | null): Difficulty {
 
 function SoloGame({
   difficulty,
+  streak,
+  savedBones,
   onExit,
   onRematch,
 }: {
   difficulty: Difficulty;
+  streak: number;
+  savedBones: number;
   onExit: () => void;
   onRematch: () => void;
 }) {
@@ -44,9 +48,19 @@ function SoloGame({
     <GameScreen
       controller={controller}
       me={me}
+      streak={streak}
+      savedBones={savedBones}
       onExit={onExit}
       onRematch={onRematch}
-      onFinish={({ solved, score, elapsedSeconds, mistakes, hintsUsed, squaresFilled }) =>
+      onFinish={({
+        solved,
+        score,
+        elapsedSeconds,
+        mistakes,
+        hintsUsed,
+        squaresFilled,
+        bonesFound,
+      }) =>
         void recordSoloGame({
           won: solved,
           score,
@@ -55,6 +69,7 @@ function SoloGame({
           mistakes,
           hintsUsed,
           squaresFilled,
+          bonesFound,
         })
       }
     />
@@ -66,11 +81,20 @@ function PlayInner() {
   const params = useSearchParams();
   const difficulty = parseDifficulty(params.get("d"));
   const [round, setRound] = useState(0);
+  const [wallet, setWallet] = useState({ streak: 0, bones: 0 });
+
+  useEffect(() => {
+    void loadUserData().then((d) => {
+      setWallet({ streak: d.solo.streak, bones: d.bones ?? 0 });
+    });
+  }, [round]);
 
   return (
     <SoloGame
       key={round}
       difficulty={difficulty}
+      streak={wallet.streak}
+      savedBones={wallet.bones}
       onExit={() => router.push("/")}
       onRematch={() => setRound((r) => r + 1)}
     />

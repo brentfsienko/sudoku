@@ -19,7 +19,7 @@ export function AppBrandTitle({
   size = "lg",
 }: Props) {
   const avatarSize =
-    size === "xl" ? (appIcon ? 56 : 42) : size === "lg" ? 36 : 28;
+    size === "xl" ? (appIcon ? 68 : 42) : size === "lg" ? 36 : 28;
   const titleClass =
     size === "xl"
       ? "font-serif-title text-[2.75rem] leading-none"

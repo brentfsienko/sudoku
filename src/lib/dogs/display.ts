@@ -1,4 +1,4 @@
-import { isExclusiveDogUnlocked } from "@/lib/dogs/challenges";
+import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import {
   isExclusiveDogId,
   resolveDogId,
@@ -6,7 +6,7 @@ import {
 } from "@/lib/theme/dogs";
 import type { UserData } from "@/lib/stats/types";
 
-/** Resolved dog for UI, respecting username overrides and exclusive unlocks. */
+/** Resolved dog for UI, respecting username overrides and purchased exclusives. */
 export function displayDogId(
   dogId: string | null | undefined,
   opts?: { username?: string; userData?: UserData },
@@ -15,7 +15,7 @@ export function displayDogId(
   if (
     isExclusiveDogId(resolved) &&
     opts?.userData &&
-    !isExclusiveDogUnlocked(resolved, opts.userData)
+    !ownsExclusiveDog(resolved, opts.userData)
   ) {
     return "golden";
   }

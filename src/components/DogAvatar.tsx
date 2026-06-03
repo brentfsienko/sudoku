@@ -1,5 +1,5 @@
 import { displayDogId } from "@/lib/dogs/display";
-import { dogById } from "@/lib/theme/dogs";
+import { dogById, resolveDogId } from "@/lib/theme/dogs";
 import type { UserData } from "@/lib/stats/types";
 
 type Props = {
@@ -10,6 +10,8 @@ type Props = {
   className?: string;
   username?: string;
   userData?: UserData;
+  /** Show this exact pup in pickers even if not purchased yet. */
+  preview?: boolean;
 };
 
 /** Pixel art profile dog. */
@@ -20,8 +22,11 @@ export function DogAvatar({
   className,
   username,
   userData,
+  preview,
 }: Props) {
-  const resolved = displayDogId(dogId, { username, userData });
+  const resolved = preview
+    ? resolveDogId(dogId, { username })
+    : displayDogId(dogId, { username, userData });
   const dog = dogById(resolved);
   const ring = ringColor ? Math.max(2, Math.round(size * 0.06)) : 0;
 

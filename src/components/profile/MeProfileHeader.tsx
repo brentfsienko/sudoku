@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { BoneIcon } from "@/components/BoneIcon";
 import { DogAvatar } from "@/components/DogAvatar";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { FriendCodeModal } from "@/components/profile/FriendCodeModal";
 import { ProfileEditModal } from "@/components/profile/ProfileEditModal";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
 import { WinLossBar } from "@/components/stats/WinLossBar";
-import { PencilIcon, SettingsIcon } from "@/components/icons";
+import { FlameIcon, PencilIcon, SettingsIcon, ShareIcon } from "@/components/icons";
 import { COOP_ACCENT, VERSUS_ACCENT, compWinLoss, coopWinLoss } from "@/lib/stats/multi";
 import { GAME_MODE_LABELS } from "@/lib/game/types";
 import { useFriends } from "@/lib/friends/useFriends";
@@ -17,11 +18,20 @@ import type { UseUserData } from "@/lib/stats/useUserData";
 type Props = {
   profile: Profile;
   multi: MultiStats;
+  soloStreak: number;
+  bones: number;
   userData: UseUserData;
   onSignIn: () => void;
 };
 
-export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
+export function MeProfileHeader({
+  profile,
+  multi,
+  soloStreak,
+  bones,
+  userData,
+  onSignIn,
+}: Props) {
   const [editing, setEditing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [friendCodeOpen, setFriendCodeOpen] = useState(false);
@@ -30,6 +40,7 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
   const versus = compWinLoss(multi);
 
   const username = friends.myProfile?.username ?? profile.username;
+  const statsData = userData.data ?? emptyUserData(profile);
 
   return (
     <div className="flex flex-col gap-6">
@@ -87,39 +98,64 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
         </div>
       )}
 
-      <div className="flex flex-col items-center gap-3 text-center">
-        <button
-          type="button"
-          onClick={() => setEditing(true)}
-          className="relative rounded-full active:scale-95"
-          aria-label="Edit profile"
-        >
-          <DogAvatar
-            dogId={profile.dogId}
-            size={96}
-            ringColor="#7ec4cf"
-            username={username}
-            userData={userData.data ?? undefined}
-          />
-          <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[var(--surface-soft)] text-[var(--muted)]">
-            <PencilIcon width={14} height={14} />
-          </span>
-        </button>
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="flex items-start justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="relative shrink-0 rounded-full active:scale-95"
+            aria-label="Edit profile"
+          >
+            <DogAvatar
+              dogId={profile.dogId}
+              size={112}
+              ringColor="#7ec4cf"
+              username={username}
+              userData={statsData}
+            />
+            <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[var(--surface-soft)] text-[var(--muted)]">
+              <PencilIcon width={14} height={14} />
+            </span>
+          </button>
+          {friends.myProfile && (
+            <button
+              type="button"
+              onClick={() => setFriendCodeOpen(true)}
+              className="mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm active:scale-95"
+              aria-label="Share friend code"
+            >
+              <ShareIcon width={20} height={20} />
+            </button>
+          )}
+        </div>
 
         <p className="font-serif-title max-w-full px-2 text-lg leading-snug text-[var(--foreground)]">
           Here are your stats,{" "}
           <span className="font-semibold">{username}</span>.
         </p>
 
-        {friends.myProfile && (
-          <button
-            type="button"
-            onClick={() => setFriendCodeOpen(true)}
-            className="rounded-full border-2 border-[var(--border)] bg-white px-5 py-2 text-sm font-bold text-[var(--foreground)] active:scale-95"
-          >
-            View friend code
-          </button>
-        )}
+        <div className="flex w-full max-w-xs justify-center gap-10">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[var(--primary)]">
+              <FlameIcon width={22} height={22} />
+            </span>
+            <p className="font-display text-2xl font-extrabold text-[var(--foreground)]">
+              {soloStreak}
+            </p>
+            <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+              Day streak
+            </p>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <BoneIcon size={22} />
+            <p className="font-display text-2xl font-extrabold text-[var(--foreground)]">
+              {bones}
+            </p>
+            <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+              Bones
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-5">
@@ -148,21 +184,24 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
       <ProfileEditModal open={editing} onClose={() => setEditing(false)}>
         <ProfileEditForm
           profile={profile}
-          userData={userData.data ?? emptyUserData(profile)}
+          userData={statsData}
           currentUsername={friends.myProfile?.username ?? profile.username}
           userId={userData.user?.id ?? null}
-          onSaveUsername={async (username) => {
+          onSaveUsername={async (uname) => {
             if (userData.user) {
-              const res = await friends.setUsername(username);
-              if (res.ok) await userData.updateProfile({ username });
+              const res = await friends.setUsername(uname);
+              if (res.ok) await userData.updateProfile({ username: uname });
               return res;
             }
-            await userData.updateProfile({ username });
+            await userData.updateProfile({ username: uname });
             return { ok: true };
           }}
           onSaveDog={async (dogId) => {
             await userData.updateProfile({ dogId });
           }}
+          onPurchaseExclusiveDog={(dogId) =>
+            userData.purchaseExclusiveDog(dogId)
+          }
           onDone={() => setEditing(false)}
         />
       </ProfileEditModal>

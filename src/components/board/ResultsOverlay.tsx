@@ -4,6 +4,7 @@ import type { GameSnapshot } from "@/lib/game/store";
 import type { GameMode, PlayerRole } from "@/lib/game/types";
 import { cellContributions } from "@/lib/game/engine";
 import { formatTime } from "@/lib/game/scoring";
+import { BoneIcon } from "@/components/BoneIcon";
 import { DogAvatar } from "@/components/DogAvatar";
 import { playerColor } from "@/lib/theme/dogs";
 
@@ -19,6 +20,8 @@ type Props = {
   solved: boolean;
   onRematch?: () => void;
   onHome: () => void;
+  bonesFound?: number;
+  winBoneBonus?: number;
 };
 
 function StatRow({ label, value }: { label: string; value: string }) {
@@ -40,6 +43,8 @@ export function ResultsOverlay({
   solved,
   onRematch,
   onHome,
+  bonesFound = 0,
+  winBoneBonus = 0,
 }: Props) {
   const contrib = cellContributions(snapshot.puzzle, snapshot.solution, snapshot.cells);
 
@@ -90,6 +95,22 @@ export function ResultsOverlay({
           <StatRow label="Hints used" value={`${snapshot.hintsUsed}`} />
           {mode === "single" && solved && (
             <StatRow label="Score" value={finalScore.toLocaleString()} />
+          )}
+          {bonesFound > 0 && (
+            <div className="flex items-center justify-between py-1.5">
+              <span className="text-[var(--muted)]">Bones found</span>
+              <span className="flex items-center gap-1 font-display font-bold text-[var(--foreground)]">
+                +{bonesFound} <BoneIcon size={16} />
+              </span>
+            </div>
+          )}
+          {winBoneBonus > 0 && (
+            <div className="flex items-center justify-between py-1.5">
+              <span className="text-[var(--muted)]">Win bonus</span>
+              <span className="flex items-center gap-1 font-display font-bold text-[var(--foreground)]">
+                +{winBoneBonus} <BoneIcon size={16} />
+              </span>
+            </div>
           )}
         </div>
 

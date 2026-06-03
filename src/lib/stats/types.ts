@@ -1,5 +1,6 @@
 import type { Difficulty } from "@/lib/game/types";
-import type { DogId } from "@/lib/theme/dogs";
+import type { DogId, ExclusiveDogId } from "@/lib/theme/dogs";
+import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { coerceProfile } from "./profile";
 
 export type SoloStats = {
@@ -71,6 +72,8 @@ export type UserData = {
   solo: SoloStats;
   multi: MultiStats;
   history: GameLog[];
+  bones: number;
+  ownedExclusiveDogs: ExclusiveDogId[];
 };
 
 /** "Elevation" analog: harder puzzles climb higher. */
@@ -140,6 +143,8 @@ export function emptyUserData(profile?: Partial<Profile> & { name?: string }): U
     solo: emptySolo(),
     multi: emptyMulti(),
     history: [],
+    bones: 0,
+    ownedExclusiveDogs: [],
   };
 }
 
@@ -180,6 +185,10 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
     solo,
     multi: { ...multi, opponents: reconcileOpponents(multi.opponents, history) },
     history,
+    bones: typeof raw.bones === "number" ? Math.max(0, raw.bones) : 0,
+    ownedExclusiveDogs: Array.isArray(raw.ownedExclusiveDogs)
+      ? (raw.ownedExclusiveDogs as ExclusiveDogId[])
+      : [],
   };
   return {
     ...data,
@@ -337,6 +346,8 @@ export type SoloResult = {
   mistakes: number;
   hintsUsed: number;
   squaresFilled: number;
+  /** Bones found on the board during this game. */
+  bonesFound: number;
 };
 
 export type MultiResult = {
@@ -350,6 +361,7 @@ export type MultiResult = {
   elapsedSeconds: number;
   mistakes: number;
   score: number;
+  bonesFound: number;
 };
 
 function todayKey(): string {
@@ -418,7 +430,10 @@ export function applySoloResult(data: UserData, r: SoloResult): UserData {
     score: r.score,
   });
 
-  return { ...data, solo, history };
+  const winBonus = r.won ? GAME_WIN_BONE_BONUS : 0;
+  const bones = data.bones + r.bonesFound + winBonus;
+
+  return { ...data, solo, history, bones };
 }
 
 /** Returns a new UserData with the multiplayer game result merged in. */
@@ -486,7 +501,17 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     tied: r.mode === "competitive" ? tie : undefined,
   });
 
-  return { ...data, solo, multi, history };
+  const winBonus =
+    r.mode === "coop"
+      ? r.solved
+        ? GAME_WIN_BONE_BONUS
+        : 0
+      : myWin && !tie
+        ? GAME_WIN_BONE_BONUS
+        : 0;
+  const bones = data.bones + r.bonesFound + winBonus;
+
+  return { ...data, solo, multi, history, bones };
 }
 
 export function mostPlayedOpponent(multi: MultiStats): OpponentRecord | null {

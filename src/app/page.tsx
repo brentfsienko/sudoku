@@ -114,6 +114,7 @@ export default function Home() {
                 solo: statsForMe.solo,
                 multi: statsForMe.multi,
                 history: statsForMe.history,
+                bones: statsForMe.bones ?? 0,
               }}
               userData={userData}
               onSignIn={() => setSignInGateOpen(true)}
@@ -150,7 +151,13 @@ function MeTab({
   userData,
   onSignIn,
 }: {
-  data: { profile: Profile; solo: SoloStats; multi: MultiStats; history: GameLog[] };
+  data: {
+    profile: Profile;
+    solo: SoloStats;
+    multi: MultiStats;
+    history: GameLog[];
+    bones: number;
+  };
   userData: ReturnType<typeof useUserData>;
   onSignIn: () => void;
 }) {
@@ -163,6 +170,8 @@ function MeTab({
       <MeProfileHeader
         profile={profile}
         multi={multi}
+        soloStreak={solo.streak}
+        bones={data.bones ?? 0}
         userData={userData}
         onSignIn={onSignIn}
       />
@@ -170,7 +179,14 @@ function MeTab({
       {/* Progress */}
       <ProgressSection
         history={history}
-        lifetimeSquares={lifetimeSquares({ profile, solo, multi, history })}
+        lifetimeSquares={lifetimeSquares({
+          profile,
+          solo,
+          multi,
+          history,
+          bones: data.bones,
+          ownedExclusiveDogs: userData.data?.ownedExclusiveDogs ?? [],
+        })}
       />
 
       {/* Multiplayer details */}

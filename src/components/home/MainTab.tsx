@@ -11,7 +11,8 @@ import {
 import { FactGuessCard } from "@/components/home/FactGuessCard";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 import { StartGameSheet } from "@/components/home/StartGameSheet";
-import { FlameIcon, PawIcon, UsersIcon } from "@/components/icons";
+import { StreakBonePill } from "@/components/home/StreakBonePill";
+import { PawIcon, UsersIcon } from "@/components/icons";
 import { createGameInvite } from "@/lib/friends/api";
 import type { PublicProfile } from "@/lib/friends/types";
 import { useFriends } from "@/lib/friends/useFriends";
@@ -70,6 +71,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   const [pickedOpponent, setPickedOpponent] = useState<PublicProfile | null>(null);
 
   const streak = data.solo.streak;
+  const bones = data.bones ?? 0;
 
   useEffect(() => {
     const prevHtml = document.documentElement.style.backgroundColor;
@@ -185,22 +187,12 @@ export function MainTab({ data, userData, onSignIn }: Props) {
           </div>
 
           {/* Above white bg, centered on rounded top edge */}
-          <div className="pointer-events-none absolute right-5 top-0 z-40 -translate-y-1/2">
-            <div className="pointer-events-auto flex shrink-0 items-center gap-2 rounded-full bg-white py-2 pl-2 pr-3 shadow-md ring-1 ring-black/[0.04]">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)]">
-                <span className="text-[var(--primary)]">
-                  <FlameIcon width={18} height={18} />
-                </span>
-              </div>
-              <div className="leading-none">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                  Streak
-                </p>
-                <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
-                  {streak} {streak === 1 ? "day" : "days"}
-                </p>
-              </div>
-            </div>
+          <div className="pointer-events-none absolute right-3 top-0 z-40 -translate-y-1/2 sm:right-5">
+            <StreakBonePill
+              streak={streak}
+              bones={bones}
+              className="pointer-events-auto"
+            />
           </div>
         </div>
       </div>

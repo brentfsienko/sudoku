@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { BoneIcon } from "@/components/BoneIcon";
 
 export type CellView = {
   index: number;
@@ -15,6 +16,8 @@ export type CellView = {
   error: boolean;
   /** Ring color when another player has this cell selected. */
   peerRingColor: string | null;
+  hasBone?: boolean;
+  bonePop?: boolean;
 };
 
 type Props = {
@@ -57,6 +60,19 @@ function CellInner({ cell, onSelect }: Props) {
           : undefined
       }
     >
+      {cell.hasBone && !cell.value && (
+        <span className="pointer-events-none absolute right-0.5 top-0.5 opacity-70">
+          <BoneIcon size={10} />
+        </span>
+      )}
+      {cell.bonePop && (
+        <span
+          className="pointer-events-none absolute inset-0 flex items-center justify-center animate-bone-pop"
+          aria-hidden
+        >
+          <BoneIcon size={22} />
+        </span>
+      )}
       {cell.value ? (
         <span
           className="font-display leading-none"
