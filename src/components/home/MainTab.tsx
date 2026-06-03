@@ -29,7 +29,7 @@ const PLAY_HEADER_HEIGHT =
 
 /** Min height for white sheet so it reaches the nav when content is short. */
 const PLAY_SHEET_MIN_HEIGHT =
-  "calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1.25rem - 2.75rem - 0.75rem - 3.25rem - 4.25rem)";
+  "calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1.25rem - 2.75rem - 0.75rem - 3.25rem - 4rem)";
 
 type Props = {
   data: UserData;

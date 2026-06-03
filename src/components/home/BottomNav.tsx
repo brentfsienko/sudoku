@@ -22,19 +22,27 @@ type Props = {
   variant?: "fixed" | "inline";
 };
 
-/** Reserve space above fixed nav (tab row + safe area). Keep in sync with page main padding. */
-export const BOTTOM_NAV_OFFSET =
-  "calc(4.25rem + env(safe-area-inset-bottom, 0px))";
+/** Tab row height — keep in sync with page main padding and Play sheet min-height. */
+export const BOTTOM_NAV_ROW = "4rem";
+
+/** Reserve space above fixed nav (tab row + home indicator). */
+export const BOTTOM_NAV_OFFSET = `calc(${BOTTOM_NAV_ROW} + env(safe-area-inset-bottom, 0px))`;
 
 function NavTabs({
   active,
   onChange,
+  fixed,
 }: {
   active: HomeTab;
   onChange: (tab: HomeTab) => void;
+  fixed?: boolean;
 }) {
   return (
-    <div className="flex items-stretch justify-around pt-2.5 pb-2">
+    <div
+      className={`flex items-stretch justify-around pt-2.5 ${
+        fixed ? "pb-[env(safe-area-inset-bottom,0px)]" : "pb-2"
+      }`}
+    >
       {TABS.map(({ id, label, Icon }) => {
         const isActive = active === id;
         return (
@@ -77,7 +85,7 @@ export function BottomNav({ active, onChange, variant = "inline" }: Props) {
         className="bottom-nav-fixed border-t border-[var(--border)] md:hidden"
         aria-label="Main navigation"
       >
-        <NavTabs active={active} onChange={onChange} />
+        <NavTabs active={active} onChange={onChange} fixed />
       </nav>
     );
   }
