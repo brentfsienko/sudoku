@@ -30,7 +30,9 @@ export function DogAvatar({
   literal = false,
 }: Props) {
   const resolved = literal
-    ? resolveDogId(dogId)
+    ? dogId === "bee"
+      ? "bee"
+      : resolveDogId(dogId)
     : preview
       ? resolveDogId(dogId, { username })
       : displayDogId(dogId, { username, email, userData });
