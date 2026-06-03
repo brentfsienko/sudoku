@@ -18,11 +18,9 @@ import { createGameInvite } from "@/lib/friends/api";
 import type { PublicProfile } from "@/lib/friends/types";
 import { useFriends } from "@/lib/friends/useFriends";
 import { newRoomCode } from "@/lib/game/room";
-import { displayDogId } from "@/lib/dogs/display";
 import { usePullableSheet } from "@/lib/hooks/usePullableSheet";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { UserData } from "@/lib/stats/types";
-import { canUseBeePup } from "@/lib/theme/dogs";
 const ACCENT = "#7ec4cf";
 
 type Props = {
@@ -75,17 +73,6 @@ export function MainTab({ data, userData, onSignIn }: Props) {
 
   const streak = data.solo.streak;
   const bones = data.bones ?? 0;
-  const headerUsername =
-    friends.myProfile?.username ?? data.profile.username;
-  const honeyHeader = canUseBeePup({
-    username: headerUsername,
-    email: userData.user?.email,
-  });
-  const headerDogId = displayDogId(data.profile.dogId, {
-    username: headerUsername,
-    email: userData.user?.email,
-    userData: data,
-  });
 
   useEffect(() => {
     const prevHtml = document.documentElement.style.backgroundColor;
@@ -146,23 +133,16 @@ export function MainTab({ data, userData, onSignIn }: Props) {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-[var(--accent)]">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 bg-[var(--accent)]"
-        style={{ height: "env(safe-area-inset-top)" }}
-      />
-
-      <header className="relative z-20 shrink-0">
-        <PlayTabHeader
-          dogId={headerDogId}
-          appIcon={!honeyHeader}
-          profileIcon={honeyHeader}
-        />
+      <header
+        className="relative z-20 shrink-0 px-5 pr-28"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+      >
+        <PlayTabHeader />
       </header>
 
       {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}
       <div
-        className="relative z-10 mt-[0.75dvh] flex min-h-0 flex-1 flex-col overflow-visible"
+        className="relative z-10 flex min-h-0 flex-1 flex-col overflow-visible"
         style={sheetMotion}
       >
         <div className="relative flex min-h-0 flex-1 flex-col overflow-visible">
