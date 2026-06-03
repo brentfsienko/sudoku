@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SignInGate } from "@/components/auth/SignInGate";
 import { DifficultySelect } from "@/components/home/DifficultySelect";
+import { GameHistoryList } from "@/components/home/GameHistoryList";
 import { ModeSelect } from "@/components/home/ModeSelect";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
 import { FriendsTab } from "@/components/home/FriendsTab";
@@ -149,6 +150,11 @@ export default function Home() {
           <>
             <DifficultySelect value={difficulty} onChange={setDifficulty} />
             <ModeSelect value={mode} onChange={setMode} />
+
+            <GameHistoryList
+              history={statsForMe.history}
+              profile={statsForMe.profile}
+            />
 
             {mode === "single" ? (
               <button

@@ -57,6 +57,10 @@ export type GameLog = {
   squares: number;
   difficulty: Difficulty;
   score: number;
+  opponentName?: string;
+  opponentDogId?: string;
+  /** Competitive mode only. */
+  tied?: boolean;
 };
 
 export type UserData = {
@@ -170,6 +174,7 @@ function normalizeHistory(raw: GameLog[] | undefined): GameLog[] {
   return raw.map((log) => ({
     ...log,
     squares: log.squares ?? 0,
+    tied: log.tied ?? false,
   }));
 }
 
@@ -333,6 +338,9 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     squares: r.mySquares,
     difficulty: r.difficulty,
     score: r.score,
+    opponentName: r.opponentName || undefined,
+    opponentDogId: r.opponentDogId || undefined,
+    tied: r.mode === "competitive" ? tie : undefined,
   });
 
   return { ...data, multi, history };
