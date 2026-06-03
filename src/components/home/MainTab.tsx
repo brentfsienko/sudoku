@@ -134,7 +134,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-[var(--accent)]">
       <header
-        className="relative z-20 shrink-0 px-5"
+        className="relative z-20 shrink-0 px-5 pb-3"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
       >
         <PlayTabHeader />

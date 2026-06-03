@@ -1,18 +1,19 @@
 import { AppDogIcon } from "@/components/AppDogIcon";
 import { APP_NAME } from "@/lib/brand";
 
-/** Matches TabScreenHeader title size (2.75rem). */
-const TITLE_PX = 44;
+const ICON_SIZE = 128;
 
 /**
- * Same layout slot as TabScreenHeader (Friends / Me): left-aligned row,
- * golden brand dog then title, vertically centered.
+ * Left-aligned like TabScreenHeader (Friends / Me), with large brand dog
+ * then title — gap keeps the wordmark clear of the pup.
  */
 export function PlayTabHeader() {
   return (
-    <div className="flex w-full items-center justify-between">
-      <div className="flex min-w-0 items-center gap-2">
-        <AppDogIcon size={TITLE_PX} />
+    <div className="flex w-full items-start justify-between">
+      <div className="flex min-w-0 items-start gap-4">
+        <div className="-ml-1.5 shrink-0">
+          <AppDogIcon size={ICON_SIZE} />
+        </div>
         <h1 className="font-serif-title shrink-0 text-[2.75rem] leading-none text-white">
           {APP_NAME}
         </h1>
