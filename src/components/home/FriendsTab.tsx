@@ -3,7 +3,10 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DogAvatar } from "@/components/DogAvatar";
-import { DifficultySelect } from "@/components/home/DifficultySelect";
+import {
+  GameSetupSheet,
+  type GameSetupResult,
+} from "@/components/home/GameSetupSheet";
 import {
   FriendListPanel,
   FriendListRow,
@@ -13,7 +16,7 @@ import { AddFriendSheet } from "@/components/home/AddFriendSheet";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { SearchIcon, UserPlusIcon } from "@/components/icons";
 import type { DogId } from "@/lib/theme/dogs";
-import { GAME_MODE_LABELS, type Difficulty, type GameMode } from "@/lib/game/types";
+import { GAME_MODE_LABELS } from "@/lib/game/types";
 import { newRoomCode } from "@/lib/game/room";
 import {
   createGameInvite,
@@ -38,8 +41,6 @@ export function FriendsTab({ userData, onSignIn }: Props) {
   const [searching, setSearching] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [inviteFriend, setInviteFriend] = useState<PublicProfile | null>(null);
-  const [inviteMode, setInviteMode] = useState<GameMode>("coop");
-  const [inviteDiff, setInviteDiff] = useState<Difficulty>("medium");
   const [addFriendOpen, setAddFriendOpen] = useState(false);
 
   if (!userData.authConfigured) {
@@ -92,24 +93,26 @@ export function FriendsTab({ userData, onSignIn }: Props) {
     }
   }
 
-  async function sendInvite() {
-    if (!inviteFriend || !userData.user) return;
-    const mode = inviteMode === "competitive" ? "competitive" : "coop";
+  async function sendInvite(result: GameSetupResult) {
+    if (!inviteFriend || !userData.user || result.kind !== "multiplayer") return;
     const code = newRoomCode();
     const res = await createGameInvite(
       userData.user.id,
       inviteFriend.userId,
       code,
-      mode,
-      inviteDiff,
+      result.mode,
+      result.difficulty,
     );
     if (!res.ok) {
       setMsg(res.error ?? "Could not send invite");
       return;
     }
+    const name = inviteFriend.username;
     setInviteFriend(null);
-    setMsg(`Invite sent to @${inviteFriend.username}!`);
-    router.push(`/game/${code}?host=1&m=${mode}&d=${inviteDiff}`);
+    setMsg(`Invite sent to @${name}!`);
+    router.push(
+      `/game/${code}?host=1&m=${result.mode}&d=${result.difficulty}`,
+    );
   }
 
   const friendIds = new Set(friends.friends.map((f) => f.userId));
@@ -220,11 +223,7 @@ export function FriendsTab({ userData, onSignIn }: Props) {
             secondary="Ready to play"
             action={
               <FriendPillButton
-                onClick={() => {
-                  setInviteFriend(f);
-                  setInviteMode("coop");
-                  setInviteDiff("medium");
-                }}
+                onClick={() => setInviteFriend(f)}
               >
                 Start
               </FriendPillButton>
@@ -262,48 +261,13 @@ export function FriendsTab({ userData, onSignIn }: Props) {
         friendIds={friendIds}
       />
 
-      {inviteFriend && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-3xl bg-white p-5 shadow-xl">
-            <h3 className="font-serif-title mb-3 text-2xl text-[var(--foreground)]">
-              Start with @{inviteFriend.username}
-            </h3>
-            <div className="mb-3 flex gap-2">
-              {(["coop", "competitive"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setInviteMode(m)}
-                  className={`font-display flex-1 rounded-full py-2.5 text-sm font-bold ${
-                    inviteMode === m
-                      ? "bg-[var(--primary)] text-white"
-                      : "bg-[var(--surface-soft)] text-[var(--muted)]"
-                  }`}
-                >
-                  {GAME_MODE_LABELS[m]}
-                </button>
-              ))}
-            </div>
-            <DifficultySelect value={inviteDiff} onChange={setInviteDiff} />
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setInviteFriend(null)}
-                className="flex-1 rounded-full bg-[var(--surface-soft)] py-3 font-bold text-[var(--muted)]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => void sendInvite()}
-                className="font-display flex-1 rounded-full bg-[var(--primary)] py-3 font-extrabold text-white"
-              >
-                Send &amp; start
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GameSetupSheet
+        open={!!inviteFriend}
+        onClose={() => setInviteFriend(null)}
+        kind="multiplayer"
+        opponentName={inviteFriend?.username}
+        onConfirm={(r) => void sendInvite(r)}
+      />
     </div>
   );
 }

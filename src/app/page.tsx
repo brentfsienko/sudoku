@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { SignInGate } from "@/components/auth/SignInGate";
-import { DifficultySelect } from "@/components/home/DifficultySelect";
-import { CreateRoomPanel } from "@/components/home/CreateRoomPanel";
-import { GameHistoryList } from "@/components/home/GameHistoryList";
-import { ModeSelect } from "@/components/home/ModeSelect";
+import { MainTab } from "@/components/home/MainTab";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
 import { FriendsTab } from "@/components/home/FriendsTab";
@@ -16,19 +12,12 @@ import { ProgressChart } from "@/components/stats/ProgressChart";
 import {
   ChartIcon,
   ClockIcon,
-  FlameIcon,
   PawIcon,
   TargetIcon,
   TrophyIcon,
   UserIcon,
 } from "@/components/icons";
-import {
-  DIFFICULTY_LABELS,
-  GAME_MODE_LABELS,
-  type Difficulty,
-  type GameMode,
-} from "@/lib/game/types";
-import { newRoomCode } from "@/lib/game/room";
+import { DIFFICULTY_LABELS, GAME_MODE_LABELS, type Difficulty } from "@/lib/game/types";
 import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
 import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
@@ -62,11 +51,7 @@ import {
 } from "@/lib/stats/progress";
 
 export default function Home() {
-  const router = useRouter();
   const [tab, setTab] = useState<HomeTab>("main");
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [mode, setMode] = useState<GameMode>("coop");
-  const [joinCode, setJoinCode] = useState("");
 
   const userData = useUserData();
   const data = userData.data;
@@ -84,21 +69,6 @@ export default function Home() {
     }
   }, [userData.loading, userData.authConfigured, userData.user]);
 
-  function startGame() {
-    if (mode === "single") {
-      router.push(`/play?d=${difficulty}`);
-    } else {
-      const code = newRoomCode();
-      router.push(`/game/${code}?host=1&m=${mode}&d=${difficulty}`);
-    }
-  }
-
-  function joinGame() {
-    const code = joinCode.trim().toUpperCase();
-    if (code.length < 3) return;
-    router.push(`/game/${code}`);
-  }
-
   return (
     <>
       <SignInGate
@@ -106,63 +76,31 @@ export default function Home() {
         userData={userData}
         onClose={() => setSignInGateOpen(false)}
       />
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--background)]">
-      <main
-        className="flex flex-1 flex-col gap-5 px-5 pb-6"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
-      >
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--accent)]">
+      <main className="flex min-h-0 flex-1 flex-col">
         {tab === "main" && (
-          <div className="flex flex-col gap-5">
-            <TabScreenHeader
-              title="Floof Sudoku"
-              action={
-                <div className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 shadow-sm">
-                  <span className="text-[var(--primary)]">
-                    <FlameIcon width={18} height={18} />
-                  </span>
-                  <span className="font-display font-bold text-[var(--foreground)]">
-                    {data?.solo.streak ?? 0}
-                  </span>
-                </div>
-              }
-            />
-
-            <DifficultySelect value={difficulty} onChange={setDifficulty} />
-            <ModeSelect value={mode} onChange={setMode} />
-
-            {mode === "single" ? (
-              <button
-                type="button"
-                onClick={startGame}
-                className="font-display rounded-full border-2 border-[var(--border)] bg-white py-4 text-xl font-extrabold text-[var(--foreground)] shadow-sm transition active:scale-[0.98]"
-              >
-                Solo Practice
-              </button>
-            ) : (
-              <CreateRoomPanel
-                joinCode={joinCode}
-                onJoinCodeChange={setJoinCode}
-                onCreateRoom={startGame}
-                onJoin={joinGame}
-              />
-            )}
-
-            <GameHistoryList
-              history={statsForMe.history}
-              profile={statsForMe.profile}
-              opponents={statsForMe.multi.opponents}
-              userId={userData.user?.id ?? null}
-              authConfigured={userData.authConfigured}
-            />
-          </div>
+          <MainTab
+            data={statsForMe}
+            userData={userData}
+            onSignIn={() => setSignInGateOpen(true)}
+          />
         )}
 
         {tab === "friends" && (
-          <FriendsTab userData={userData} onSignIn={() => setSignInGateOpen(true)} />
+          <div
+            className="flex flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
+            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+          >
+            <FriendsTab userData={userData} onSignIn={() => setSignInGateOpen(true)} />
+          </div>
         )}
 
-        {tab === "me" &&
-          (userData.loading ? (
+        {tab === "me" && (
+          <div
+            className="flex flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
+            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+          >
+          {userData.loading ? (
             <div className="flex flex-1 items-center justify-center">
               <span className="font-display animate-pulse text-[var(--muted)]">
                 Loading your stats… 🐾
@@ -179,7 +117,9 @@ export default function Home() {
               userData={userData}
               onSignIn={() => setSignInGateOpen(true)}
             />
-          ))}
+          )}
+          </div>
+        )}
       </main>
 
       <BottomNav active={tab} onChange={setTab} />

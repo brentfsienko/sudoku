@@ -213,6 +213,15 @@ export function ChartIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function PlusIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
 export function MountainIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>

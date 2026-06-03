@@ -105,3 +105,5 @@ export function useFriends(user: AuthUser | null, profile: Profile | null) {
     setUsername,
   };
 }
+
+export type UseFriends = ReturnType<typeof useFriends>;
