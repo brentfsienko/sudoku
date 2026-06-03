@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AppBrandTitle } from "@/components/AppBrandTitle";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
@@ -10,7 +10,7 @@ import {
 } from "@/components/home/GameSetupSheet";
 import { FactGuessCard } from "@/components/home/FactGuessCard";
 import { StartGameSheet } from "@/components/home/StartGameSheet";
-import { FlameIcon, PawIcon, PlusIcon } from "@/components/icons";
+import { FlameIcon, PawIcon, UsersIcon } from "@/components/icons";
 import { createGameInvite } from "@/lib/friends/api";
 import type { PublicProfile } from "@/lib/friends/types";
 import { useFriends } from "@/lib/friends/useFriends";
@@ -27,6 +27,39 @@ type Props = {
   userData: UseUserData;
   onSignIn: () => void;
 };
+
+function PlayRow({
+  icon,
+  title,
+  subtitle,
+  onClick,
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-2xl bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99]"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-display text-sm font-bold text-[var(--foreground)]">
+          {title}
+        </p>
+        <p className="text-xs text-[var(--muted)]">{subtitle}</p>
+      </div>
+      <span className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-bold text-[var(--foreground)]">
+        Start
+      </span>
+    </button>
+  );
+}
 
 export function MainTab({ data, userData, onSignIn }: Props) {
   const router = useRouter();
@@ -98,83 +131,65 @@ export function MainTab({ data, userData, onSignIn }: Props) {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
-      {/* Accent fill behind notch / status bar */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 bg-[var(--accent)]"
         style={{ height: "env(safe-area-inset-top)" }}
       />
 
-      {/* Fixed title — stays put when pulling down */}
       <header
-        className="relative z-20 shrink-0 px-5 pb-3"
+        className="relative z-20 shrink-0 px-5 pb-2"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}
       >
         <AppBrandTitle dogId={data.profile.dogId as DogId} light />
       </header>
 
-      {/* Pills + white sheet move together */}
+      {/* Streak + white sheet move together on pull */}
       <div
         ref={sheetRef}
         className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
         style={sheetMotion}
       >
-        <div className="flex shrink-0 items-stretch gap-2.5 px-5 pb-2 pt-1">
-          <div className="flex shrink-0 items-center gap-2 rounded-full bg-white py-2 pl-2 pr-3 shadow-md ring-1 ring-black/[0.04]">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)]">
-              <span className="text-[var(--primary)]">
-                <FlameIcon width={18} height={18} />
-              </span>
-            </div>
-            <div className="leading-none">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                Streak
-              </p>
-              <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
-                {streak} {streak === 1 ? "day" : "days"}
-              </p>
+        {/* Bridge: streak sits on blue/white seam, aligned right */}
+        <div className="relative shrink-0 px-5 pb-0 pt-2">
+          <div className="absolute right-5 top-full z-30 -translate-y-1/2">
+            <div className="flex shrink-0 items-center gap-2 rounded-full bg-white py-2 pl-2 pr-3 shadow-md ring-1 ring-black/[0.04]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)]">
+                <span className="text-[var(--primary)]">
+                  <FlameIcon width={18} height={18} />
+                </span>
+              </div>
+              <div className="leading-none">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+                  Streak
+                </p>
+                <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
+                  {streak} {streak === 1 ? "day" : "days"}
+                </p>
+              </div>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setStartSheetOpen(true)}
-            className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-[1.35rem] bg-[var(--foreground)] px-3 py-2.5 shadow-md transition active:scale-[0.98]"
-          >
-            <span className="font-display text-[15px] font-extrabold leading-tight text-white">
-              Start game
-            </span>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white">
-              <PlusIcon width={18} height={18} />
-            </span>
-          </button>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col rounded-t-[28px] bg-white px-5 pb-4 pt-6 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
+        <div className="flex min-h-0 flex-1 flex-col rounded-t-[28px] bg-white px-5 pb-4 pt-9 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
           <section className="mb-5">
-            <h2 className="font-serif-title mb-2 text-lg text-[var(--foreground)]">
-              Play against the computer
+            <h2 className="font-serif-title mb-3 text-lg text-[var(--foreground)]">
+              Play
             </h2>
-            <button
-              type="button"
-              onClick={openSoloSetup}
-              className="flex w-full items-center gap-3 rounded-2xl bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99]"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
-                <PawIcon width={20} height={20} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-display text-sm font-bold text-[var(--foreground)]">
-                  Solo practice
-                </p>
-                <p className="text-xs text-[var(--muted)]">
-                  Pick difficulty when you start
-                </p>
-              </div>
-              <span className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-bold text-[var(--foreground)]">
-                Start
-              </span>
-            </button>
+            <div className="flex flex-col gap-2">
+              <PlayRow
+                icon={<PawIcon width={20} height={20} />}
+                title="Solo play"
+                subtitle="Pick difficulty when you start"
+                onClick={openSoloSetup}
+              />
+              <PlayRow
+                icon={<UsersIcon width={20} height={20} />}
+                title="Multiplayer"
+                subtitle="Friends, search, and invites"
+                onClick={() => setStartSheetOpen(true)}
+              />
+            </div>
           </section>
 
           <div className="mb-5">
