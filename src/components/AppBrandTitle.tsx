@@ -18,7 +18,8 @@ export function AppBrandTitle({
   light,
   size = "lg",
 }: Props) {
-  const avatarSize = size === "xl" ? 42 : size === "lg" ? 36 : 28;
+  const avatarSize =
+    size === "xl" ? (appIcon ? 56 : 42) : size === "lg" ? 36 : 28;
   const titleClass =
     size === "xl"
       ? "font-serif-title text-[2.75rem] leading-none"
@@ -27,7 +28,9 @@ export function AppBrandTitle({
         : "font-serif-title text-xl leading-none";
 
   return (
-    <div className="flex items-center gap-2.5">
+    <div
+      className={`flex items-center ${size === "xl" && appIcon ? "gap-3" : "gap-2.5"}`}
+    >
       {appIcon ? (
         <AppDogIcon size={avatarSize} />
       ) : (
