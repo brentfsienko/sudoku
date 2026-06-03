@@ -78,7 +78,9 @@ export default function Home() {
         onClose={() => setSignInGateOpen(false)}
       />
     <AppFrame variant={tab === "main" ? "accent" : "background"}>
-      <main className="flex min-h-0 flex-1 flex-col">
+      <main
+        className={`flex min-h-0 flex-1 flex-col ${tab === "main" ? "overflow-hidden" : ""}`}
+      >
         {tab === "main" && (
           <MainTab
             data={statsForMe}
