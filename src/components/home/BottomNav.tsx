@@ -74,8 +74,7 @@ export function BottomNav({ active, onChange, variant = "inline" }: Props) {
   if (variant === "fixed") {
     return (
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border)] bg-[var(--surface)] md:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        className="bottom-nav-fixed border-t border-[var(--border)] md:hidden"
         aria-label="Main navigation"
       >
         <NavTabs active={active} onChange={onChange} />

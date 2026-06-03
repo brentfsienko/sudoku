@@ -73,6 +73,45 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Mobile/PWA: dvh can end above the home indicator — fill with surface under the nav */
+@media (max-width: 767px) {
+  html {
+    height: -webkit-fill-available;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    background-color: var(--surface);
+  }
+
+  .app-mobile-shell {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    height: 100lvh;
+    height: -webkit-fill-available;
+  }
+
+  .bottom-nav-fixed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    background-color: var(--surface);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* Paint through any gap below the layout viewport (iOS PWA) */
+    box-shadow: 0 100vh 0 0 var(--surface);
+  }
+}
+
 /* Serif headings & stat numbers (Friends / Me tab style) */
 .font-display,
 .font-serif-title {
