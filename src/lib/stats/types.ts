@@ -1,7 +1,16 @@
+import {
+  isActiveSolo,
+  type ActiveSoloSave,
+} from "@/lib/game/activeSolo";
 import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
 import type { DogId, ExclusiveDogId } from "@/lib/theme/dogs";
 import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { coerceProfile } from "./profile";
+
+export type { ActiveSoloSave };
+
+/** Max in-progress solo games synced per account (keeps user_data JSON reasonable). */
+export const MAX_ACTIVE_SOLOS = 10;
 
 export type SoloStats = {
   played: number;
@@ -83,6 +92,8 @@ export type UserData = {
   bones: number;
   ownedExclusiveDogs: ExclusiveDogId[];
   triviaGuesses?: Record<string, TriviaUserGuess>;
+  /** In-progress solo boards — synced when signed in. */
+  activeSolos?: ActiveSoloSave[];
 };
 
 /** "Elevation" analog: harder puzzles climb higher. */
@@ -193,6 +204,25 @@ function mergeMultiStats(a: MultiStats, b: MultiStats): MultiStats {
   };
 }
 
+/** Merge in-progress solo games from two devices (newer `updatedAt` wins per id). */
+export function mergeActiveSolos(
+  a: ActiveSoloSave[] | undefined,
+  b: ActiveSoloSave[] | undefined,
+): ActiveSoloSave[] {
+  const map = new Map<string, ActiveSoloSave>();
+  for (const item of [...(a ?? []), ...(b ?? [])]) {
+    if (!item?.id || !item.snapshot?.puzzle || !isActiveSolo(item.snapshot)) continue;
+    const at = typeof item.updatedAt === "number" ? item.updatedAt : 0;
+    const prev = map.get(item.id);
+    if (!prev || at >= (prev.updatedAt ?? 0)) {
+      map.set(item.id, { id: item.id, snapshot: item.snapshot, updatedAt: at });
+    }
+  }
+  return [...map.values()]
+    .sort((x, y) => y.updatedAt - x.updatedAt)
+    .slice(0, MAX_ACTIVE_SOLOS);
+}
+
 /** Merge two device copies without losing solo (or any) history rows. */
 export function mergeUserData(local: UserData, remote: UserData): UserData {
   return normalizeUserData({
@@ -211,6 +241,7 @@ export function mergeUserData(local: UserData, remote: UserData): UserData {
       local.triviaGuesses ?? {},
       remote.triviaGuesses ?? {},
     ),
+    activeSolos: mergeActiveSolos(local.activeSolos, remote.activeSolos),
   });
 }
 
@@ -266,6 +297,7 @@ export function emptyUserData(profile?: Partial<Profile> & { name?: string }): U
     bones: 0,
     ownedExclusiveDogs: [],
     triviaGuesses: {},
+    activeSolos: [],
   };
 }
 
@@ -344,6 +376,7 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
       ? (raw.ownedExclusiveDogs as ExclusiveDogId[])
       : [],
     triviaGuesses: normalizeTriviaGuesses(raw.triviaGuesses),
+    activeSolos: mergeActiveSolos([], raw.activeSolos),
   };
   return {
     ...data,

@@ -62,14 +62,28 @@ function migrateLegacy(): ActiveSoloSave[] {
   }
 }
 
-function writeList(list: ActiveSoloSave[]): void {
+function writeList(list: ActiveSoloSave[], notify = true): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    window.dispatchEvent(new Event(ACTIVE_SOLO_UPDATED_EVENT));
+    if (notify) window.dispatchEvent(new Event(ACTIVE_SOLO_UPDATED_EVENT));
   } catch {
     // ignore quota errors
   }
+}
+
+/** Replace device cache (e.g. after cloud sync) without triggering a cloud upsert. */
+export function replaceActiveSolosLocal(list: ActiveSoloSave[]): void {
+  if (typeof window === "undefined") return;
+  const valid = list.filter(
+    (item) =>
+      item?.id &&
+      item.snapshot?.puzzle &&
+      item.snapshot.solution &&
+      isActiveSolo(item.snapshot),
+  );
+  valid.sort((a, b) => b.updatedAt - a.updatedAt);
+  writeList(valid, false);
 }
 
 export function loadActiveSolos(): ActiveSoloSave[] {

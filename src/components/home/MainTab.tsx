@@ -25,6 +25,10 @@ import type { UserData } from "@/lib/stats/types";
 
 const ACCENT = "#7ec4cf";
 
+/** Space reserved for pinned title (must match header + scroll padding-top). */
+const PLAY_HEADER_HEIGHT =
+  "calc(env(safe-area-inset-top) + 1.25rem + 2.75rem + 0.75rem)";
+
 type Props = {
   data: UserData;
   userData: UseUserData;
@@ -135,10 +139,13 @@ export function MainTab({ data, userData, onSignIn }: Props) {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
-      {/* Title stays pinned; sheet scrolls over it (z-20 > z-10) */}
+      {/* Pinned title — lower z so the sheet can slide over it when scrolling */}
       <header
         className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-[var(--accent)] px-5"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)",
+          height: PLAY_HEADER_HEIGHT,
+        }}
       >
         <PlayTabHeader />
       </header>
@@ -147,19 +154,18 @@ export function MainTab({ data, userData, onSignIn }: Props) {
         ref={sheetRef}
         className="relative z-20 flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-y-contain"
       >
-        <div className="relative flex flex-col" style={sheetMotion}>
-          {/* Spacer: initial layout below title; scrolls away as sheet covers header */}
-          <div
-            className="shrink-0 bg-[var(--accent)]"
-            style={{ height: "calc(env(safe-area-inset-top) + 6.75rem)" }}
-            aria-hidden
-          />
-
-          <div className="relative -mt-10">
-            <div className="pointer-events-none absolute bottom-full left-3 z-30 mb-[-2.5rem] translate-y-1/2 sm:left-5">
+        <div
+          className="relative flex min-h-full flex-col"
+          style={{ ...sheetMotion, paddingTop: PLAY_HEADER_HEIGHT }}
+        >
+          {/* Dog saddle — sheet edge only; no negative margin into title zone */}
+          <div className="relative h-[3.25rem] shrink-0">
+            <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
               <AppDogIcon size={128} />
             </div>
+          </div>
 
+          <div className="relative flex min-h-0 flex-1 flex-col">
             <div className="pointer-events-none absolute right-3 top-0 z-50 -translate-y-1/2 sm:right-5">
               <StreakBonePill
                 streak={streak}
@@ -168,7 +174,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
               />
             </div>
 
-            <div className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
+            <div className="relative flex min-h-0 flex-1 flex-col rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
               <ActiveSoloGames
                 profile={data.profile}
                 userEmail={userData.user?.email}

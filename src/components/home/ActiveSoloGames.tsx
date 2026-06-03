@@ -10,6 +10,7 @@ import {
   isActiveSolo,
   loadActiveSolos,
 } from "@/lib/game/activeSolo";
+import { loadUserData, STATS_UPDATED_EVENT } from "@/lib/stats/store";
 import { formatGameClock } from "@/lib/game/format";
 import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
 import { DIFFICULTY_LABELS } from "@/lib/game/types";
@@ -100,15 +101,32 @@ export function ActiveSoloGames({ profile, userEmail }: Props) {
   const [actives, setActives] = useState<ActiveSoloSave[]>([]);
 
   useEffect(() => {
-    const refresh = () => setActives(loadActiveSolos());
-    refresh();
-    window.addEventListener(ACTIVE_SOLO_UPDATED_EVENT, refresh);
-    window.addEventListener("focus", refresh);
-    document.addEventListener("visibilitychange", refresh);
+    let syncing = false;
+    const refreshLocal = () => setActives(loadActiveSolos());
+    const syncFromAccount = async () => {
+      if (syncing) return;
+      syncing = true;
+      try {
+        await loadUserData();
+        refreshLocal();
+      } finally {
+        syncing = false;
+      }
+    };
+    void syncFromAccount();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void syncFromAccount();
+    };
+    const onFocus = () => void syncFromAccount();
+    window.addEventListener(ACTIVE_SOLO_UPDATED_EVENT, refreshLocal);
+    window.addEventListener(STATS_UPDATED_EVENT, refreshLocal);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
-      window.removeEventListener(ACTIVE_SOLO_UPDATED_EVENT, refresh);
-      window.removeEventListener("focus", refresh);
-      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener(ACTIVE_SOLO_UPDATED_EVENT, refreshLocal);
+      window.removeEventListener(STATS_UPDATED_EVENT, refreshLocal);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 

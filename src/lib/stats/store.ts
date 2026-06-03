@@ -1,11 +1,17 @@
 "use client";
 
+import {
+  ACTIVE_SOLO_UPDATED_EVENT,
+  loadActiveSolos,
+  replaceActiveSolosLocal,
+} from "@/lib/game/activeSolo";
 import { getSupabase } from "@/lib/supabase/client";
 import { loadLocal, saveLocal } from "./local";
 import { fetchRemote, upsertRemote } from "./remote";
 import {
   applyMultiResult,
   applySoloResult,
+  mergeActiveSolos,
   mergeUserData,
   type MultiResult,
   type SoloResult,
@@ -33,30 +39,49 @@ async function currentUserId(): Promise<string | null> {
   }
 }
 
+/** Include this device's in-progress solos in the stats blob used for merge/sync. */
+function withDeviceActiveSolos(data: UserData): UserData {
+  return {
+    ...data,
+    activeSolos: mergeActiveSolos(data.activeSolos, loadActiveSolos()),
+  };
+}
+
+function applyActiveSolosToDeviceCache(data: UserData): void {
+  replaceActiveSolosLocal(data.activeSolos ?? []);
+}
+
 /**
  * Loads and merges stats (local + remote when signed in). Read-only for remote:
  * never upserts here — a slow read-time upsert could overwrite a newer save.
  */
 export async function loadUserData(): Promise<UserData> {
   const uid = await currentUserId();
-  if (!uid) return loadLocal();
+  let data = withDeviceActiveSolos(loadLocal());
 
-  const local = loadLocal();
+  if (!uid) {
+    applyActiveSolosToDeviceCache(data);
+    saveLocal(data);
+    return data;
+  }
+
   const remote = await withTimeout(fetchRemote(uid), 6000, null);
   if (remote) {
-    const merged = mergeUserData(local, remote);
-    saveLocal(merged);
-    return merged;
+    data = mergeUserData(data, remote);
   }
-  return local;
+  applyActiveSolosToDeviceCache(data);
+  saveLocal(data);
+  return data;
 }
 
 export const STATS_UPDATED_EVENT = "sudogku:stats-updated";
 
 export async function saveUserData(data: UserData): Promise<void> {
-  saveLocal(data);
+  const withActives = withDeviceActiveSolos(data);
+  applyActiveSolosToDeviceCache(withActives);
+  saveLocal(withActives);
   const uid = await currentUserId();
-  if (uid) await upsertRemote(uid, data);
+  if (uid) await upsertRemote(uid, withActives);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(STATS_UPDATED_EVENT));
   }
@@ -67,7 +92,7 @@ export async function seedRemoteIfMissing(): Promise<void> {
   const uid = await currentUserId();
   if (!uid) return;
   const remote = await withTimeout(fetchRemote(uid), 6000, null);
-  if (!remote) void upsertRemote(uid, loadLocal());
+  if (!remote) void upsertRemote(uid, withDeviceActiveSolos(loadLocal()));
 }
 
 async function loadForWrite(): Promise<UserData> {
@@ -89,4 +114,29 @@ export async function recordMultiGame(result: MultiResult): Promise<void> {
   const data = await loadForWrite();
   const bonesFound = Math.max(0, result.bonesFound);
   await saveUserData(applyMultiResult(data, { ...result, bonesFound }));
+}
+
+let activeSoloPersistTimer: ReturnType<typeof setTimeout> | null = null;
+
+async function persistActiveSolosToAccount(): Promise<void> {
+  const uid = await currentUserId();
+  if (!uid) return;
+  try {
+    const data = withDeviceActiveSolos(await loadForWrite());
+    await saveUserData(data);
+  } catch {
+    // ignore — local actives still on device
+  }
+}
+
+function schedulePersistActiveSolos(): void {
+  if (activeSoloPersistTimer) clearTimeout(activeSoloPersistTimer);
+  activeSoloPersistTimer = setTimeout(() => {
+    activeSoloPersistTimer = null;
+    void persistActiveSolosToAccount();
+  }, 500);
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener(ACTIVE_SOLO_UPDATED_EVENT, schedulePersistActiveSolos);
 }
