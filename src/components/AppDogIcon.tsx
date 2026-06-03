@@ -1,7 +1,13 @@
 import { BRAND_DOG_IMAGE } from "@/lib/brand";
 
 /** Pixel golden dog head — Sudogku brand mark. */
-export function AppDogIcon({ size = 42 }: { size?: number }) {
+export function AppDogIcon({
+  size = 42,
+  className,
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -9,7 +15,7 @@ export function AppDogIcon({ size = 42 }: { size?: number }) {
       alt=""
       width={size}
       height={size}
-      className="block shrink-0 object-contain"
+      className={`block shrink-0 object-contain ${className ?? ""}`}
       style={{ imageRendering: "pixelated" }}
       aria-hidden
     />
