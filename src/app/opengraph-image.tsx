@@ -35,8 +35,8 @@ export default function OgImage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={dogSrc}
-            width={140}
-            height={140}
+            width={280}
+            height={280}
             alt=""
             style={{ objectFit: "contain" }}
           />

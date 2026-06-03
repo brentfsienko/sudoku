@@ -22,11 +22,8 @@ type Props = {
 
 export function BottomNav({ active, onChange }: Props) {
   return (
-    <nav className="z-10 shrink-0 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur">
-      <div
-        className="mx-auto flex max-w-md items-stretch justify-around"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      >
+    <nav className="z-10 shrink-0 border-t border-[var(--border)] bg-[var(--surface)]">
+      <div className="mx-auto flex max-w-md items-stretch justify-around">
         {TABS.map(({ id, label, Icon }) => {
           const isActive = active === id;
           return (
@@ -59,6 +56,12 @@ export function BottomNav({ active, onChange }: Props) {
           );
         })}
       </div>
+      {/* Fills home-indicator inset so accent doesn’t show below the bar */}
+      <div
+        aria-hidden
+        className="bg-[var(--surface)]"
+        style={{ height: "env(safe-area-inset-bottom, 0px)" }}
+      />
     </nav>
   );
 }
