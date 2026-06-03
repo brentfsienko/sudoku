@@ -41,6 +41,7 @@ type Props = {
     elapsedSeconds: number;
     mistakes: number;
     hintsUsed: number;
+    squaresFilled: number;
   }) => void;
 };
 
@@ -110,6 +111,7 @@ export function GameScreen({
         elapsedSeconds: elapsed,
         mistakes: snapshot.mistakes,
         hintsUsed: snapshot.hintsUsed,
+        squaresFilled: contrib[me.role] ?? contrib.total,
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);

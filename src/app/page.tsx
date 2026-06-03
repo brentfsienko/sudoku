@@ -41,6 +41,7 @@ import {
 } from "@/lib/stats/multi";
 import {
   emptyUserData,
+  lifetimeSquares,
   type GameLog,
   type MultiStats,
   type OpponentRecord,
@@ -284,7 +285,10 @@ function MeTab({
       />
 
       {/* Progress */}
-      <ProgressSection history={history} />
+      <ProgressSection
+        history={history}
+        lifetimeSquares={lifetimeSquares({ profile, solo, multi, history })}
+      />
 
       {/* Multiplayer details */}
       <CoopSection multi={multi} />
@@ -312,7 +316,7 @@ function MeTab({
 const METRIC_COLORS: Record<Metric, string> = {
   games: "#f4a259",
   time: "#4ea1a3",
-  mistakes: "#ef6f6c",
+  squares: "#7c6fdc",
 };
 
 const HISTORY_FILTERS: { id: HistoryFilter; label: string; color: string }[] = [
@@ -322,7 +326,13 @@ const HISTORY_FILTERS: { id: HistoryFilter; label: string; color: string }[] = [
   { id: "solo", label: "Solo", color: "#a06bd6" },
 ];
 
-function ProgressSection({ history }: { history: GameLog[] }) {
+function ProgressSection({
+  history,
+  lifetimeSquares: lifetimeTotal,
+}: {
+  history: GameLog[];
+  lifetimeSquares: number;
+}) {
   const [metric, setMetric] = useState<Metric>("games");
   const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
   const filteredHistory = useMemo(
@@ -396,7 +406,7 @@ function ProgressSection({ history }: { history: GameLog[] }) {
       <div className="grid grid-cols-3 gap-2">
         <WeekStat label="Games" value={week.games.toLocaleString()} />
         <WeekStat label="Time" value={formatDuration(week.seconds)} />
-        <WeekStat label="Mistakes" value={week.mistakes.toLocaleString()} />
+        <WeekStat label="Squares" value={lifetimeTotal.toLocaleString()} />
       </div>
 
       <div className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
@@ -564,8 +574,8 @@ function CoopSection({ multi }: { multi: MultiStats }) {
       <StatGrid
         items={[
           { value: `${coop.wins}/${coop.played}`, label: "Solved" },
-          { value: String(coop.losses), label: "Unsolved" },
           { value: `${coop.winPct}%`, label: "Solve Rate" },
+          { value: multi.coopSquares.toLocaleString(), label: "Squares Filled" },
         ]}
       />
 
@@ -595,7 +605,7 @@ function VersusSection({ multi }: { multi: MultiStats }) {
         items={[
           { value: versus.record, label: "W-L-T" },
           { value: String(versus.wins), label: "Wins" },
-          { value: multi.totalSquares.toLocaleString(), label: "Squares Filled" },
+          { value: multi.compSquares.toLocaleString(), label: "Squares Filled" },
         ]}
       />
 

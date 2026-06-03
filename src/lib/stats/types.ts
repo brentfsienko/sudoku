@@ -15,6 +15,7 @@ export type SoloStats = {
   lastPlayedDate: string | null;
   bestTimeByDifficulty: Partial<Record<Difficulty, number>>;
   playsByDifficulty: Partial<Record<Difficulty, number>>;
+  totalSquares: number;
 };
 
 export type OpponentRecord = {
@@ -33,7 +34,10 @@ export type MultiStats = {
   compPlayed: number;
   compWon: number;
   compTied: number;
-  totalSquares: number;
+  coopSquares: number;
+  compSquares: number;
+  /** @deprecated Migrated to coopSquares + compSquares on load. */
+  totalSquares?: number;
   opponents: Record<string, OpponentRecord>;
 };
 
@@ -49,6 +53,8 @@ export type GameLog = {
   won: boolean;
   seconds: number;
   mistakes: number;
+  /** Correct cells filled by the player (all modes). */
+  squares: number;
   difficulty: Difficulty;
   score: number;
 };
@@ -92,6 +98,7 @@ export function emptySolo(): SoloStats {
     lastPlayedDate: null,
     bestTimeByDifficulty: {},
     playsByDifficulty: {},
+    totalSquares: 0,
   };
 }
 
@@ -102,9 +109,17 @@ export function emptyMulti(): MultiStats {
     compPlayed: 0,
     compWon: 0,
     compTied: 0,
-    totalSquares: 0,
+    coopSquares: 0,
+    compSquares: 0,
     opponents: {},
   };
+}
+
+/** Lifetime correct cells filled across solo, co-op, and versus. */
+export function lifetimeSquares(data: UserData): number {
+  return (
+    data.solo.totalSquares + data.multi.coopSquares + data.multi.compSquares
+  );
 }
 
 export function emptyUserData(profile?: Partial<Profile> & { name?: string }): UserData {
@@ -144,13 +159,37 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
       ...base.profile,
       ...(raw.profile as Partial<Profile> & { name?: string }),
     }),
-    solo: { ...base.solo, ...raw.solo },
-    multi: {
-      ...base.multi,
-      ...raw.multi,
-      opponents: normalizeOpponents(raw.multi?.opponents),
-    },
-    history: Array.isArray(raw.history) ? raw.history : [],
+    solo: { ...base.solo, ...raw.solo, totalSquares: raw.solo?.totalSquares ?? 0 },
+    multi: normalizeMulti(raw.multi),
+    history: normalizeHistory(raw.history),
+  };
+}
+
+function normalizeHistory(raw: GameLog[] | undefined): GameLog[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((log) => ({
+    ...log,
+    squares: log.squares ?? 0,
+  }));
+}
+
+function normalizeMulti(raw: Partial<MultiStats> | undefined): MultiStats {
+  const base = emptyMulti();
+  if (!raw) return base;
+
+  let coopSquares = raw.coopSquares ?? 0;
+  let compSquares = raw.compSquares ?? 0;
+  const legacy = raw.totalSquares ?? 0;
+  if (coopSquares + compSquares === 0 && legacy > 0) {
+    coopSquares = legacy;
+  }
+
+  return {
+    ...base,
+    ...raw,
+    coopSquares,
+    compSquares,
+    opponents: normalizeOpponents(raw.opponents),
   };
 }
 
@@ -161,6 +200,7 @@ export type SoloResult = {
   elapsedSeconds: number;
   mistakes: number;
   hintsUsed: number;
+  squaresFilled: number;
 };
 
 export type MultiResult = {
@@ -224,12 +264,15 @@ export function applySoloResult(data: UserData, r: SoloResult): UserData {
     if (r.mistakes === 0 && r.hintsUsed === 0) solo.perfectGames += 1;
   }
 
+  solo.totalSquares += r.squaresFilled;
+
   const history = appendHistory(data.history, {
     t: Date.now(),
     mode: "solo",
     won: r.won,
     seconds: r.elapsedSeconds,
     mistakes: r.mistakes,
+    squares: r.squaresFilled,
     difficulty: r.difficulty,
     score: r.score,
   });
@@ -256,7 +299,8 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     if (tie) multi.compTied += 1;
     else if (myWin) multi.compWon += 1;
   }
-  multi.totalSquares += r.mySquares;
+  if (r.mode === "coop") multi.coopSquares += r.mySquares;
+  else multi.compSquares += r.mySquares;
 
   const key = (r.opponentName || "anon").trim().toLowerCase() || "anon";
   const prev = multi.opponents[key] ?? {
@@ -286,6 +330,7 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     won: myWin,
     seconds: r.elapsedSeconds,
     mistakes: r.mistakes,
+    squares: r.mySquares,
     difficulty: r.difficulty,
     score: r.score,
   });

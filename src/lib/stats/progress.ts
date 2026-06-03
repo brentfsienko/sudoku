@@ -1,11 +1,11 @@
 import type { GameLog } from "./types";
 
-export type Metric = "games" | "time" | "mistakes";
+export type Metric = "games" | "time" | "squares";
 
 export const METRICS: { id: Metric; label: string }[] = [
   { id: "games", label: "Games" },
   { id: "time", label: "Time" },
-  { id: "mistakes", label: "Mistakes" },
+  { id: "squares", label: "Squares" },
 ];
 
 /** Per-game contribution to a metric. */
@@ -15,8 +15,8 @@ export function metricValue(log: GameLog, metric: Metric): number {
       return 1;
     case "time":
       return log.seconds;
-    case "mistakes":
-      return log.mistakes;
+    case "squares":
+      return log.squares ?? 0;
   }
 }
 
@@ -59,16 +59,16 @@ export function weeklySeries(
 export type PeriodTotals = {
   games: number;
   seconds: number;
-  mistakes: number;
+  squares: number;
 };
 
 export function totalsSince(history: GameLog[], sinceMs: number): PeriodTotals {
-  const t: PeriodTotals = { games: 0, seconds: 0, mistakes: 0 };
+  const t: PeriodTotals = { games: 0, seconds: 0, squares: 0 };
   for (const log of history) {
     if (log.t < sinceMs) continue;
     t.games += 1;
     t.seconds += log.seconds;
-    t.mistakes += log.mistakes;
+    t.squares += log.squares ?? 0;
   }
   return t;
 }
