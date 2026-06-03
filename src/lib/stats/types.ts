@@ -371,23 +371,28 @@ function isYesterday(dateStr: string): boolean {
   return d.toISOString().slice(0, 10) === yesterday.toISOString().slice(0, 10);
 }
 
+/** Bump day streak for any completed game (solo, co-op, or versus). */
+function applyPlayStreak(solo: SoloStats): SoloStats {
+  const today = todayKey();
+  const next = { ...solo };
+  if (next.lastPlayedDate !== today) {
+    next.streak =
+      next.lastPlayedDate && isYesterday(next.lastPlayedDate) ? next.streak + 1 : 1;
+    next.lastPlayedDate = today;
+  } else if (next.streak === 0) {
+    next.streak = 1;
+  }
+  next.bestStreak = Math.max(next.bestStreak, next.streak);
+  return next;
+}
+
 /** Returns a new UserData with the solo game result merged in. */
 export function applySoloResult(data: UserData, r: SoloResult): UserData {
-  const solo: SoloStats = {
+  let solo = applyPlayStreak({
     ...data.solo,
     bestTimeByDifficulty: { ...data.solo.bestTimeByDifficulty },
     playsByDifficulty: { ...data.solo.playsByDifficulty },
-  };
-  const today = todayKey();
-
-  if (solo.lastPlayedDate !== today) {
-    solo.streak =
-      solo.lastPlayedDate && isYesterday(solo.lastPlayedDate) ? solo.streak + 1 : 1;
-    solo.lastPlayedDate = today;
-  } else if (solo.streak === 0) {
-    solo.streak = 1;
-  }
-  solo.bestStreak = Math.max(solo.bestStreak, solo.streak);
+  });
 
   solo.played += 1;
   solo.playsByDifficulty[r.difficulty] =
@@ -426,6 +431,7 @@ export function applySoloResult(data: UserData, r: SoloResult): UserData {
 
 /** Returns a new UserData with the multiplayer game result merged in. */
 export function applyMultiResult(data: UserData, r: MultiResult): UserData {
+  const solo = applyPlayStreak({ ...data.solo });
   const multi: MultiStats = {
     ...data.multi,
     opponents: { ...data.multi.opponents },
@@ -484,7 +490,7 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     tied: r.mode === "competitive" ? tie : undefined,
   });
 
-  return { ...data, multi, history };
+  return { ...data, solo, multi, history };
 }
 
 export function mostPlayedOpponent(multi: MultiStats): OpponentRecord | null {
