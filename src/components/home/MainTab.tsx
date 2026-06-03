@@ -21,6 +21,7 @@ import { newRoomCode } from "@/lib/game/room";
 import { usePullableSheet } from "@/lib/hooks/usePullableSheet";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { UserData } from "@/lib/stats/types";
+
 const ACCENT = "#7ec4cf";
 
 type Props = {
@@ -132,59 +133,63 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col bg-[var(--accent)]">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
+      {/* Anchored brand row — only the white sheet scrolls below */}
       <header
-        className="relative z-20 shrink-0 pl-3 pr-5 pb-3"
-        style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+        className="sticky top-0 z-30 shrink-0 bg-[var(--accent)] px-5 pb-3"
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)",
+          paddingLeft: "max(1.25rem, calc(env(safe-area-inset-left, 0px) + 1.25rem))",
+          paddingRight: "max(1.25rem, calc(env(safe-area-inset-right, 0px) + 1.25rem))",
+        }}
       >
         <PlayTabHeader />
       </header>
 
-      {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}
       <div
-        className="relative z-10 flex min-h-0 flex-1 flex-col overflow-visible"
+        className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden"
         style={sheetMotion}
       >
-        <div className="relative flex min-h-0 flex-1 flex-col overflow-visible">
+        <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <div
             ref={sheetRef}
             className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-6 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
           >
-          <ActiveSoloGames
-            profile={data.profile}
-            userEmail={userData.user?.email}
-          />
+            <ActiveSoloGames
+              profile={data.profile}
+              userEmail={userData.user?.email}
+            />
 
-          <section className="mb-5">
-            <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
-            <div className="flex flex-col gap-2">
-              <PlayRow
-                icon={<PawIcon width={24} height={24} />}
-                title="Solo play"
-                subtitle="Pick difficulty when you start"
-                onClick={openSoloSetup}
-              />
-              <PlayRow
-                icon={<UsersIcon width={24} height={24} />}
-                title="Multiplayer"
-                subtitle="Friends, search, and invites"
-                onClick={() => setStartSheetOpen(true)}
-              />
+            <section className="mb-5">
+              <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
+              <div className="flex flex-col gap-2">
+                <PlayRow
+                  icon={<PawIcon width={24} height={24} />}
+                  title="Solo play"
+                  subtitle="Pick difficulty when you start"
+                  onClick={openSoloSetup}
+                />
+                <PlayRow
+                  icon={<UsersIcon width={24} height={24} />}
+                  title="Multiplayer"
+                  subtitle="Friends, search, and invites"
+                  onClick={() => setStartSheetOpen(true)}
+                />
+              </div>
+            </section>
+
+            <div className="mb-5">
+              <FactGuessCard />
             </div>
-          </section>
 
-          <div className="mb-5">
-            <FactGuessCard />
-          </div>
-
-          <GameHistoryList
-            history={data.history}
-            profile={data.profile}
-            opponents={data.multi.opponents}
-            userId={userData.user?.id ?? null}
-            userEmail={userData.user?.email}
-            authConfigured={userData.authConfigured}
-          />
+            <GameHistoryList
+              history={data.history}
+              profile={data.profile}
+              opponents={data.multi.opponents}
+              userId={userData.user?.id ?? null}
+              userEmail={userData.user?.email}
+              authConfigured={userData.authConfigured}
+            />
           </div>
 
           <div className="pointer-events-none absolute right-3 top-0 z-40 -translate-y-1/2 sm:right-5">
