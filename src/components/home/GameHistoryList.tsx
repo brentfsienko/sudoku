@@ -16,7 +16,7 @@ import { DIFFICULTY_LABELS, GAME_MODE_LABELS, type GameMode } from "@/lib/game/t
 import { boardSharePercents } from "@/lib/stats/boardShare";
 import { COOP_ACCENT, VERSUS_ACCENT } from "@/lib/stats/multi";
 import type { GameLog, MultiStats, OpponentRecord, Profile } from "@/lib/stats/types";
-import type { DogId } from "@/lib/theme/dogs";
+import { dogIdForUsername, type DogId } from "@/lib/theme/dogs";
 
 type Props = {
   history: GameLog[];
@@ -140,7 +140,12 @@ function PlayerChip({
             <CrownIcon width={10} height={10} />
           </span>
         )}
-        <DogAvatar dogId={dogId} size={32} />
+        <DogAvatar
+          dogId={dogId}
+          username={username}
+          size={44}
+          headCrop
+        />
       </div>
       <div className="min-w-0 leading-tight">
         {percent != null && (
@@ -193,7 +198,7 @@ function MultiplayerHistoryRow({
         </div>
         <div className="flex items-center gap-1.5">
           <PlayerChip
-            dogId={profile.dogId}
+            dogId={dogIdForUsername(meName, profile.dogId)}
             username={meName}
             percent={competitive ? (share?.mine ?? null) : undefined}
             crowned={youWon}
@@ -202,7 +207,7 @@ function MultiplayerHistoryRow({
             {log.mode === "coop" ? "with" : "vs"}
           </span>
           <PlayerChip
-            dogId={opp.dogId as DogId}
+            dogId={dogIdForUsername(opp.name, opp.dogId)}
             username={opp.name}
             percent={competitive ? (share?.theirs ?? null) : undefined}
             crowned={theyWon}
@@ -236,7 +241,12 @@ function SoloHistoryRow({
         divider ? "border-b border-white/70" : ""
       }`}
     >
-      <DogAvatar dogId={profile.dogId} size={36} />
+      <DogAvatar
+        dogId={dogIdForUsername(meName, profile.dogId)}
+        username={meName}
+        size={44}
+        headCrop
+      />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="truncate text-sm font-bold text-[var(--foreground)]">

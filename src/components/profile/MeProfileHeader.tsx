@@ -99,11 +99,11 @@ export function MeProfileHeader({
       )}
 
       <div className="flex flex-col items-center gap-4 text-center">
-        <div className="flex items-start justify-center gap-3">
+        <div className="relative mx-auto w-fit px-12">
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="relative shrink-0 rounded-full active:scale-95"
+            className="relative block rounded-full active:scale-95"
             aria-label="Edit profile"
           >
             <DogAvatar
@@ -112,6 +112,7 @@ export function MeProfileHeader({
               ringColor="#7ec4cf"
               username={username}
               userData={statsData}
+              headCrop
             />
             <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[var(--surface-soft)] text-[var(--muted)]">
               <PencilIcon width={14} height={14} />
@@ -121,7 +122,7 @@ export function MeProfileHeader({
             <button
               type="button"
               onClick={() => setFriendCodeOpen(true)}
-              className="mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm active:scale-95"
+              className="absolute right-0 top-2 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm active:scale-95"
               aria-label="Share friend code"
             >
               <ShareIcon width={20} height={20} />

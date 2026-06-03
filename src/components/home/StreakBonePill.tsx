@@ -10,36 +10,31 @@ type Props = {
 export function StreakBonePill({ streak, bones, className }: Props) {
   return (
     <div
-      className={`flex shrink-0 items-center rounded-full bg-white py-2 pl-2 pr-3 shadow-md ring-1 ring-black/[0.04] ${className ?? ""}`}
+      className={`flex shrink-0 items-center rounded-full bg-[var(--foreground)] py-2 pl-2 pr-3 shadow-md ${className ?? ""}`}
     >
       <div className="flex min-w-0 items-center gap-2 pr-2.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)]">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
           <span className="text-[var(--primary)]">
             <FlameIcon width={18} height={18} />
           </span>
         </div>
         <div className="leading-none">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-white/65">
             Streak
           </p>
-          <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
+          <p className="font-display text-lg font-extrabold text-white">
             {streak} {streak === 1 ? "day" : "days"}
           </p>
         </div>
       </div>
-      <div
-        className="mx-0.5 h-9 w-px shrink-0 bg-[var(--border)]"
-        aria-hidden
-      />
+      <div className="mx-0.5 h-9 w-px shrink-0 bg-white/25" aria-hidden />
       <div className="flex min-w-0 items-center gap-2 pl-2.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface-soft)]">
-          <BoneIcon size={20} />
-        </div>
+        <BoneIcon size={22} />
         <div className="leading-none">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-white/65">
             Bones
           </p>
-          <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
+          <p className="font-display text-lg font-extrabold text-white">
             {bones}
           </p>
         </div>

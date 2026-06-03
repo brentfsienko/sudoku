@@ -33,19 +33,15 @@ export const STANDARD_DOGS: Dog[] = [
   { id: "corgi", breed: "Corgi", image: "/dogs/corgi.png" },
 ];
 
+/** Sorted by bone cost (low → high) for the profile picker row. */
 export const EXCLUSIVE_DOGS: Dog[] = [
   { id: "royal", breed: "Royal Pup", image: "/dogs/royal.png", exclusive: true },
   { id: "hero", breed: "Hero Hound", image: "/dogs/hero.png", exclusive: true },
+  { id: "party", breed: "Party Pup", image: "/dogs/party.png", exclusive: true },
   {
     id: "galaxy",
     breed: "Galaxy Pup",
     image: "/dogs/galaxy.png",
-    exclusive: true,
-  },
-  {
-    id: "party",
-    breed: "Party Pup",
-    image: "/dogs/party.png",
     exclusive: true,
   },
 ];
@@ -65,7 +61,21 @@ const LEGACY_DOG_MAP: Record<string, DogId> = {
 const USERNAME_DOG_OVERRIDES: Record<string, DogId> = {
   j999: "pomeranian",
   milksfavoritecookie: "pug",
+  rimboy: "pug",
 };
+
+/** Profile dog for a user, including fixed usernames and party → pug migration. */
+export function dogIdForUsername(
+  username: string,
+  storedDogId?: string | null,
+): DogId {
+  const u = normalizeUsername(username);
+  const override = USERNAME_DOG_OVERRIDES[u];
+  if (override) return override;
+  const id = storedDogId?.trim() || "golden";
+  if (id === "party") return "pug";
+  return resolveDogId(id, { username: u });
+}
 
 export function dogById(id: string | null | undefined): Dog {
   const resolved = resolveDogId(id);
