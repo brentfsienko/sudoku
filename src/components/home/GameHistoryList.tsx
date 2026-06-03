@@ -12,7 +12,7 @@ import { CrownIcon } from "@/components/icons";
 import { createGameInvite, lookupProfileByUsername } from "@/lib/friends/api";
 import { newRoomCode } from "@/lib/game/room";
 import { DIFFICULTY_LABELS, GAME_MODE_LABELS, type GameMode } from "@/lib/game/types";
-import { boardShareLabel } from "@/lib/stats/boardShare";
+import { boardSharePercents } from "@/lib/stats/boardShare";
 import { COOP_ACCENT, VERSUS_ACCENT } from "@/lib/stats/multi";
 import type { GameLog, MultiStats, OpponentRecord, Profile } from "@/lib/stats/types";
 import type { DogId } from "@/lib/theme/dogs";
@@ -80,59 +80,153 @@ function resolveOpponent(
   return { name: "friend", dogId: "golden" };
 }
 
-function OpponentLine({
-  me,
-  log,
-  opponents,
-}: {
-  me: string;
-  log: GameLog;
-  opponents: Record<string, OpponentRecord>;
-}) {
-  const youWonComp = log.mode === "competitive" && log.won && !log.tied;
-  const meName = displayUsername(me);
-
-  if (log.mode === "solo") {
-    return (
-      <span className="truncate text-[15px] font-bold text-[var(--foreground)]">
-        @{meName}
-      </span>
-    );
-  }
-
-  const opp = resolveOpponent(log, opponents);
+function ModeBadge({ log }: { log: GameLog }) {
+  const accent = modeAccent(log.mode);
   return (
-    <span className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5">
-      <span className="relative inline-flex items-center gap-0.5">
-        {youWonComp && (
-          <span className="text-[var(--primary)]" aria-hidden>
-            <CrownIcon width={11} height={11} />
-          </span>
-        )}
-        <span className="truncate text-[15px] font-bold text-[var(--foreground)]">
-          @{meName}
-        </span>
-      </span>
-      <span className="text-xs font-semibold text-[var(--muted)]">
-        {log.mode === "coop" ? "with" : "vs"}
-      </span>
-      <span className="truncate text-[15px] font-bold text-[var(--foreground)]">
-        @{opp.name}
-      </span>
+    <span
+      className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
+      style={{ backgroundColor: accent }}
+    >
+      {log.mode === "solo" ? "Solo" : GAME_MODE_LABELS[log.mode]}
     </span>
   );
 }
 
-function secondaryLine(
-  log: GameLog,
-  profile: Profile,
-  opponents: Record<string, OpponentRecord>,
-): string {
-  const base = `${outcomeText(log)} · ${DIFFICULTY_LABELS[log.difficulty]}`;
-  if (log.mode === "solo") return base;
+function PlayerColumn({
+  dogId,
+  username,
+  percent,
+  crowned,
+}: {
+  dogId: DogId;
+  username: string;
+  percent: number | null;
+  crowned?: boolean;
+}) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
+      <div className="relative mb-0.5">
+        {crowned && (
+          <span
+            className="absolute -top-3 left-1/2 -translate-x-1/2 text-[var(--primary)]"
+            aria-hidden
+          >
+            <CrownIcon width={14} height={14} />
+          </span>
+        )}
+        <DogAvatar dogId={dogId} size={48} />
+      </div>
+      {percent != null ? (
+        <span className="font-display text-xl font-extrabold leading-none text-[var(--foreground)]">
+          {percent}%
+        </span>
+      ) : (
+        <span className="font-display text-lg font-extrabold leading-none text-[var(--muted)]">
+          —
+        </span>
+      )}
+      <span className="max-w-[5.5rem] truncate text-center text-xs font-bold text-[var(--foreground)]">
+        @{username}
+      </span>
+    </div>
+  );
+}
+
+function MultiplayerHistoryRow({
+  log,
+  profile,
+  opponents,
+  divider,
+  onPlayAgain,
+  rematchBusy,
+}: {
+  log: GameLog;
+  profile: Profile;
+  opponents: Record<string, OpponentRecord>;
+  divider: boolean;
+  onPlayAgain: () => void;
+  rematchBusy: boolean;
+}) {
   const opp = resolveOpponent(log, opponents);
-  const share = boardShareLabel(log, profile.username, opp.name);
-  return share ? `${base} · ${share}` : base;
+  const share = boardSharePercents(log);
+  const meName = displayUsername(profile.username);
+  const youWon = log.mode === "competitive" && log.won && !log.tied;
+  const theyWon = log.mode === "competitive" && !log.won && !log.tied;
+
+  return (
+    <div
+      className={`px-4 py-4 ${
+        divider ? "border-b border-white/70" : ""
+      }`}
+    >
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <ModeBadge log={log} />
+        <span className="text-xs font-semibold text-[var(--muted)]">
+          {DIFFICULTY_LABELS[log.difficulty]} · {outcomeText(log)}
+        </span>
+      </div>
+
+      <div className="flex max-w-[17rem] items-start gap-3">
+        <PlayerColumn
+          dogId={profile.dogId}
+          username={meName}
+          percent={share?.mine ?? null}
+          crowned={youWon}
+        />
+        <span className="pt-7 text-[11px] font-bold uppercase tracking-wide text-[var(--muted)]">
+          {log.mode === "coop" ? "with" : "vs"}
+        </span>
+        <PlayerColumn
+          dogId={opp.dogId as DogId}
+          username={opp.name}
+          percent={share?.theirs ?? null}
+          crowned={theyWon}
+        />
+      </div>
+
+      <div className="mt-3 flex items-center justify-between border-t border-white/60 pt-2.5">
+        <span className="text-xs font-semibold text-[var(--muted)]">
+          {formatWhen(log.t)}
+        </span>
+        <FriendPillButton variant="neutral" onClick={onPlayAgain}>
+          {rematchBusy ? "…" : "Again"}
+        </FriendPillButton>
+      </div>
+    </div>
+  );
+}
+
+function SoloHistoryRow({
+  log,
+  profile,
+  divider,
+}: {
+  log: GameLog;
+  profile: Profile;
+  divider: boolean;
+}) {
+  const meName = displayUsername(profile.username);
+
+  return (
+    <FriendListRow
+      divider={divider}
+      avatar={<DogAvatar dogId={profile.dogId} size={44} />}
+      primary={
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[15px] font-bold text-[var(--foreground)]">
+            @{meName}
+          </span>
+          <ModeBadge log={log} />
+        </div>
+      }
+      secondary={`${outcomeText(log)} · ${DIFFICULTY_LABELS[log.difficulty]}`}
+      action={
+        <span className="text-[11px] font-semibold text-[var(--muted)]">
+          {formatWhen(log.t)}
+        </span>
+      }
+    />
+  );
 }
 
 function HistoryRow({
@@ -150,50 +244,20 @@ function HistoryRow({
   onPlayAgain: (log: GameLog) => void;
   rematchBusy: boolean;
 }) {
-  const opp = log.mode === "solo" ? null : resolveOpponent(log, opponents);
-  const accent = modeAccent(log.mode);
-  const multi = log.mode !== "solo";
+  if (log.mode === "solo") {
+    return (
+      <SoloHistoryRow log={log} profile={profile} divider={divider} />
+    );
+  }
 
   return (
-    <FriendListRow
+    <MultiplayerHistoryRow
+      log={log}
+      profile={profile}
+      opponents={opponents}
       divider={divider}
-      avatar={
-        <div className="flex shrink-0 items-center -space-x-2">
-          <DogAvatar dogId={profile.dogId} size={44} />
-          {opp && (
-            <div className="rounded-full ring-2 ring-white">
-              <DogAvatar dogId={opp.dogId as DogId} size={44} />
-            </div>
-          )}
-        </div>
-      }
-      primary={
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <OpponentLine me={profile.username} log={log} opponents={opponents} />
-          <span
-            className="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
-            style={{ backgroundColor: accent }}
-          >
-            {log.mode === "solo" ? "Solo" : GAME_MODE_LABELS[log.mode]}
-          </span>
-        </div>
-      }
-      secondary={secondaryLine(log, profile, opponents)}
-      action={
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
-          {multi && (
-            <FriendPillButton
-              variant="primary"
-              onClick={() => onPlayAgain(log)}
-            >
-              {rematchBusy ? "…" : "Again"}
-            </FriendPillButton>
-          )}
-          <span className="text-[11px] font-semibold text-[var(--muted)]">
-            {formatWhen(log.t)}
-          </span>
-        </div>
-      }
+      onPlayAgain={() => onPlayAgain(log)}
+      rematchBusy={rematchBusy}
     />
   );
 }
