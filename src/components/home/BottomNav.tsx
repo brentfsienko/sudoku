@@ -22,11 +22,8 @@ type Props = {
 
 export function BottomNav({ active, onChange }: Props) {
   return (
-    <nav
-      className="mt-auto w-full shrink-0 border-t border-[var(--border)] bg-[var(--surface)] pt-2.5"
-      style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom, 0px))" }}
-    >
-      <div className="mx-auto flex max-w-md items-stretch justify-around pb-2">
+    <nav className="mt-auto w-full shrink-0 border-t border-[var(--border)] bg-[var(--surface)]">
+      <div className="mx-auto flex max-w-md items-stretch justify-around pt-2.5 pb-2">
         {TABS.map(({ id, label, Icon }) => {
           const isActive = active === id;
           return (
@@ -59,6 +56,11 @@ export function BottomNav({ active, onChange }: Props) {
           );
         })}
       </div>
+      <div
+        aria-hidden
+        className="bg-[var(--surface)]"
+        style={{ height: "env(safe-area-inset-bottom, 0px)" }}
+      />
     </nav>
   );
 }

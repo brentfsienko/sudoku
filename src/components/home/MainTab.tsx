@@ -80,17 +80,6 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   const streak = data.solo.streak;
   const bones = data.bones ?? 0;
 
-  useEffect(() => {
-    const prevHtml = document.documentElement.style.backgroundColor;
-    const prevBody = document.body.style.backgroundColor;
-    document.documentElement.style.backgroundColor = ACCENT;
-    document.body.style.backgroundColor = ACCENT;
-    return () => {
-      document.documentElement.style.backgroundColor = prevHtml;
-      document.body.style.backgroundColor = prevBody;
-    };
-  }, []);
-
   const sheetMotion = {
     transform: `translateY(${offset}px)`,
     transition: pulling ? "none" : "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
@@ -150,69 +139,73 @@ export function MainTab({ data, userData, onSignIn }: Props) {
         <PlayTabHeader />
       </header>
 
-      <div
-        ref={sheetRef}
-        className="relative z-20 flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto overscroll-y-contain"
-      >
+      <div className="relative z-20 flex min-h-0 flex-1 flex-col">
         <div
-          className="relative flex min-h-full flex-col"
-          style={{ ...sheetMotion, paddingTop: PLAY_HEADER_HEIGHT }}
+          ref={sheetRef}
+          className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain"
         >
-          {/* Dog saddle — sheet edge only; no negative margin into title zone */}
-          <div className="relative h-[3.25rem] shrink-0">
-            <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
-              <AppDogIcon size={128} />
-            </div>
-          </div>
-
-          <div className="relative flex min-h-0 flex-1 flex-col">
-            <div className="pointer-events-none absolute right-3 top-0 z-50 -translate-y-1/2 sm:right-5">
-              <StreakBonePill
-                streak={streak}
-                bones={bones}
-                className="pointer-events-auto"
-              />
+          <div
+            className="relative flex flex-col"
+            style={{ ...sheetMotion, paddingTop: PLAY_HEADER_HEIGHT }}
+          >
+            {/* Dog saddle — sheet edge only; no negative margin into title zone */}
+            <div className="relative h-[3.25rem] shrink-0">
+              <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
+                <AppDogIcon size={128} />
+              </div>
             </div>
 
-            <div className="relative flex min-h-0 flex-1 flex-col rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
-              <ActiveSoloGames
-                profile={data.profile}
-                userEmail={userData.user?.email}
-              />
-
-              <section className="mb-5">
-                <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
-                <div className="flex flex-col gap-2">
-                  <PlayRow
-                    icon={<PawIcon width={24} height={24} />}
-                    title="Solo play"
-                    subtitle="Pick difficulty when you start"
-                    onClick={openSoloSetup}
-                  />
-                  <PlayRow
-                    icon={<UsersIcon width={24} height={24} />}
-                    title="Multiplayer"
-                    subtitle="Friends, search, and invites"
-                    onClick={() => setStartSheetOpen(true)}
-                  />
-                </div>
-              </section>
-
-              <div className="mb-5">
-                <FactGuessCard />
+            <div className="relative">
+              <div className="pointer-events-none absolute right-3 top-0 z-50 -translate-y-1/2 sm:right-5">
+                <StreakBonePill
+                  streak={streak}
+                  bones={bones}
+                  className="pointer-events-auto"
+                />
               </div>
 
-              <GameHistoryList
-                history={data.history}
-                profile={data.profile}
-                opponents={data.multi.opponents}
-                userId={userData.user?.id ?? null}
-                userEmail={userData.user?.email}
-                authConfigured={userData.authConfigured}
-              />
+              <div className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]">
+                <ActiveSoloGames
+                  profile={data.profile}
+                  userEmail={userData.user?.email}
+                />
+
+                <section className="mb-5">
+                  <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
+                  <div className="flex flex-col gap-2">
+                    <PlayRow
+                      icon={<PawIcon width={24} height={24} />}
+                      title="Solo play"
+                      subtitle="Pick difficulty when you start"
+                      onClick={openSoloSetup}
+                    />
+                    <PlayRow
+                      icon={<UsersIcon width={24} height={24} />}
+                      title="Multiplayer"
+                      subtitle="Friends, search, and invites"
+                      onClick={() => setStartSheetOpen(true)}
+                    />
+                  </div>
+                </section>
+
+                <div className="mb-5">
+                  <FactGuessCard />
+                </div>
+
+                <GameHistoryList
+                  history={data.history}
+                  profile={data.profile}
+                  opponents={data.multi.opponents}
+                  userId={userData.user?.id ?? null}
+                  userEmail={userData.user?.email}
+                  authConfigured={userData.authConfigured}
+                />
+              </div>
             </div>
           </div>
         </div>
+        {/* Fills gap above nav on mobile (min-h-full in scroll is unreliable on iOS) */}
+        <div className="min-h-0 flex-1 shrink-0 bg-white" aria-hidden />
       </div>
 
       <StartGameSheet
