@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { SignInGate } from "@/components/auth/SignInGate";
+import { AppFrame } from "@/components/layout/AppFrame";
 import { MainTab } from "@/components/home/MainTab";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
@@ -76,8 +77,8 @@ export default function Home() {
         userData={userData}
         onClose={() => setSignInGateOpen(false)}
       />
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--accent)]">
-      <main className="flex min-h-0 flex-1 flex-col">
+    <AppFrame variant={tab === "main" ? "accent" : "background"}>
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {tab === "main" && (
           <MainTab
             data={statsForMe}
@@ -123,7 +124,7 @@ export default function Home() {
       </main>
 
       <BottomNav active={tab} onChange={setTab} />
-    </div>
+    </AppFrame>
     </>
   );
 }
