@@ -20,6 +20,26 @@ function niceMax(value: number): number {
   return step * pow;
 }
 
+/** Y-axis max and tick values — integer metrics never show duplicate rounded labels. */
+function chartAxis(
+  dataMax: number,
+  metric: Metric,
+): { max: number; ticks: number[] } {
+  if (metric === "time") {
+    const max = niceMax(dataMax);
+    return { max, ticks: [0, max / 2, max] };
+  }
+
+  let max: number;
+  if (dataMax <= 0) max = 2;
+  else if (dataMax <= 2) max = 2;
+  else max = niceMax(dataMax);
+
+  const mid = Math.max(1, Math.round(max / 2));
+  const ticks = [...new Set([0, mid, max])].sort((a, b) => a - b);
+  return { max, ticks };
+}
+
 export function ProgressChart({
   series,
   starts,
@@ -35,7 +55,8 @@ export function ProgressChart({
   const n = series.length;
   const plotW = W - PAD.left - PAD.right;
   const plotH = H - PAD.top - PAD.bottom;
-  const max = niceMax(Math.max(...series, 0));
+  const dataMax = Math.max(...series, 0);
+  const { max, ticks } = chartAxis(dataMax, metric);
 
   const x = (i: number) => PAD.left + (n <= 1 ? 0 : (i / (n - 1)) * plotW);
   const y = (v: number) => PAD.top + plotH * (1 - v / max);
@@ -65,10 +86,10 @@ export function ProgressChart({
       </defs>
 
       {/* gridlines + right-side value labels */}
-      {[1, 0.5, 0].map((frac) => {
-        const gy = PAD.top + plotH * (1 - frac);
+      {ticks.map((tick) => {
+        const gy = y(tick);
         return (
-          <g key={frac}>
+          <g key={tick}>
             <line
               x1={PAD.left}
               y1={gy}
@@ -76,7 +97,7 @@ export function ProgressChart({
               y2={gy}
               stroke="var(--border)"
               strokeWidth={1}
-              strokeDasharray={frac === 0 ? undefined : "3 4"}
+              strokeDasharray={tick === 0 ? undefined : "3 4"}
             />
             <text
               x={W - PAD.right + 5}
@@ -85,7 +106,7 @@ export function ProgressChart({
               fill="var(--muted)"
               className="font-display"
             >
-              {formatMetric(max * frac, metric)}
+              {formatMetric(tick, metric)}
             </text>
           </g>
         );
