@@ -221,7 +221,7 @@ function Lobby({
       typeof window !== "undefined" ? `${window.location.origin}/game/${code}` : "";
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Floof Sudoku", text: `Join my game! Code: ${code}`, url });
+        await navigator.share({ title: "Sudogku", text: `Join my game! Code: ${code}`, url });
         return;
       }
       await navigator.clipboard.writeText(url);

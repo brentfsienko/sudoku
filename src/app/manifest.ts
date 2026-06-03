@@ -3,14 +3,14 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Floof Sudoku",
-    short_name: "Floof",
-    description: "A floofy dog-themed multiplayer Sudoku.",
+    name: "Sudogku",
+    short_name: "Sudogku",
+    description: "A dog-themed multiplayer Sudoku.",
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: "#fdf6ec",
-    theme_color: "#fdf6ec",
+    background_color: "#7ec4cf",
+    theme_color: "#7ec4cf",
     orientation: "portrait",
     icons: [
       {

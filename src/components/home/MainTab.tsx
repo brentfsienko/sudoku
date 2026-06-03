@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AppBrandTitle } from "@/components/AppBrandTitle";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
 import {
   GameSetupSheet,
@@ -17,6 +18,7 @@ import { newRoomCode } from "@/lib/game/room";
 import { usePullableSheet } from "@/lib/hooks/usePullableSheet";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { UserData } from "@/lib/stats/types";
+import type { DogId } from "@/lib/theme/dogs";
 
 type Props = {
   data: UserData;
@@ -77,70 +79,58 @@ export function MainTab({ data, userData, onSignIn }: Props) {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      {/* Fixed blue header — title only */}
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
+      {/* Blue fills behind notch via parent bg; content inset below safe area */}
       <header
-        className="relative shrink-0 px-5"
-        style={{
-          paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)",
-          paddingBottom: "2.75rem",
-          backgroundColor: "var(--accent)",
-        }}
+        className="relative z-20 shrink-0 px-5 pb-12"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}
       >
-        <h1 className="font-serif-title text-[2.5rem] leading-none text-white">
-          Floof Sudoku
-        </h1>
-
-        {/* Hero pills — half on blue, half on white */}
-        <div className="absolute left-5 right-5 bottom-0 flex translate-y-1/2 items-stretch gap-2.5">
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-2.5 py-2 shadow-md ring-1 ring-black/[0.04]">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)]">
-              <span className="text-[var(--primary)]">
-                <FlameIcon width={18} height={18} />
-              </span>
-            </div>
-            <div className="min-w-0 leading-none">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                Streak
-              </p>
-              <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
-                {streak} {streak === 1 ? "day" : "days"}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setStartSheetOpen(true)}
-            className="flex w-[6.5rem] shrink-0 flex-col justify-between rounded-[1.35rem] bg-[var(--foreground)] px-2.5 py-2.5 text-left shadow-md transition active:scale-[0.98]"
-          >
-            <span className="font-display text-[15px] font-extrabold leading-tight text-white">
-              Start
-              <br />
-              game
-            </span>
-            <span className="self-end rounded-lg bg-white/15 p-0.5 text-white">
-              <PlusIcon width={16} height={16} />
-            </span>
-          </button>
-        </div>
+        <AppBrandTitle dogId={data.profile.dogId as DogId} light />
       </header>
 
-      {/* Pullable white sheet — drags down; header stays fixed */}
+      {/* Hero pills sit above the white sheet */}
+      <div className="relative z-30 mx-5 -mt-8 mb-[-1.65rem] flex items-stretch gap-2.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-2.5 py-2 shadow-md ring-1 ring-black/[0.04]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)]">
+            <span className="text-[var(--primary)]">
+              <FlameIcon width={18} height={18} />
+            </span>
+          </div>
+          <div className="min-w-0 leading-none">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+              Streak
+            </p>
+            <p className="font-display text-lg font-extrabold text-[var(--foreground)]">
+              {streak} {streak === 1 ? "day" : "days"}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setStartSheetOpen(true)}
+          className="flex w-[6.5rem] shrink-0 flex-col justify-between rounded-[1.35rem] bg-[var(--foreground)] px-2.5 py-2.5 text-left shadow-md transition active:scale-[0.98]"
+        >
+          <span className="font-display text-[15px] font-extrabold leading-tight text-white">
+            Start
+            <br />
+            game
+          </span>
+          <span className="self-end rounded-lg bg-white/15 p-0.5 text-white">
+            <PlusIcon width={16} height={16} />
+          </span>
+        </button>
+      </div>
+
+      {/* White sheet — below hero pills in stacking order */}
       <div
         ref={sheetRef}
-        className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
+        className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain rounded-t-[28px] bg-white px-5 pb-4 pt-10 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
         style={{
-          paddingTop: "2.75rem",
           transform: `translateY(${offset}px)`,
           transition: pulling ? "none" : "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
       >
-        <div
-          className="mx-auto mb-3 h-1 w-10 shrink-0 rounded-full bg-[var(--border)] md:hidden"
-          aria-hidden
-        />
-
         <section className="mb-5">
           <h2 className="font-serif-title mb-2 text-lg text-[var(--foreground)]">
             Play against the computer

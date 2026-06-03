@@ -55,11 +55,11 @@ export function AddFriendSheet({
   }
 
   async function inviteFriend() {
-    const handle = myUsername ? `@${myUsername}` : "Floof Sudoku";
-    const text = `Play Floof Sudoku with me! Find me as ${handle} — ${window.location.origin}`;
+    const handle = myUsername ? `@${myUsername}` : "Sudogku";
+    const text = `Play Sudogku with me! Find me as ${handle} — ${window.location.origin}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Floof Sudoku", text, url: window.location.origin });
+        await navigator.share({ title: "Sudogku", text, url: window.location.origin });
         return;
       }
     } catch {

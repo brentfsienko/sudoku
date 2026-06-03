@@ -46,7 +46,7 @@ export function ResetPasswordForm() {
           Password updated
         </p>
         <p className="text-sm leading-relaxed text-[var(--muted)]">
-          Open <span className="font-bold text-[var(--foreground)]">Floof Sudoku</span>{" "}
+          Open <span className="font-bold text-[var(--foreground)]">Sudogku</span>{" "}
           from your home screen, tap Sign in, and use your email with your new password.
         </p>
         <p className="text-xs text-[var(--muted)]">

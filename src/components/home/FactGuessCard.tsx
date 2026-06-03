@@ -153,7 +153,7 @@ function FactGuessBody({
       {globalPct && (
         <div className="rounded-2xl bg-white/70 px-3 py-2.5 ring-1 ring-[var(--border)]/60">
           <p className="mb-1.5 text-center text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-            Floof players worldwide
+            Sudogku players worldwide
           </p>
           <div className="flex h-1.5 overflow-hidden rounded-full bg-[var(--list-panel)]">
             <div

@@ -22,12 +22,12 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Floof Sudoku",
-  description: "A floofy dog-themed multiplayer Sudoku. Play solo or with a friend.",
-  applicationName: "Floof Sudoku",
+  title: "Sudogku",
+  description: "A dog-themed multiplayer Sudoku. Play solo or with a friend.",
+  applicationName: "Sudogku",
   appleWebApp: {
     capable: true,
-    title: "Floof Sudoku",
+    title: "Sudogku",
     statusBarStyle: "default",
   },
   formatDetection: {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fdf6ec",
+  themeColor: "#7ec4cf",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
