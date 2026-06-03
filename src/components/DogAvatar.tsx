@@ -10,9 +10,11 @@ type Props = {
   username?: string;
   userData?: UserData;
   preview?: boolean;
-  /** Crop to head and blend out the cream tile (history, lists). */
+  /** Slightly zoomed head in a circle (game history, etc.). */
   headCrop?: boolean;
 };
+
+const HEAD_ZOOM = 1.28;
 
 export function DogAvatar({
   dogId,
@@ -32,17 +34,18 @@ export function DogAvatar({
 
   const img = headCrop ? (
     <span
-      className="relative block overflow-hidden rounded-full"
+      className="relative block overflow-hidden rounded-full bg-[var(--surface-soft)]"
       style={{ width: size, height: size }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={dog.image}
         alt=""
-        className={`pixel-dog-head pixel-dog-knockout absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${className ?? ""}`}
+        className={`absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 object-cover ${className ?? ""}`}
         style={{
-          width: size * 1.85,
-          height: size * 1.85,
+          width: size * HEAD_ZOOM,
+          height: size * HEAD_ZOOM,
+          imageRendering: "pixelated",
         }}
         aria-hidden
       />
@@ -54,7 +57,8 @@ export function DogAvatar({
       alt=""
       width={size}
       height={size}
-      className={`block object-cover pixel-dog-knockout ${headCrop ? "rounded-full" : "rounded-[22%]"} ${className ?? ""}`}
+      className={`block rounded-[22%] object-cover ${className ?? ""}`}
+      style={{ imageRendering: "pixelated" }}
       aria-hidden
     />
   );

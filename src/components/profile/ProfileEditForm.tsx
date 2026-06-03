@@ -33,7 +33,7 @@ type Props = {
   onDone: () => void;
 };
 
-const PICKER_DOG_SIZE = 58;
+const PICKER_DOG_SIZE = 76;
 
 function DogPickerButton({
   dogId,

@@ -143,7 +143,7 @@ function PlayerChip({
         <DogAvatar
           dogId={dogId}
           username={username}
-          size={44}
+          size={38}
           headCrop
         />
       </div>
@@ -244,7 +244,7 @@ function SoloHistoryRow({
       <DogAvatar
         dogId={dogIdForUsername(meName, profile.dogId)}
         username={meName}
-        size={44}
+        size={38}
         headCrop
       />
       <div className="min-w-0 flex-1">

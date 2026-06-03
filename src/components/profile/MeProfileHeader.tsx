@@ -112,7 +112,6 @@ export function MeProfileHeader({
               ringColor="#7ec4cf"
               username={username}
               userData={statsData}
-              headCrop
             />
             <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[var(--surface-soft)] text-[var(--muted)]">
               <PencilIcon width={14} height={14} />

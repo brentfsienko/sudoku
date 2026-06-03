@@ -13,11 +13,9 @@ export function StreakBonePill({ streak, bones, className }: Props) {
       className={`flex shrink-0 items-center rounded-full bg-[var(--foreground)] py-2 pl-2 pr-3 shadow-md ${className ?? ""}`}
     >
       <div className="flex min-w-0 items-center gap-2 pr-2.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
-          <span className="text-[var(--primary)]">
-            <FlameIcon width={18} height={18} />
-          </span>
-        </div>
+        <span className="shrink-0 text-[var(--primary)]">
+          <FlameIcon width={18} height={18} />
+        </span>
         <div className="leading-none">
           <p className="text-[10px] font-bold uppercase tracking-wide text-white/65">
             Streak
