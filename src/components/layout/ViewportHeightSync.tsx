@@ -1,14 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
+import { isStandalonePwa, measureAppHeight } from "@/lib/layout/standalone";
 
-/** Sync --app-height to window.innerHeight (fixes iOS home-screen PWA gap below fixed UI). */
+/** Sync viewport sizing; iOS home-screen uses full-bleed CSS instead of --app-height. */
 export function ViewportHeightSync() {
   useEffect(() => {
     const root = document.documentElement;
 
     function update() {
-      root.style.setProperty("--app-height", `${window.innerHeight}px`);
+      const standalone = isStandalonePwa();
+      root.classList.toggle("ios-standalone", standalone);
+      if (standalone) {
+        root.style.removeProperty("--app-height");
+        return;
+      }
+      root.style.setProperty("--app-height", `${measureAppHeight()}px`);
     }
 
     update();

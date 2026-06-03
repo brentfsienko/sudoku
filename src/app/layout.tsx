@@ -76,7 +76,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){document.documentElement.style.setProperty('--app-height',window.innerHeight+'px')})();",
+              "(function(){var d=document.documentElement,s=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;if(s){d.classList.add('ios-standalone');}else{d.style.setProperty('--app-height',Math.max(window.innerHeight,document.documentElement.clientHeight)+'px');}})();",
           }}
         />
         <ViewportHeightSync />

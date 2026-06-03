@@ -75,7 +75,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Mobile/PWA: innerHeight via --app-height (see ViewportHeightSync) */
+/* Mobile browser: innerHeight via --app-height (see ViewportHeightSync) */
 @media (max-width: 767px) {
   html {
     height: -webkit-fill-available;
@@ -85,7 +85,6 @@ body {
     background-color: var(--surface);
   }
 
-  /* Sized to window.innerHeight — eliminates gap under nav in iOS standalone */
   .app-viewport-root {
     position: fixed;
     top: 0;
@@ -109,18 +108,42 @@ body {
     width: 100%;
   }
 
-  /* In-flow dock — tab row matches desktop; ::after fills home-indicator zone */
   .bottom-nav-dock {
     flex-shrink: 0;
     width: 100%;
     background-color: var(--surface);
   }
+}
 
-  .bottom-nav-dock::after {
-    content: "";
-    display: block;
-    height: env(safe-area-inset-bottom, 0px);
+/*
+ * iPhone Add to Home Screen: innerHeight is shorter than the painted screen,
+ * which leaves a white band under the app. Fill the real viewport with inset:0.
+ */
+@media (max-width: 767px) {
+  html.ios-standalone {
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+
+  html.ios-standalone body {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    overflow: hidden;
     background-color: var(--surface);
+  }
+
+  html.ios-standalone .app-viewport-root {
+    position: absolute;
+    inset: 0;
+    height: auto !important;
+    max-height: none;
+  }
+
+  html.ios-standalone .bottom-nav-dock {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
