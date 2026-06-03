@@ -3,7 +3,6 @@ import { normalizeUsername, validateUsername } from "@/lib/friends/username";
 import {
   defaultProfileDogId,
   isExclusiveDogId,
-  isHoneyUser,
   resolveDogId,
   type DogId,
 } from "@/lib/theme/dogs";
@@ -23,10 +22,7 @@ function coerceDogId(
   if (!raw) raw = defaultProfileDogId({ username, email });
   if (raw === "party") raw = "pug";
 
-  const resolved = resolveDogId(raw, { username });
-  if (resolved === "bee" && !isHoneyUser({ username, email })) {
-    return "golden";
-  }
+  const resolved = resolveDogId(raw, { username, email });
   if (
     isExclusiveDogId(resolved) &&
     userData &&

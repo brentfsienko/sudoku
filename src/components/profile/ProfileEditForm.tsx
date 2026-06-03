@@ -14,7 +14,7 @@ import {
   EXCLUSIVE_DOGS,
   STANDARD_DOGS,
   isExclusiveDogId,
-  isHoneyUser,
+  canUseBeePup,
   type DogId,
   type ExclusiveDogId,
 } from "@/lib/theme/dogs";
@@ -106,7 +106,7 @@ export function ProfileEditForm({
   const displayUsername = normalizeUsername(
     currentUsername ?? profile.username,
   );
-  const honeyProfile = isHoneyUser({
+  const honeyProfile = canUseBeePup({
     username: displayUsername,
     email: userEmail,
   });

@@ -84,6 +84,13 @@ export function isHoneyUser(opts?: {
   return normalizeUsername(opts?.username ?? "") === "honey";
 }
 
+/** Only honey / brentfsienko@gmail.com may equip or pick the bee pup. */
+export const canUseBeePup = isHoneyUser;
+
+export function isBeeDogId(id: string): id is BeeDogId {
+  return id === "bee";
+}
+
 function usernameDogOverride(username: string): DogId | null {
   return USERNAME_DOG_OVERRIDES[normalizeUsername(username)] ?? null;
 }
@@ -101,14 +108,17 @@ export function defaultProfileDogId(opts?: {
 export function dogIdForUsername(
   username: string,
   storedDogId?: string | null,
+  email?: string | null,
 ): DogId {
-  const override = usernameDogOverride(username);
-  if (override) return override;
   const u = normalizeUsername(username);
+  const override = usernameDogOverride(u);
+  if (override) return override;
   const id = storedDogId?.trim() || "golden";
   if (id === "party") return "pug";
-  if (id === "bee") return "bee";
-  return resolveDogId(id, { username: u });
+  if (id === "bee") {
+    return canUseBeePup({ username: u, email }) ? "bee" : "golden";
+  }
+  return resolveDogId(id, { username: u, email });
 }
 
 export function dogById(id: string | null | undefined): Dog {
@@ -123,7 +133,7 @@ export function isExclusiveDogId(id: string): id is ExclusiveDogId {
 
 export function resolveDogId(
   dogId: string | null | undefined,
-  opts?: { username?: string },
+  opts?: { username?: string; email?: string | null },
 ): DogId {
   const override = usernameDogOverride(opts?.username ?? "");
   if (override) return override;
@@ -131,7 +141,9 @@ export function resolveDogId(
   let id = (dogId?.trim() || "golden") as DogId;
   if (LEGACY_DOG_MAP[id]) id = LEGACY_DOG_MAP[id];
 
-  if (id === "bee") return "golden";
+  if (id === "bee") {
+    return canUseBeePup(opts) ? "bee" : "golden";
+  }
 
   if (!DOG_IDS.includes(id)) return "golden";
 

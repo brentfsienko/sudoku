@@ -43,11 +43,20 @@ export function useUserData(): UseUserData {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const dataRef = useRef<UserData | null>(null);
+  const userRef = useRef<AuthUser | null>(null);
 
   const setDataBoth = useCallback((next: UserData) => {
     dataRef.current = next;
     setData(next);
   }, []);
+
+  const withOwnerProfile = useCallback(
+    (data: UserData, email?: string | null): UserData => ({
+      ...data,
+      profile: coerceProfile(data.profile, data, email ?? userRef.current?.email),
+    }),
+    [],
+  );
 
   const refresh = useCallback(async () => {
     const d = await loadUserData();
@@ -65,9 +74,10 @@ export function useUserData(): UseUserData {
           const { data: sessionData } = await sb.auth.getSession();
           const u = sessionData.session?.user;
           authUser = u ? { id: u.id, email: u.email ?? null } : null;
+          userRef.current = authUser;
           if (active) setUser(authUser);
         }
-        const d = await loadUserData();
+        const d = withOwnerProfile(await loadUserData(), authUser?.email);
         if (active) setDataBoth(d);
         if (authUser && active) {
           const synced = await syncPublicProfile(authUser.id, d.profile);
@@ -94,7 +104,9 @@ export function useUserData(): UseUserData {
     const sub = sb?.auth.onAuthStateChange((event, session) => {
       if (!active) return;
       const u = session?.user;
-      setUser(u ? { id: u.id, email: u.email ?? null } : null);
+      const authUser = u ? { id: u.id, email: u.email ?? null } : null;
+      userRef.current = authUser;
+      setUser(authUser);
 
       // Never await heavy I/O in the auth listener — it can block updateUser().
       void (async () => {
@@ -106,7 +118,7 @@ export function useUserData(): UseUserData {
           if (event === "PASSWORD_RECOVERY" || event === "USER_UPDATED") {
             return;
           }
-          const d = await loadUserData();
+          const d = withOwnerProfile(await loadUserData(), u.email ?? null);
           if (!active) return;
           setDataBoth(d);
           const synced = await syncPublicProfile(u.id, d.profile);
@@ -147,6 +159,7 @@ export function useUserData(): UseUserData {
         profile: coerceProfile(
           { ...current.profile, ...next },
           { ...current, profile: { ...current.profile, ...next } },
+          userRef.current?.email,
         ),
       };
       setDataBoth(merged);
@@ -189,6 +202,7 @@ export function useUserData(): UseUserData {
               : current.bones - cost,
             ownedExclusiveDogs: nextOwned,
           },
+          userRef.current?.email,
         ),
       };
       setDataBoth(merged);

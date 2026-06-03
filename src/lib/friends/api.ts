@@ -4,6 +4,7 @@ import { getSupabase } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/stats/types";
 import type { Difficulty, GameMode } from "@/lib/game/types";
 import type { Friend, FriendRequest, GameInvite, PublicProfile } from "./types";
+import { resolveDogId } from "@/lib/theme/dogs";
 import { normalizeUsername, validateUsername } from "./username";
 
 type ProfileRow = {
@@ -17,7 +18,7 @@ function mapProfile(row: ProfileRow): PublicProfile {
   return {
     userId: row.user_id,
     username: row.username,
-    dogId: row.dog_id,
+    dogId: resolveDogId(row.dog_id, { username: row.username }),
   };
 }
 

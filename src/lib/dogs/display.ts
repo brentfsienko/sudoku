@@ -1,7 +1,7 @@
 import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import {
+  canUseBeePup,
   isExclusiveDogId,
-  isHoneyUser,
   resolveDogId,
   type DogId,
 } from "@/lib/theme/dogs";
@@ -16,10 +16,12 @@ export function displayDogId(
     userData?: UserData;
   },
 ): DogId {
-  const email = opts?.email ?? undefined;
-  const resolved = resolveDogId(dogId, { username: opts?.username });
+  const resolved = resolveDogId(dogId, {
+    username: opts?.username,
+    email: opts?.email,
+  });
 
-  if (resolved === "bee" && !isHoneyUser({ username: opts?.username, email })) {
+  if (resolved === "bee" && !canUseBeePup(opts)) {
     return "golden";
   }
 
