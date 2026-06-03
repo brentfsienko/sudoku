@@ -182,6 +182,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
             profile={data.profile}
             opponents={data.multi.opponents}
             userId={userData.user?.id ?? null}
+            userEmail={userData.user?.email}
             authConfigured={userData.authConfigured}
           />
           </div>

@@ -15,11 +15,12 @@ function coerceDogId(
   dogId: string | undefined,
   username: string,
   userData?: UserData,
+  email?: string | null,
 ): DogId {
   let raw = dogId;
   if (raw === "party") raw = "pug";
 
-  const resolved = resolveDogId(raw, { username });
+  const resolved = resolveDogId(raw, { username, email });
   if (
     isExclusiveDogId(resolved) &&
     userData &&
@@ -34,6 +35,7 @@ function coerceDogId(
 export function coerceProfile(
   raw?: Partial<Profile> & { name?: string; dogId?: string },
   userData?: UserData,
+  email?: string | null,
 ): Profile {
   let username =
     raw?.username?.trim() ||
@@ -47,6 +49,6 @@ export function coerceProfile(
 
   return {
     username,
-    dogId: coerceDogId(raw?.dogId, username, userData),
+    dogId: coerceDogId(raw?.dogId, username, userData, email),
   };
 }

@@ -13,7 +13,10 @@ export type StandardDogId =
 
 export type ExclusiveDogId = "royal" | "hero" | "galaxy" | "party";
 
-export type DogId = StandardDogId | ExclusiveDogId;
+/** Owner-only pup (not sold in the bone shop). */
+export type BeeDogId = "bee";
+
+export type DogId = StandardDogId | ExclusiveDogId | BeeDogId;
 
 export type Dog = {
   id: DogId;
@@ -21,6 +24,8 @@ export type Dog = {
   image: string;
   exclusive?: boolean;
 };
+
+export const HONEY_EMAIL = "brentfsienko@gmail.com";
 
 export const STANDARD_DOGS: Dog[] = [
   { id: "golden", breed: "Golden Retriever", image: "/dogs/golden.png" },
@@ -46,9 +51,15 @@ export const EXCLUSIVE_DOGS: Dog[] = [
   },
 ];
 
+export const BEE_DOG: Dog = {
+  id: "bee",
+  breed: "Bee Pup",
+  image: "/dogs/bee.png",
+};
+
 export const DOGS: Dog[] = [...STANDARD_DOGS, ...EXCLUSIVE_DOGS];
 
-export const DOG_IDS: DogId[] = DOGS.map((d) => d.id);
+export const DOG_IDS: DogId[] = [...DOGS.map((d) => d.id), "bee"];
 
 export const STANDARD_DOG_IDS = STANDARD_DOGS.map((d) => d.id) as StandardDogId[];
 
@@ -64,20 +75,40 @@ const USERNAME_DOG_OVERRIDES: Record<string, DogId> = {
   rimboy: "pug",
 };
 
+export function isHoneyUser(opts?: {
+  username?: string;
+  email?: string | null;
+}): boolean {
+  const e = opts?.email?.trim().toLowerCase();
+  if (e === HONEY_EMAIL) return true;
+  return normalizeUsername(opts?.username ?? "") === "honey";
+}
+
+function profileDogOverride(opts?: {
+  username?: string;
+  email?: string | null;
+}): DogId | null {
+  if (isHoneyUser(opts)) return "bee";
+  const u = normalizeUsername(opts?.username ?? "");
+  return USERNAME_DOG_OVERRIDES[u] ?? null;
+}
+
 /** Profile dog for a user, including fixed usernames and party → pug migration. */
 export function dogIdForUsername(
   username: string,
   storedDogId?: string | null,
+  email?: string | null,
 ): DogId {
-  const u = normalizeUsername(username);
-  const override = USERNAME_DOG_OVERRIDES[u];
+  const override = profileDogOverride({ username, email });
   if (override) return override;
+  const u = normalizeUsername(username);
   const id = storedDogId?.trim() || "golden";
   if (id === "party") return "pug";
-  return resolveDogId(id, { username: u });
+  return resolveDogId(id, { username: u, email });
 }
 
 export function dogById(id: string | null | undefined): Dog {
+  if (id === "bee") return BEE_DOG;
   const resolved = resolveDogId(id);
   return DOGS.find((d) => d.id === resolved) ?? STANDARD_DOGS[0];
 }
@@ -88,14 +119,15 @@ export function isExclusiveDogId(id: string): id is ExclusiveDogId {
 
 export function resolveDogId(
   dogId: string | null | undefined,
-  opts?: { username?: string },
+  opts?: { username?: string; email?: string | null },
 ): DogId {
-  const username = normalizeUsername(opts?.username ?? "");
-  const override = USERNAME_DOG_OVERRIDES[username];
+  const override = profileDogOverride(opts);
   if (override) return override;
 
   let id = (dogId?.trim() || "golden") as DogId;
   if (LEGACY_DOG_MAP[id]) id = LEGACY_DOG_MAP[id];
+
+  if (id === "bee") return "golden";
 
   if (!DOG_IDS.includes(id)) return "golden";
 

@@ -111,6 +111,7 @@ export function MeProfileHeader({
               size={112}
               bare
               username={username}
+              email={userData.user?.email}
               userData={statsData}
             />
             <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[var(--surface-soft)] text-[var(--muted)]">
@@ -185,6 +186,7 @@ export function MeProfileHeader({
         <ProfileEditForm
           profile={profile}
           userData={statsData}
+          userEmail={userData.user?.email}
           currentUsername={friends.myProfile?.username ?? profile.username}
           userId={userData.user?.id ?? null}
           onSaveUsername={async (uname) => {

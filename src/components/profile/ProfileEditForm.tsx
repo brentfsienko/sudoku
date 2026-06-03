@@ -24,6 +24,7 @@ type Props = {
   profile: Profile;
   currentUsername: string | null;
   userId: string | null;
+  userEmail?: string | null;
   userData: UserData;
   onSaveUsername: (username: string) => Promise<{ ok: boolean; error?: string }>;
   onSaveDog: (dogId: DogId) => Promise<void>;
@@ -43,6 +44,7 @@ function DogPickerButton({
   cost,
   onSelect,
   username,
+  userEmail,
   userData,
 }: {
   dogId: DogId;
@@ -52,6 +54,7 @@ function DogPickerButton({
   cost?: number;
   onSelect: () => void;
   username: string;
+  userEmail?: string | null;
   userData: UserData;
 }) {
   const showCost = cost != null && !owned;
@@ -71,6 +74,7 @@ function DogPickerButton({
         size={PICKER_DOG_SIZE}
         bare
         username={username}
+        email={userEmail}
         userData={userData}
         preview={!owned && cost != null}
         className="block shrink-0"
@@ -95,6 +99,7 @@ export function ProfileEditForm({
   profile,
   currentUsername,
   userId,
+  userEmail,
   userData,
   onSaveUsername,
   onSaveDog,
@@ -116,6 +121,7 @@ export function ProfileEditForm({
   );
   const resolvedDogId = displayDogId(profile.dogId, {
     username: displayUsername,
+    email: userEmail,
     userData,
   });
   const bones = userData.bones ?? 0;
@@ -293,6 +299,7 @@ export function ProfileEditForm({
               owned
               onSelect={() => void handleDogPick(d.id)}
               username={displayUsername}
+              userEmail={userEmail}
               userData={userData}
             />
           ))}
@@ -315,6 +322,7 @@ export function ProfileEditForm({
                 cost={cost}
                 onSelect={() => void handleDogPick(d.id)}
                 username={displayUsername}
+                userEmail={userEmail}
                 userData={userData}
               />
             );

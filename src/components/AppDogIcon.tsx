@@ -1,6 +1,6 @@
 import { BRAND_DOG_IMAGE } from "@/lib/brand";
 
-/** Pixel golden dog head on accent header — cream tile knocked out via multiply. */
+/** Pixel golden dog head — Sudogku brand mark. */
 export function AppDogIcon({ size = 42 }: { size?: number }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -9,7 +9,7 @@ export function AppDogIcon({ size = 42 }: { size?: number }) {
       alt=""
       width={size}
       height={size}
-      className="block shrink-0 object-contain mix-blend-multiply"
+      className="block shrink-0 object-contain"
       style={{ imageRendering: "pixelated" }}
       aria-hidden
     />

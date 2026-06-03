@@ -23,6 +23,7 @@ type Props = {
   profile: Profile;
   opponents: MultiStats["opponents"];
   userId: string | null;
+  userEmail?: string | null;
   authConfigured: boolean;
 };
 
@@ -121,11 +122,13 @@ function RowActions({
 function PlayerChip({
   dogId,
   username,
+  email,
   percent,
   crowned,
 }: {
   dogId: DogId;
   username: string;
+  email?: string | null;
   percent?: number | null;
   crowned?: boolean;
 }) {
@@ -143,6 +146,7 @@ function PlayerChip({
         <DogAvatar
           dogId={dogId}
           username={username}
+          email={email}
           size={40}
           bare
         />
@@ -165,6 +169,7 @@ function MultiplayerHistoryRow({
   log,
   profile,
   opponents,
+  userEmail,
   divider,
   onPlayAgain,
   rematchBusy,
@@ -172,6 +177,7 @@ function MultiplayerHistoryRow({
   log: GameLog;
   profile: Profile;
   opponents: Record<string, OpponentRecord>;
+  userEmail?: string | null;
   divider: boolean;
   onPlayAgain: () => void;
   rematchBusy: boolean;
@@ -198,8 +204,9 @@ function MultiplayerHistoryRow({
         </div>
         <div className="flex items-center gap-1.5">
           <PlayerChip
-            dogId={dogIdForUsername(meName, profile.dogId)}
+            dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
             username={meName}
+            email={userEmail}
             percent={competitive ? (share?.mine ?? null) : undefined}
             crowned={youWon}
           />
@@ -227,10 +234,12 @@ function MultiplayerHistoryRow({
 function SoloHistoryRow({
   log,
   profile,
+  userEmail,
   divider,
 }: {
   log: GameLog;
   profile: Profile;
+  userEmail?: string | null;
   divider: boolean;
 }) {
   const meName = displayUsername(profile.username);
@@ -242,8 +251,9 @@ function SoloHistoryRow({
       }`}
     >
       <DogAvatar
-        dogId={dogIdForUsername(meName, profile.dogId)}
+        dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
         username={meName}
+        email={userEmail}
         size={40}
         bare
       />
@@ -267,6 +277,7 @@ function HistoryRow({
   log,
   profile,
   opponents,
+  userEmail,
   divider,
   onPlayAgain,
   rematchBusy,
@@ -274,13 +285,19 @@ function HistoryRow({
   log: GameLog;
   profile: Profile;
   opponents: Record<string, OpponentRecord>;
+  userEmail?: string | null;
   divider: boolean;
   onPlayAgain: (log: GameLog) => void;
   rematchBusy: boolean;
 }) {
   if (log.mode === "solo") {
     return (
-      <SoloHistoryRow log={log} profile={profile} divider={divider} />
+      <SoloHistoryRow
+        log={log}
+        profile={profile}
+        userEmail={userEmail}
+        divider={divider}
+      />
     );
   }
 
@@ -289,6 +306,7 @@ function HistoryRow({
       log={log}
       profile={profile}
       opponents={opponents}
+      userEmail={userEmail}
       divider={divider}
       onPlayAgain={() => onPlayAgain(log)}
       rematchBusy={rematchBusy}
@@ -301,6 +319,7 @@ export function GameHistoryList({
   profile,
   opponents,
   userId,
+  userEmail,
   authConfigured,
 }: Props) {
   const router = useRouter();
@@ -353,6 +372,7 @@ export function GameHistoryList({
           log={log}
           profile={profile}
           opponents={opponents}
+          userEmail={userEmail}
           divider={i < rows.length - 1}
           onPlayAgain={(entry) => void handlePlayAgain(entry)}
           rematchBusy={rematchKey === `${log.t}`}

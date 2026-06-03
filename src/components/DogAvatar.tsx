@@ -8,12 +8,10 @@ type Props = {
   ringColor?: string;
   className?: string;
   username?: string;
+  email?: string | null;
   userData?: UserData;
   preview?: boolean;
-  /**
-   * Show head only on light panels (e.g. recent games) — no tile or circle;
-   * cream in the PNG is knocked out via multiply blend.
-   */
+  /** Transparent head only — no tile (recent games, picker, etc.). */
   bare?: boolean;
 };
 
@@ -23,35 +21,25 @@ export function DogAvatar({
   ringColor,
   className,
   username,
+  email,
   userData,
   preview,
   bare = false,
 }: Props) {
   const resolved = preview
-    ? resolveDogId(dogId, { username })
-    : displayDogId(dogId, { username, userData });
+    ? resolveDogId(dogId, { username, email })
+    : displayDogId(dogId, { username, email, userData });
   const dog = dogById(resolved);
   const ring = ringColor ? Math.max(2, Math.round(size * 0.06)) : 0;
 
-  const img = bare ? (
+  const img = (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={dog.image}
       alt=""
       width={size}
       height={size}
-      className={`block object-contain mix-blend-multiply ${className ?? ""}`}
-      style={{ imageRendering: "pixelated" }}
-      aria-hidden
-    />
-  ) : (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={dog.image}
-      alt=""
-      width={size}
-      height={size}
-      className={`block rounded-[22%] object-cover ${className ?? ""}`}
+      className={`block object-contain ${bare ? "" : "rounded-[22%]"} ${className ?? ""}`}
       style={{ imageRendering: "pixelated" }}
       aria-hidden
     />
