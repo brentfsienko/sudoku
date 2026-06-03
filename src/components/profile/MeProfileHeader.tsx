@@ -108,7 +108,7 @@ export function MeProfileHeader({
           >
             <DogAvatar
               dogId={profile.dogId}
-              size={112}
+              size={128}
               bare
               username={username}
               email={userData.user?.email}

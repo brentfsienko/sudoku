@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 /** Section headings on the home tab (Play, Recent games, etc.) */
 export const homeSectionTitleClass =
-  "font-serif-title text-[1.35rem] leading-tight text-[var(--foreground)]";
+  "font-serif-title text-left text-[1.35rem] leading-tight text-[var(--foreground)]";
 
 type Props = {
   title: string;

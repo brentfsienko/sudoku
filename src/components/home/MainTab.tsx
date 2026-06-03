@@ -17,9 +17,11 @@ import { createGameInvite } from "@/lib/friends/api";
 import type { PublicProfile } from "@/lib/friends/types";
 import { useFriends } from "@/lib/friends/useFriends";
 import { newRoomCode } from "@/lib/game/room";
+import { displayDogId } from "@/lib/dogs/display";
 import { usePullableSheet } from "@/lib/hooks/usePullableSheet";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { UserData } from "@/lib/stats/types";
+import { canUseBeePup } from "@/lib/theme/dogs";
 const ACCENT = "#7ec4cf";
 
 type Props = {
@@ -45,7 +47,7 @@ function PlayRow({
       onClick={onClick}
       className="flex w-full items-center gap-3 rounded-2xl bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99]"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -72,6 +74,17 @@ export function MainTab({ data, userData, onSignIn }: Props) {
 
   const streak = data.solo.streak;
   const bones = data.bones ?? 0;
+  const headerUsername =
+    friends.myProfile?.username ?? data.profile.username;
+  const honeyHeader = canUseBeePup({
+    username: headerUsername,
+    email: userData.user?.email,
+  });
+  const headerDogId = displayDogId(data.profile.dogId, {
+    username: headerUsername,
+    email: userData.user?.email,
+    userData: data,
+  });
 
   useEffect(() => {
     const prevHtml = document.documentElement.style.backgroundColor;
@@ -139,14 +152,16 @@ export function MainTab({ data, userData, onSignIn }: Props) {
       />
 
       <header
-        className="relative z-20 flex shrink-0 items-start justify-between gap-5 px-5 pb-5"
+        className="relative z-20 shrink-0 px-5 pb-6 pr-28"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
       >
-        <AppBrandTitle appIcon light size="xl" />
-        <StreakBonePill
-          streak={streak}
-          bones={bones}
-          className="mt-1 shrink-0"
+        <AppBrandTitle
+          light
+          size="xl"
+          align="start"
+          dogId={headerDogId}
+          appIcon={!honeyHeader}
+          profileIcon={honeyHeader}
         />
       </header>
 
@@ -164,13 +179,13 @@ export function MainTab({ data, userData, onSignIn }: Props) {
             <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
             <div className="flex flex-col gap-2">
               <PlayRow
-                icon={<PawIcon width={20} height={20} />}
+                icon={<PawIcon width={24} height={24} />}
                 title="Solo play"
                 subtitle="Pick difficulty when you start"
                 onClick={openSoloSetup}
               />
               <PlayRow
-                icon={<UsersIcon width={20} height={20} />}
+                icon={<UsersIcon width={24} height={24} />}
                 title="Multiplayer"
                 subtitle="Friends, search, and invites"
                 onClick={() => setStartSheetOpen(true)}
@@ -190,6 +205,14 @@ export function MainTab({ data, userData, onSignIn }: Props) {
             userEmail={userData.user?.email}
             authConfigured={userData.authConfigured}
           />
+          </div>
+
+          <div className="pointer-events-none absolute right-3 top-0 z-40 -translate-y-1/2 sm:right-5">
+            <StreakBonePill
+              streak={streak}
+              bones={bones}
+              className="pointer-events-auto"
+            />
           </div>
         </div>
       </div>
