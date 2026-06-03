@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { SignInGate } from "@/components/auth/SignInGate";
 import { AppFrame } from "@/components/layout/AppFrame";
+import { MobileAppRoot } from "@/components/layout/MobileAppRoot";
 import { MainTab } from "@/components/home/MainTab";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { BottomNav, BOTTOM_NAV_OFFSET, type HomeTab } from "@/components/home/BottomNav";
@@ -77,60 +78,62 @@ export default function Home() {
         userData={userData}
         onClose={() => setSignInGateOpen(false)}
       />
-    <AppFrame variant={tab === "main" ? "accent" : "background"}>
-      <main
-        className={`flex min-h-0 flex-1 flex-col overflow-hidden max-md:pb-[var(--bottom-nav-offset)] md:pb-0 ${
-          tab === "main" ? "bg-[var(--accent)]" : "bg-[var(--background)]"
-        }`}
-        style={{ ["--bottom-nav-offset" as string]: BOTTOM_NAV_OFFSET }}
-      >
-        {tab === "main" && (
-          <MainTab
-            data={statsForMe}
-            userData={userData}
-            onSignIn={() => setSignInGateOpen(true)}
-          />
-        )}
-
-        {tab === "friends" && (
-          <div
-            className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
-            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
-          >
-            <FriendsTab userData={userData} onSignIn={() => setSignInGateOpen(true)} />
-          </div>
-        )}
-
-        {tab === "me" && (
-          <div
-            className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
-            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
-          >
-          {userData.loading ? (
-            <div className="flex flex-1 items-center justify-center">
-              <span className="font-display animate-pulse text-[var(--muted)]">
-                Loading your stats… 🐾
-              </span>
-            </div>
-          ) : (
-            <MeTab
-              data={{
-                profile: statsForMe.profile,
-                solo: statsForMe.solo,
-                multi: statsForMe.multi,
-                history: statsForMe.history,
-                bones: statsForMe.bones ?? 0,
-              }}
+    <MobileAppRoot>
+      <AppFrame variant={tab === "main" ? "accent" : "background"}>
+        <main
+          className={`flex min-h-0 flex-1 flex-col overflow-hidden max-md:pb-[var(--bottom-nav-offset)] md:pb-0 ${
+            tab === "main" ? "bg-[var(--accent)]" : "bg-[var(--background)]"
+          }`}
+          style={{ ["--bottom-nav-offset" as string]: BOTTOM_NAV_OFFSET }}
+        >
+          {tab === "main" && (
+            <MainTab
+              data={statsForMe}
               userData={userData}
               onSignIn={() => setSignInGateOpen(true)}
             />
           )}
-          </div>
-        )}
-      </main>
-      <BottomNav active={tab} onChange={setTab} variant="inline" />
-    </AppFrame>
-    <BottomNav active={tab} onChange={setTab} variant="fixed" />
+
+          {tab === "friends" && (
+            <div
+              className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
+              style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+            >
+              <FriendsTab userData={userData} onSignIn={() => setSignInGateOpen(true)} />
+            </div>
+          )}
+
+          {tab === "me" && (
+            <div
+              className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
+              style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+            >
+            {userData.loading ? (
+              <div className="flex flex-1 items-center justify-center">
+                <span className="font-display animate-pulse text-[var(--muted)]">
+                  Loading your stats… 🐾
+                </span>
+              </div>
+            ) : (
+              <MeTab
+                data={{
+                  profile: statsForMe.profile,
+                  solo: statsForMe.solo,
+                  multi: statsForMe.multi,
+                  history: statsForMe.history,
+                  bones: statsForMe.bones ?? 0,
+                }}
+                userData={userData}
+                onSignIn={() => setSignInGateOpen(true)}
+              />
+            )}
+            </div>
+          )}
+        </main>
+        <BottomNav active={tab} onChange={setTab} variant="inline" />
+      </AppFrame>
+      <BottomNav active={tab} onChange={setTab} variant="fixed" />
+    </MobileAppRoot>
     </>
   );
 }

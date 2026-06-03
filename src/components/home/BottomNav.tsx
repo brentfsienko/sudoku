@@ -25,8 +25,8 @@ type Props = {
 /** Tab row height — keep in sync with page main padding and Play sheet min-height. */
 export const BOTTOM_NAV_ROW = "4rem";
 
-/** Reserve space above fixed nav (tab row + home indicator). */
-export const BOTTOM_NAV_OFFSET = `calc(${BOTTOM_NAV_ROW} + env(safe-area-inset-bottom, 0px))`;
+/** Reserve space above fixed nav (tab row + home indicator / PWA inset). */
+export const BOTTOM_NAV_OFFSET = `calc(${BOTTOM_NAV_ROW} + max(env(safe-area-inset-bottom, 0px), var(--vv-bottom-inset, 0px)))`;
 
 function NavTabs({
   active,
@@ -40,7 +40,9 @@ function NavTabs({
   return (
     <div
       className={`flex items-stretch justify-around pt-2.5 ${
-        fixed ? "pb-[env(safe-area-inset-bottom,0px)]" : "pb-2"
+        fixed
+          ? "pb-[max(env(safe-area-inset-bottom,0px),var(--vv-bottom-inset,0px))]"
+          : "pb-2"
       }`}
     >
       {TABS.map(({ id, label, Icon }) => {

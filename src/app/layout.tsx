@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Lora, Nunito } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
 import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -71,7 +72,14 @@ export default function RootLayout({
       lang="en"
       className={`${baloo.variable} ${nunito.variable} ${lora.variable} h-full antialiased`}
     >
-      <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh">
+      <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh max-md:h-[var(--app-height,100dvh)] max-md:max-h-[var(--app-height,100dvh)]">
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){var d=document.documentElement,h=window.innerHeight;d.style.setProperty('--app-height',h+'px');var v=window.visualViewport;if(v){var g=Math.max(0,Math.round(h-v.height-v.offsetTop));d.style.setProperty('--vv-bottom-inset',g+'px')}})();",
+          }}
+        />
+        <ViewportHeightSync />
         {children}
         <Analytics />
       </body>
