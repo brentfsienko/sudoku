@@ -15,8 +15,8 @@
   --paw: #c98b5b;
 
   /* Player colors */
-  --player-1: #3b82f6; /* blue */
-  --player-2: #7c6fdc; /* violet — distinct from mistake red */
+  --player-1: #1d6fd8; /* blue */
+  --player-2: #e85d04; /* orange — distinct from blue and mistake red */
 
   /* Board */
   --cell-bg: #ffffff;

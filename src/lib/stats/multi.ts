@@ -1,7 +1,9 @@
 import type { GameLog, MultiStats, OpponentRecord } from "./types";
 
-export const COOP_ACCENT = "#4ea1a3";
-export const VERSUS_ACCENT = "#f4a259";
+/** Co-op badges / stats — green (reads clearly vs versus orange). */
+export const COOP_ACCENT = "#1f9d6a";
+/** Versus badges / stats — warm orange (not blue-adjacent teal or purple). */
+export const VERSUS_ACCENT = "#e85d04";
 
 export function coopWinLoss(multi: MultiStats) {
   const wins = multi.coopSolved;
