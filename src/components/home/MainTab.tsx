@@ -19,8 +19,6 @@ import { newRoomCode } from "@/lib/game/room";
 import { usePullableSheet } from "@/lib/hooks/usePullableSheet";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { UserData } from "@/lib/stats/types";
-import type { DogId } from "@/lib/theme/dogs";
-
 const ACCENT = "#7ec4cf";
 
 type Props = {
@@ -142,7 +140,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
         className="relative z-20 shrink-0 px-5 pb-5"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
       >
-        <AppBrandTitle dogId={data.profile.dogId as DogId} light size="xl" />
+        <AppBrandTitle appIcon light size="xl" />
       </header>
 
       {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}

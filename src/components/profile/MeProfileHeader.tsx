@@ -4,6 +4,7 @@ import { useState } from "react";
 import { DogAvatar } from "@/components/DogAvatar";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { FriendCodeModal } from "@/components/profile/FriendCodeModal";
+import { ProfileEditModal } from "@/components/profile/ProfileEditModal";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
 import { WinLossBar } from "@/components/stats/WinLossBar";
 import { PencilIcon, SettingsIcon } from "@/components/icons";
@@ -138,7 +139,7 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
         />
       </div>
 
-      {editing && (
+      <ProfileEditModal open={editing} onClose={() => setEditing(false)}>
         <ProfileEditForm
           profile={profile}
           currentUsername={friends.myProfile?.username ?? profile.username}
@@ -157,7 +158,7 @@ export function MeProfileHeader({ profile, multi, userData, onSignIn }: Props) {
           }}
           onDone={() => setEditing(false)}
         />
-      )}
+      </ProfileEditModal>
 
       {friendCodeOpen && friends.myProfile && (
         <FriendCodeModal

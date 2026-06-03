@@ -134,7 +134,7 @@ export function ProfileEditForm({
         : "border-[var(--border)]";
 
   return (
-    <div className="animate-float-in flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm">
+    <div className="flex flex-col gap-3">
       <label className="flex flex-col gap-1">
         <span className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
           Username
