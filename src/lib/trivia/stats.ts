@@ -4,11 +4,7 @@ import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { FactTopic } from "./facts";
 
 const USER_GUESSES_KEY = "floof-trivia-user";
-const LOCAL_GLOBAL_KEY = "floof-trivia-global";
-
-/** Seed so first-time players see plausible community stats. */
-const SEED_CORRECT = 1247;
-const SEED_WRONG = 892;
+const LOCAL_FACT_PREFIX = "floof-trivia-fact-";
 
 export type UserGuess = {
   factId: string;
@@ -22,22 +18,40 @@ export type GlobalTriviaStats = {
   wrong: number;
 };
 
-function loadLocalGlobal(): GlobalTriviaStats {
+function localFactKey(factId: string): string {
+  return `${LOCAL_FACT_PREFIX}${factId}`;
+}
+
+function loadLocalFactStats(factId: string): GlobalTriviaStats {
   if (typeof window === "undefined") {
-    return { correct: SEED_CORRECT, wrong: SEED_WRONG };
+    return { correct: 0, wrong: 0 };
   }
   try {
-    const raw = window.localStorage.getItem(LOCAL_GLOBAL_KEY);
+    const raw = window.localStorage.getItem(localFactKey(factId));
     if (raw) return JSON.parse(raw) as GlobalTriviaStats;
   } catch {
     // ignore
   }
-  return { correct: SEED_CORRECT, wrong: SEED_WRONG };
+  return { correct: 0, wrong: 0 };
 }
 
-function saveLocalGlobal(stats: GlobalTriviaStats) {
+function saveLocalFactStats(factId: string, stats: GlobalTriviaStats) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(LOCAL_GLOBAL_KEY, JSON.stringify(stats));
+  window.localStorage.setItem(localFactKey(factId), JSON.stringify(stats));
+}
+
+function mergeStats(
+  local: GlobalTriviaStats,
+  remote: GlobalTriviaStats,
+): GlobalTriviaStats {
+  const localTotal = local.correct + local.wrong;
+  const remoteTotal = remote.correct + remote.wrong;
+  if (localTotal > remoteTotal) return local;
+  if (remoteTotal > localTotal) return remote;
+  return {
+    correct: Math.max(local.correct, remote.correct),
+    wrong: Math.max(local.wrong, remote.wrong),
+  };
 }
 
 export function loadUserGuesses(): Record<string, UserGuess> {
@@ -58,28 +72,28 @@ export function saveUserGuess(guess: UserGuess) {
   window.localStorage.setItem(USER_GUESSES_KEY, JSON.stringify(all));
 }
 
-export async function fetchGlobalStats(): Promise<GlobalTriviaStats> {
-  const local = loadLocalGlobal();
+export async function fetchFactStats(
+  factId: string,
+): Promise<GlobalTriviaStats> {
+  const local = loadLocalFactStats(factId);
   if (!isSupabaseConfigured) return local;
 
   try {
     const sb = getSupabase();
     if (!sb) return local;
     const { data, error } = await sb
-      .from("trivia_stats")
+      .from("trivia_fact_stats")
       .select("correct, wrong")
-      .eq("id", "global")
+      .eq("fact_id", factId)
       .maybeSingle();
     if (error || !data) return local;
     const remote: GlobalTriviaStats = {
       correct: Number(data.correct) || 0,
       wrong: Number(data.wrong) || 0,
     };
-    if (remote.correct + remote.wrong > 0) {
-      saveLocalGlobal(remote);
-      return remote;
-    }
-    return local;
+    const merged = mergeStats(local, remote);
+    saveLocalFactStats(factId, merged);
+    return merged;
   } catch {
     return local;
   }
@@ -92,23 +106,23 @@ export async function recordGuess(
 ): Promise<GlobalTriviaStats> {
   saveUserGuess({ factId, guess, correct: wasCorrect, at: Date.now() });
 
-  const local = loadLocalGlobal();
+  const local = loadLocalFactStats(factId);
   const next: GlobalTriviaStats = {
     correct: local.correct + (wasCorrect ? 1 : 0),
     wrong: local.wrong + (wasCorrect ? 0 : 1),
   };
-  saveLocalGlobal(next);
+  saveLocalFactStats(factId, next);
 
   if (isSupabaseConfigured) {
     try {
       const sb = getSupabase();
       if (sb) {
         const { error } = await sb.rpc("record_trivia_guess", {
+          p_fact_id: factId,
           was_correct: wasCorrect,
         });
         if (!error) {
-          const remote = await fetchGlobalStats();
-          saveLocalGlobal(remote);
+          const remote = await fetchFactStats(factId);
           return remote;
         }
       }
@@ -123,9 +137,10 @@ export async function recordGuess(
 export function globalPercentages(stats: GlobalTriviaStats): {
   correctPct: number;
   wrongPct: number;
-} {
+  total: number;
+} | null {
   const total = stats.correct + stats.wrong;
-  if (total === 0) return { correctPct: 50, wrongPct: 50 };
+  if (total === 0) return null;
   const correctPct = Math.round((stats.correct / total) * 100);
-  return { correctPct, wrongPct: 100 - correctPct };
+  return { correctPct, wrongPct: 100 - correctPct, total };
 }

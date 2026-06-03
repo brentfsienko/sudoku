@@ -9,7 +9,7 @@ import {
   type TriviaFact,
 } from "@/lib/trivia/facts";
 import {
-  fetchGlobalStats,
+  fetchFactStats,
   globalPercentages,
   loadUserGuesses,
   recordGuess,
@@ -44,7 +44,7 @@ export function FactGuessCard() {
     setExpanded(false);
     const saved = loadUserGuesses()[fact.id];
     setUserGuess(saved ?? null);
-    void fetchGlobalStats().then(setGlobal);
+    void fetchFactStats(fact.id).then(setGlobal);
   }, [fact.id]);
 
   async function submit(guess: FactTopic) {
@@ -66,7 +66,7 @@ export function FactGuessCard() {
           onClick={() => {
             setExpanded((e) => {
               const next = !e;
-              if (next) void fetchGlobalStats().then(setGlobal);
+              if (next) void fetchFactStats(fact.id).then(setGlobal);
               return next;
             });
           }}
@@ -127,7 +127,7 @@ function FactGuessBody({
 }: {
   fact: TriviaFact;
   userGuess: UserGuess | null;
-  globalPct: { correctPct: number; wrongPct: number } | null;
+  globalPct: { correctPct: number; wrongPct: number; total: number } | null;
   onGuess: (guess: FactTopic) => void;
 }) {
   if (!userGuess) {

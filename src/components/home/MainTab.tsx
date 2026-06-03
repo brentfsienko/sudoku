@@ -139,10 +139,15 @@ export function MainTab({ data, userData, onSignIn }: Props) {
       />
 
       <header
-        className="relative z-20 shrink-0 px-5 pb-5"
+        className="relative z-20 flex shrink-0 items-start justify-between gap-5 px-5 pb-5"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
       >
         <AppBrandTitle appIcon light size="xl" />
+        <StreakBonePill
+          streak={streak}
+          bones={bones}
+          className="mt-1 shrink-0"
+        />
       </header>
 
       {/* Pull moves sheet + streak together; overflow visible so pill isn't clipped */}
@@ -185,15 +190,6 @@ export function MainTab({ data, userData, onSignIn }: Props) {
             userEmail={userData.user?.email}
             authConfigured={userData.authConfigured}
           />
-          </div>
-
-          {/* Above white bg, centered on rounded top edge */}
-          <div className="pointer-events-none absolute right-3 top-0 z-40 -translate-y-1/2 sm:right-5">
-            <StreakBonePill
-              streak={streak}
-              bones={bones}
-              className="pointer-events-auto"
-            />
           </div>
         </div>
       </div>
