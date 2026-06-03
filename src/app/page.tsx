@@ -28,6 +28,7 @@ import {
   type Difficulty,
   type GameMode,
 } from "@/lib/game/types";
+import { newRoomCode } from "@/lib/game/room";
 import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
 import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
@@ -59,15 +60,6 @@ import {
   weekStarts,
   type Metric,
 } from "@/lib/stats/progress";
-
-function newRoomCode(): string {
-  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  let code = "";
-  for (let i = 0; i < 4; i++) {
-    code += letters[Math.floor(Math.random() * letters.length)];
-  }
-  return code;
-}
 
 export default function Home() {
   const router = useRouter();
@@ -159,6 +151,8 @@ export default function Home() {
               history={statsForMe.history}
               profile={statsForMe.profile}
               opponents={statsForMe.multi.opponents}
+              userId={userData.user?.id ?? null}
+              authConfigured={userData.authConfigured}
             />
           </div>
         )}

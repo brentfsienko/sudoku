@@ -14,6 +14,7 @@ import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { SearchIcon, UserPlusIcon } from "@/components/icons";
 import type { DogId } from "@/lib/theme/dogs";
 import { GAME_MODE_LABELS, type Difficulty, type GameMode } from "@/lib/game/types";
+import { newRoomCode } from "@/lib/game/room";
 import {
   createGameInvite,
   markInviteJoined,
@@ -21,15 +22,6 @@ import {
 import { useFriends } from "@/lib/friends/useFriends";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { PublicProfile } from "@/lib/friends/types";
-
-function newRoomCode(): string {
-  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  let code = "";
-  for (let i = 0; i < 4; i++) {
-    code += letters[Math.floor(Math.random() * letters.length)];
-  }
-  return code;
-}
 
 type Props = {
   userData: UseUserData;

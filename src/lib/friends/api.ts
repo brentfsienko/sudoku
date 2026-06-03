@@ -159,6 +159,28 @@ export async function searchProfiles(
   return (data ?? []).map((r) => mapProfile(r as ProfileRow));
 }
 
+/** Exact @username lookup for rematch invites. */
+export async function lookupProfileByUsername(
+  username: string,
+  excludeUserId?: string,
+): Promise<PublicProfile | null> {
+  const clean = normalizeUsername(username);
+  if (!clean) return null;
+
+  const sb = getSupabase();
+  if (!sb) return null;
+
+  let query = sb
+    .from("player_profiles")
+    .select("user_id, username, display_name, dog_id")
+    .ilike("username", clean);
+
+  if (excludeUserId) query = query.neq("user_id", excludeUserId);
+
+  const { data } = await query.maybeSingle();
+  return data ? mapProfile(data as ProfileRow) : null;
+}
+
 export async function sendFriendRequest(
   fromUserId: string,
   toUserId: string,

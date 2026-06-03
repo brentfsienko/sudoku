@@ -59,6 +59,9 @@ export type GameLog = {
   score: number;
   opponentName?: string;
   opponentDogId?: string;
+  /** Multiplayer: correct cells each player placed (non-given). */
+  mySquares?: number;
+  opponentSquares?: number;
   /** Competitive mode only. */
   tied?: boolean;
 };
@@ -185,6 +188,8 @@ function normalizeHistory(raw: GameLog[] | undefined): GameLog[] {
   return raw.map((log) => ({
     ...log,
     squares: log.squares ?? 0,
+    mySquares: log.mySquares ?? log.squares ?? 0,
+    opponentSquares: log.opponentSquares ?? 0,
     tied: log.tied ?? false,
   }));
 }
@@ -487,6 +492,8 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
     opponentName:
       r.opponentName.replace(/^@/, "").trim() || undefined,
     opponentDogId: r.opponentDogId || undefined,
+    mySquares: r.mySquares,
+    opponentSquares: r.opponentSquares,
     tied: r.mode === "competitive" ? tie : undefined,
   });
 

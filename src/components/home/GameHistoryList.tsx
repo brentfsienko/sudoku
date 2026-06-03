@@ -1,12 +1,18 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { DogAvatar } from "@/components/DogAvatar";
 import {
   FriendListPanel,
   FriendListRow,
+  FriendPillButton,
 } from "@/components/home/FriendListPanel";
 import { CrownIcon } from "@/components/icons";
-import { DIFFICULTY_LABELS, GAME_MODE_LABELS } from "@/lib/game/types";
+import { createGameInvite, lookupProfileByUsername } from "@/lib/friends/api";
+import { newRoomCode } from "@/lib/game/room";
+import { DIFFICULTY_LABELS, GAME_MODE_LABELS, type GameMode } from "@/lib/game/types";
+import { boardShareLabel } from "@/lib/stats/boardShare";
 import { COOP_ACCENT, VERSUS_ACCENT } from "@/lib/stats/multi";
 import type { GameLog, MultiStats, OpponentRecord, Profile } from "@/lib/stats/types";
 import type { DogId } from "@/lib/theme/dogs";
@@ -15,13 +21,15 @@ type Props = {
   history: GameLog[];
   profile: Profile;
   opponents: MultiStats["opponents"];
+  userId: string | null;
+  authConfigured: boolean;
 };
 
 function formatWhen(t: number): string {
   const d = new Date(t);
   const now = new Date();
   const today = now.toDateString();
-  const yesterday = new Date(now);
+  const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   if (d.toDateString() === today) {
     return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -113,20 +121,36 @@ function OpponentLine({
   );
 }
 
+function secondaryLine(
+  log: GameLog,
+  profile: Profile,
+  opponents: Record<string, OpponentRecord>,
+): string {
+  const base = `${outcomeText(log)} · ${DIFFICULTY_LABELS[log.difficulty]}`;
+  if (log.mode === "solo") return base;
+  const opp = resolveOpponent(log, opponents);
+  const share = boardShareLabel(log, profile.username, opp.name);
+  return share ? `${base} · ${share}` : base;
+}
+
 function HistoryRow({
   log,
   profile,
   opponents,
   divider,
+  onPlayAgain,
+  rematchBusy,
 }: {
   log: GameLog;
   profile: Profile;
   opponents: Record<string, OpponentRecord>;
   divider: boolean;
+  onPlayAgain: (log: GameLog) => void;
+  rematchBusy: boolean;
 }) {
-  const opp =
-    log.mode === "solo" ? null : resolveOpponent(log, opponents);
+  const opp = log.mode === "solo" ? null : resolveOpponent(log, opponents);
   const accent = modeAccent(log.mode);
+  const multi = log.mode !== "solo";
 
   return (
     <FriendListRow
@@ -152,18 +176,66 @@ function HistoryRow({
           </span>
         </div>
       }
-      secondary={`${outcomeText(log)} · ${DIFFICULTY_LABELS[log.difficulty]}`}
+      secondary={secondaryLine(log, profile, opponents)}
       action={
-        <span className="text-[11px] font-semibold text-[var(--muted)]">
-          {formatWhen(log.t)}
-        </span>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          {multi && (
+            <FriendPillButton
+              variant="primary"
+              onClick={() => onPlayAgain(log)}
+            >
+              {rematchBusy ? "…" : "Again"}
+            </FriendPillButton>
+          )}
+          <span className="text-[11px] font-semibold text-[var(--muted)]">
+            {formatWhen(log.t)}
+          </span>
+        </div>
       }
     />
   );
 }
 
-export function GameHistoryList({ history, profile, opponents }: Props) {
+export function GameHistoryList({
+  history,
+  profile,
+  opponents,
+  userId,
+  authConfigured,
+}: Props) {
+  const router = useRouter();
+  const [rematchKey, setRematchKey] = useState<string | null>(null);
   const rows = [...history].reverse();
+
+  async function handlePlayAgain(log: GameLog) {
+    if (log.mode === "solo") return;
+    const key = `${log.t}`;
+    setRematchKey(key);
+
+    const gameMode: GameMode =
+      log.mode === "competitive" ? "competitive" : "coop";
+    const code = newRoomCode();
+    const opp = resolveOpponent(log, opponents);
+
+    try {
+      if (authConfigured && userId) {
+        const guest = await lookupProfileByUsername(opp.name, userId);
+        if (guest) {
+          await createGameInvite(
+            userId,
+            guest.userId,
+            code,
+            gameMode,
+            log.difficulty,
+          );
+        }
+      }
+
+      router.push(`/game/${code}?host=1&m=${gameMode}&d=${log.difficulty}`);
+    } finally {
+      setRematchKey(null);
+    }
+  }
 
   return (
     <FriendListPanel
@@ -181,6 +253,8 @@ export function GameHistoryList({ history, profile, opponents }: Props) {
           profile={profile}
           opponents={opponents}
           divider={i < rows.length - 1}
+          onPlayAgain={(entry) => void handlePlayAgain(entry)}
+          rematchBusy={rematchKey === `${log.t}`}
         />
       ))}
     </FriendListPanel>
