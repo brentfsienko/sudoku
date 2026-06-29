@@ -1,11 +1,12 @@
 import type { MetadataRoute } from "next";
+import { DEFAULT_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Sudogku",
-    short_name: "Sudogku",
-    description: "A dog-themed multiplayer Sudoku.",
+    name: `${SITE_NAME} — Free Online Sudoku`,
+    short_name: SITE_NAME,
+    description: DEFAULT_DESCRIPTION,
     start_url: "/",
     scope: "/",
     display: "standalone",

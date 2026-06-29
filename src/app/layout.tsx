@@ -1,8 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Lora, Nunito } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
-import { getSiteUrl } from "@/lib/site";
+import {
+  ROOT_METADATA,
+  organizationJsonLd,
+  webApplicationJsonLd,
+} from "@/lib/seo";
 import "./globals.css";
 
 const baloo = Baloo_2({
@@ -23,35 +28,7 @@ const lora = Lora({
   weight: ["400", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: getSiteUrl(),
-  title: "Sudogku",
-  description: "A dog-themed multiplayer Sudoku. Play solo or with a friend.",
-  applicationName: "Sudogku",
-  icons: {
-    icon: [{ url: "/dogs/golden.png", type: "image/png", sizes: "512x512" }],
-    apple: [{ url: "/dogs/golden.png", type: "image/png", sizes: "512x512" }],
-  },
-  openGraph: {
-    type: "website",
-    siteName: "Sudogku",
-    title: "Sudogku",
-    description: "A dog-themed multiplayer Sudoku. Play solo or with a friend.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Sudogku",
-    description: "A dog-themed multiplayer Sudoku. Play solo or with a friend.",
-  },
-  appleWebApp: {
-    capable: true,
-    title: "Sudogku",
-    statusBarStyle: "black-translucent",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-};
+export const metadata: Metadata = ROOT_METADATA;
 
 export const viewport: Viewport = {
   themeColor: "#7ec4cf",
@@ -73,6 +50,7 @@ export default function RootLayout({
       className={`${baloo.variable} ${nunito.variable} ${lora.variable} h-full antialiased`}
     >
       <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh max-md:h-[var(--app-height,100dvh)] max-md:max-h-[var(--app-height,100dvh)]">
+        <JsonLd data={[webApplicationJsonLd(), organizationJsonLd()]} />
         <script
           dangerouslySetInnerHTML={{
             __html:

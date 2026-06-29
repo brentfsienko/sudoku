@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { brandDogDataUrl } from "@/lib/brand-dog-data-url";
 
-export const alt = "Sudogku — dog-themed Sudoku";
+export const alt = "Sudogku — free online Sudoku, solo and multiplayer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
