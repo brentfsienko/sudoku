@@ -19,8 +19,7 @@ import type { Profile } from "@/lib/stats/types";
 import { dogIdForUsername } from "@/lib/theme/dogs";
 
 const SOLO_ACCENT = "#a06bd6";
-const SWIPE_THRESHOLD = 60; // px to reveal actions
-const SWIPE_DISMISS = 140; // px to auto-dismiss
+const SWIPE_THRESHOLD = 60; // px to trigger quit confirm
 
 function displayUsername(raw: string): string {
   const clean = raw.replace(/^@/, "").trim();
@@ -98,16 +97,10 @@ function ActiveSoloRow({
 
   function onTouchEnd() {
     setSwiping(false);
-    if (swipeX <= -SWIPE_DISMISS) {
-      // Full swipe — show confirm
+    if (swipeX <= -SWIPE_THRESHOLD) {
       setConfirming(true);
-      setSwipeX(0);
-    } else if (swipeX <= -SWIPE_THRESHOLD) {
-      // Partial swipe — snap to reveal actions
-      setSwipeX(-84);
-    } else {
-      setSwipeX(0);
     }
+    setSwipeX(0);
     isHorizontal.current = null;
   }
 
@@ -150,18 +143,7 @@ function ActiveSoloRow({
     <div
       className={`relative overflow-hidden ${divider ? "border-b border-white/70" : ""}`}
     >
-      {/* Swipe action background */}
-      <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 pr-2">
-        <button
-          type="button"
-          onClick={() => { setConfirming(true); setSwipeX(0); }}
-          className="flex h-full items-center rounded-lg bg-red-500 px-4 text-xs font-bold text-white"
-        >
-          Quit
-        </button>
-      </div>
-
-      {/* Sliding row */}
+      {/* Sliding row — solid background so nothing bleeds through */}
       <button
         type="button"
         onClick={swipeX === 0 ? onOpen : resetSwipe}
@@ -172,7 +154,7 @@ function ActiveSoloRow({
           transform: `translateX(${swipeX}px)`,
           transition: swiping ? "none" : "transform 0.22s ease",
         }}
-        className="relative z-10 flex w-full items-center gap-2.5 bg-transparent px-3 py-2 text-left active:bg-white/50"
+        className="relative z-10 flex w-full items-center gap-2.5 bg-[var(--list-panel)] px-3 py-2 text-left active:bg-white/50"
       >
         <DogAvatar
           dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
