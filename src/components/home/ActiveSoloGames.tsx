@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DogAvatar } from "@/components/DogAvatar";
 import { FriendListPanel, homeSectionTitleClass } from "@/components/home/FriendListPanel";
@@ -9,6 +9,7 @@ import {
   type ActiveSoloSave,
   isActiveSolo,
   loadActiveSolos,
+  removeActiveSolo,
 } from "@/lib/game/activeSolo";
 import { loadUserData, STATS_UPDATED_EVENT } from "@/lib/stats/store";
 import { formatGameClock } from "@/lib/game/format";
@@ -18,6 +19,8 @@ import type { Profile } from "@/lib/stats/types";
 import { dogIdForUsername } from "@/lib/theme/dogs";
 
 const SOLO_ACCENT = "#a06bd6";
+const SWIPE_THRESHOLD = 60; // px to reveal actions
+const SWIPE_DISMISS = 140; // px to auto-dismiss
 
 function displayUsername(raw: string): string {
   const clean = raw.replace(/^@/, "").trim();
@@ -41,14 +44,23 @@ function ActiveSoloRow({
   userEmail,
   divider,
   onOpen,
+  onQuit,
 }: {
   snapshot: GameSnapshot;
   profile: Profile;
   userEmail?: string | null;
   divider: boolean;
   onOpen: () => void;
+  onQuit: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
+  const [swipeX, setSwipeX] = useState(0);
+  const [swiping, setSwiping] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const isHorizontal = useRef<boolean | null>(null);
+
   const meName = displayUsername(profile.username);
   const spent = elapsedSeconds(snapshot, now);
   const paused = snapshot.status === "paused";
@@ -58,36 +70,133 @@ function ActiveSoloRow({
     return () => clearInterval(id);
   }, []);
 
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left transition active:bg-white/50 ${
-        divider ? "border-b border-white/70" : ""
-      }`}
-    >
-      <DogAvatar
-        dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
-        username={meName}
-        email={userEmail}
-        size={40}
-        bare
-      />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="truncate text-sm font-bold text-[var(--foreground)]">
-            @{meName}
-          </span>
-          <SoloModeBadge />
-        </div>
-        <span className="text-[10px] font-semibold text-[var(--muted)]">
-          {paused ? "Paused" : "In progress"} · {DIFFICULTY_LABELS[snapshot.difficulty]}
+  function onTouchStart(e: React.TouchEvent) {
+    const t = e.touches[0];
+    startX.current = t.clientX;
+    startY.current = t.clientY;
+    isHorizontal.current = null;
+    setSwiping(true);
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (!swiping) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX.current;
+    const dy = t.clientY - startY.current;
+
+    if (isHorizontal.current === null) {
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+        isHorizontal.current = Math.abs(dx) > Math.abs(dy);
+      }
+    }
+
+    if (!isHorizontal.current) return;
+    e.preventDefault();
+    const clamped = Math.max(-SWIPE_DISMISS - 20, Math.min(0, dx));
+    setSwipeX(clamped);
+  }
+
+  function onTouchEnd() {
+    setSwiping(false);
+    if (swipeX <= -SWIPE_DISMISS) {
+      // Full swipe — show confirm
+      setConfirming(true);
+      setSwipeX(0);
+    } else if (swipeX <= -SWIPE_THRESHOLD) {
+      // Partial swipe — snap to reveal actions
+      setSwipeX(-84);
+    } else {
+      setSwipeX(0);
+    }
+    isHorizontal.current = null;
+  }
+
+  function resetSwipe() {
+    setSwipeX(0);
+    setConfirming(false);
+  }
+
+  if (confirming) {
+    return (
+      <div
+        className={`flex w-full items-center justify-between gap-3 px-3 py-2 animate-slide-in-right ${
+          divider ? "border-b border-white/70" : ""
+        }`}
+      >
+        <span className="text-sm font-semibold text-[var(--foreground)]">
+          Quit this game?
         </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={resetSwipe}
+            className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-bold text-[var(--muted)] active:scale-95"
+          >
+            Keep
+          </button>
+          <button
+            type="button"
+            onClick={onQuit}
+            className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white active:scale-95"
+          >
+            Quit
+          </button>
+        </div>
       </div>
-      <span className="shrink-0 text-[10px] font-semibold leading-none text-[var(--muted)]">
-        {formatGameClock(spent)}
-      </span>
-    </button>
+    );
+  }
+
+  return (
+    <div
+      className={`relative overflow-hidden ${divider ? "border-b border-white/70" : ""}`}
+    >
+      {/* Swipe action background */}
+      <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 pr-2">
+        <button
+          type="button"
+          onClick={() => { setConfirming(true); setSwipeX(0); }}
+          className="flex h-full items-center rounded-lg bg-red-500 px-4 text-xs font-bold text-white"
+        >
+          Quit
+        </button>
+      </div>
+
+      {/* Sliding row */}
+      <button
+        type="button"
+        onClick={swipeX === 0 ? onOpen : resetSwipe}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          transform: `translateX(${swipeX}px)`,
+          transition: swiping ? "none" : "transform 0.22s ease",
+        }}
+        className="relative z-10 flex w-full items-center gap-2.5 bg-transparent px-3 py-2 text-left active:bg-white/50"
+      >
+        <DogAvatar
+          dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
+          username={meName}
+          email={userEmail}
+          size={40}
+          bare
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="truncate text-sm font-bold text-[var(--foreground)]">
+              @{meName}
+            </span>
+            <SoloModeBadge />
+          </div>
+          <span className="text-[10px] font-semibold text-[var(--muted)]">
+            {paused ? "Paused" : "In progress"} · {DIFFICULTY_LABELS[snapshot.difficulty]}
+          </span>
+        </div>
+        <span className="shrink-0 text-[10px] font-semibold leading-none text-[var(--muted)]">
+          {formatGameClock(spent)}
+        </span>
+      </button>
+    </div>
   );
 }
 
@@ -130,6 +239,11 @@ export function ActiveSoloGames({ profile, userEmail }: Props) {
     };
   }, []);
 
+  function handleQuit(id: string) {
+    removeActiveSolo(id);
+    setActives((prev) => prev.filter((a) => a.id !== id));
+  }
+
   const rows = actives.filter((item) => isActiveSolo(item.snapshot));
   if (rows.length === 0) return null;
 
@@ -144,6 +258,7 @@ export function ActiveSoloGames({ profile, userEmail }: Props) {
             userEmail={userEmail}
             divider={index < rows.length - 1}
             onOpen={() => router.push(`/play?resume=${encodeURIComponent(item.id)}`)}
+            onQuit={() => handleQuit(item.id)}
           />
         ))}
       </FriendListPanel>

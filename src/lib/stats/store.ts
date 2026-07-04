@@ -109,6 +109,13 @@ export async function recordSoloGame(
   result: SoloResult,
   opts?: { activeId?: string },
 ): Promise<void> {
+  // Cancel any pending cloud-sync of active solos so it can't race with this
+  // finish write and restore the game as active after we remove it.
+  if (activeSoloPersistTimer) {
+    clearTimeout(activeSoloPersistTimer);
+    activeSoloPersistTimer = null;
+  }
+
   if (opts?.activeId) removeActiveSolo(opts.activeId);
 
   let data = await loadForWrite();

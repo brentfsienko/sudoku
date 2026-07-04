@@ -1,5 +1,6 @@
 "use client";
 
+import { isSoloFinished } from "./finishedSolo";
 import { pauseSnapshot, type GameSnapshot } from "./store";
 
 const STORAGE_KEY = "floof-active-solos";
@@ -35,7 +36,8 @@ function parseList(raw: string | null): ActiveSoloSave[] {
         item?.id &&
         item.snapshot?.puzzle &&
         item.snapshot.solution &&
-        isActiveSolo(item.snapshot),
+        isActiveSolo(item.snapshot) &&
+        !isSoloFinished(item.id),
     );
   } catch {
     return [];
@@ -80,7 +82,8 @@ export function replaceActiveSolosLocal(list: ActiveSoloSave[]): void {
       item?.id &&
       item.snapshot?.puzzle &&
       item.snapshot.solution &&
-      isActiveSolo(item.snapshot),
+      isActiveSolo(item.snapshot) &&
+      !isSoloFinished(item.id),
   );
   valid.sort((a, b) => b.updatedAt - a.updatedAt);
   writeList(valid, false);
