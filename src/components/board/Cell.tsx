@@ -53,7 +53,7 @@ function CellInner({ cell, onSelect }: Props) {
     <button
       type="button"
       onClick={() => onSelect(cell.index)}
-      className={`relative flex aspect-square items-center justify-center border-[var(--grid-line)] ${borderClasses} ${bg} no-select transition-colors`}
+      className={`relative flex aspect-square items-center justify-center border-[var(--grid-line)] ${borderClasses} ${bg} no-select transition-colors duration-75`}
       style={
         cell.peerRingColor
           ? { boxShadow: `inset 0 0 0 2px ${cell.peerRingColor}` }

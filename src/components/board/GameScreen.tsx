@@ -184,7 +184,7 @@ export function GameScreen({
 
   return (
     <div
-      className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--background)]"
+      className="game-viewport mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--background)]"
       style={{
         paddingTop: "env(safe-area-inset-top)",
         paddingBottom: "env(safe-area-inset-bottom)",

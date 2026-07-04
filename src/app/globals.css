@@ -210,6 +210,39 @@ textarea {
   animation: float-in 0.3s ease-out both;
 }
 
+/* ── Game pages: use measured app height so number pad never clips ── */
+@media (max-width: 767px) {
+  .game-viewport {
+    height: var(--app-height, 100dvh);
+    max-height: var(--app-height, 100dvh);
+    overflow: hidden;
+  }
+}
+
+/* ── Hide Liveblocks attribution badge ── */
+[data-liveblocks-portal],
+.lb-root.lb-portal,
+[class*="lb-"][class*="-portal"],
+[id^="liveblocks"],
+iframe[src*="liveblocks"] {
+  display: none !important;
+}
+
+/* ── Smooth transitions across interactive elements ── */
+button {
+  transition: opacity 120ms ease, transform 120ms ease, background-color 140ms ease,
+    color 140ms ease, border-color 140ms ease;
+}
+
+/* ── Swipe reveal ── */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.22s ease-out both;
+}
+
 @keyframes bone-pop {
   0% {
     transform: scale(0.4) translateY(4px);

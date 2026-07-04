@@ -79,7 +79,7 @@ export function ResultsOverlay({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5 backdrop-blur-sm animate-float-in">
       <div className="animate-pop w-full max-w-sm rounded-3xl bg-[var(--surface)] p-6 shadow-2xl">
         <div className="flex flex-col items-center gap-2 text-center">
           <DogAvatar dogId={heroDogId} size={88} ringColor={heroRing} />

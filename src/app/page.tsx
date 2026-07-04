@@ -241,6 +241,7 @@ function ProgressSection({
 }) {
   const [metric, setMetric] = useState<Metric>("games");
   const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
   const filteredHistory = useMemo(
     () => filterHistory(history, historyFilter),
     [history, historyFilter],
@@ -251,9 +252,33 @@ function ProgressSection({
     [filteredHistory, metric],
   );
   const week = useMemo(() => thisWeekTotals(filteredHistory), [filteredHistory]);
+
+  const selectedWeekTotals = useMemo(() => {
+    if (selectedWeek === null) return null;
+    const startMs = starts[selectedWeek];
+    const endMs = startMs + 7 * 24 * 60 * 60 * 1000;
+    const t = { games: 0, seconds: 0, squares: 0 };
+    for (const log of filteredHistory) {
+      if (log.t >= startMs && log.t < endMs) {
+        t.games += 1;
+        t.seconds += log.seconds;
+        t.squares += log.squares ?? 0;
+      }
+    }
+    return t;
+  }, [selectedWeek, starts, filteredHistory]);
+
   const chartColor =
     HISTORY_FILTERS.find((f) => f.id === historyFilter)?.color ?? METRIC_COLORS[metric];
   const color = historyFilter === "all" ? METRIC_COLORS[metric] : chartColor;
+
+  const displayWeek = selectedWeekTotals ?? week;
+  const weekLabel = selectedWeek !== null
+    ? (() => {
+        const d = new Date(starts[selectedWeek]);
+        return `Week of ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+      })()
+    : "This week";
 
   return (
     <section className="flex flex-col gap-3 border-t border-[var(--border)] pt-5">
@@ -291,7 +316,7 @@ function ProgressSection({
             <button
               key={f.id}
               type="button"
-              onClick={() => setHistoryFilter(f.id)}
+              onClick={() => { setHistoryFilter(f.id); setSelectedWeek(null); }}
               className="shrink-0 rounded-full border-2 px-3 py-1 text-xs font-bold transition active:scale-95"
               style={{
                 borderColor: active ? f.color : "var(--border)",
@@ -305,29 +330,42 @@ function ProgressSection({
         })}
       </div>
 
-      {/* This week */}
-      <div className="font-display text-sm font-extrabold text-[var(--foreground)]">
-        This week
+      {/* Week stats — changes when a week is selected in the chart */}
+      <div className="flex items-center justify-between">
+        <div className="font-display text-sm font-extrabold text-[var(--foreground)]">
+          {weekLabel}
+        </div>
+        {selectedWeek !== null && (
+          <button
+            type="button"
+            onClick={() => setSelectedWeek(null)}
+            className="text-xs font-semibold text-[var(--muted)] underline underline-offset-2"
+          >
+            Clear
+          </button>
+        )}
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <WeekStat label="Games" value={week.games.toLocaleString()} />
-        <WeekStat label="Time" value={formatDuration(week.seconds)} />
-        <WeekStat label="Squares" value={week.squares.toLocaleString()} />
+        <WeekStat label="Games" value={displayWeek.games.toLocaleString()} />
+        <WeekStat label="Time" value={formatDuration(displayWeek.seconds)} />
+        <WeekStat label="Squares" value={displayWeek.squares.toLocaleString()} />
       </div>
-      {metric === "squares" && (
+      {metric === "squares" && selectedWeek === null && (
         <p className="text-xs font-semibold text-[var(--muted)]">
           {lifetimeTotal.toLocaleString()} lifetime · chart shows squares per week
         </p>
       )}
 
       <div className="pt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
-        Past 12 weeks
+        Past 12 weeks · tap a week to inspect
       </div>
       <ProgressChart
         series={series}
         starts={starts}
         metric={metric}
         color={color}
+        selectedIndex={selectedWeek}
+        onSelect={setSelectedWeek}
       />
     </section>
   );
