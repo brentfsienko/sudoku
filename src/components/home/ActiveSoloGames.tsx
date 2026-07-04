@@ -91,7 +91,7 @@ function ActiveSoloRow({
 
     if (!isHorizontal.current) return;
     e.preventDefault();
-    const clamped = Math.max(-SWIPE_DISMISS - 20, Math.min(0, dx));
+    const clamped = Math.max(-(SWIPE_THRESHOLD * 2), Math.min(0, dx));
     setSwipeX(clamped);
   }
 
