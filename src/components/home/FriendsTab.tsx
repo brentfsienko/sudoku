@@ -32,14 +32,15 @@ type SubTab = "friends" | "daily";
 type Props = {
   userData: UseUserData;
   onSignIn: () => void;
+  initialSubTab?: SubTab;
 };
 
-export function FriendsTab({ userData, onSignIn }: Props) {
+export function FriendsTab({ userData, onSignIn, initialSubTab }: Props) {
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
   const profile = userData.data?.profile ?? null;
   const friends = useFriends(userData.user, profile);
-  const [subTab, setSubTab] = useState<SubTab>("friends");
+  const [subTab, setSubTab] = useState<SubTab>(initialSubTab ?? "friends");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicProfile[]>([]);
   const [searching, setSearching] = useState(false);

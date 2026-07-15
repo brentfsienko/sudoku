@@ -54,6 +54,9 @@ import {
 
 export default function Home() {
   const [tab, setTab] = useState<HomeTab>("main");
+  // Desired sub-tab when switching to the Friends tab from elsewhere.
+  // FriendsTab remounts on tab switch, so it reads this as initialSubTab.
+  const [friendsInitSubTab, setFriendsInitSubTab] = useState<"friends" | "daily">("friends");
 
   const userData = useUserData();
   const data = userData.data;
@@ -90,6 +93,10 @@ export default function Home() {
               data={statsForMe}
               userData={userData}
               onSignIn={() => setSignInGateOpen(true)}
+              onViewDailyLeaderboard={() => {
+                setFriendsInitSubTab("daily");
+                setTab("friends");
+              }}
             />
           )}
 
@@ -98,7 +105,11 @@ export default function Home() {
               className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
               style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
             >
-              <FriendsTab userData={userData} onSignIn={() => setSignInGateOpen(true)} />
+              <FriendsTab
+                userData={userData}
+                onSignIn={() => setSignInGateOpen(true)}
+                initialSubTab={friendsInitSubTab}
+              />
             </div>
           )}
 

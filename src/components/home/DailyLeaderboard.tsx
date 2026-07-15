@@ -39,7 +39,11 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
   const friendIds = friends.map((f) => f.userId);
 
   useEffect(() => {
-    if (!myId) return;
+    if (!myId) {
+      // Still waiting for auth to resolve — don't show stale "No results" yet
+      setLoading(true);
+      return;
+    }
     setLoading(true);
 
     void (async () => {
