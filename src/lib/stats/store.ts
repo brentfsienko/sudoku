@@ -132,6 +132,32 @@ export async function recordSoloGame(
   await saveUserData(applySoloResult(data, { ...result, bonesFound }));
 }
 
+/**
+ * Permanently deletes an active solo from both local and remote storage.
+ * Cancels any pending debounced persist so the remote can't race to restore it.
+ */
+export async function deleteActiveSolo(id: string): Promise<void> {
+  if (activeSoloPersistTimer) {
+    clearTimeout(activeSoloPersistTimer);
+    activeSoloPersistTimer = null;
+  }
+  removeActiveSolo(id);
+  const uid = await currentUserId();
+  if (!uid) return;
+  try {
+    let data = await loadForWrite();
+    data = {
+      ...data,
+      activeSolos: mergeActiveSolos([], data.activeSolos).filter(
+        (item) => item.id !== id,
+      ),
+    };
+    await saveUserData(data);
+  } catch {
+    // local already removed — acceptable failure
+  }
+}
+
 export async function recordMultiGame(result: MultiResult): Promise<void> {
   const data = await loadForWrite();
   const bonesFound = Math.max(0, result.bonesFound);

@@ -210,12 +210,14 @@ textarea {
   animation: float-in 0.3s ease-out both;
 }
 
-/* ── Game pages: use measured app height so number pad never clips ── */
+/* ── Game pages: fixed to visual viewport so browser chrome never clips content ── */
 @media (max-width: 767px) {
   .game-viewport {
-    height: var(--app-height, 100dvh);
-    max-height: var(--app-height, 100dvh);
+    position: fixed;
+    inset: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 }
 

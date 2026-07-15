@@ -14,6 +14,7 @@ import { FactGuessCard } from "@/components/home/FactGuessCard";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 import { StartGameSheet } from "@/components/home/StartGameSheet";
 import { StreakBonePill } from "@/components/home/StreakBonePill";
+import { DailySection } from "@/components/home/DailySection";
 import { PawIcon, UsersIcon } from "@/components/icons";
 import { createGameInvite } from "@/lib/friends/api";
 import type { PublicProfile } from "@/lib/friends/types";
@@ -172,6 +173,11 @@ export function MainTab({ data, userData, onSignIn }: Props) {
               <ActiveSoloGames
                 profile={data.profile}
                 userEmail={userData.user?.email}
+              />
+
+              <DailySection
+                friends={friends.friends}
+                myId={userData.user?.id ?? null}
               />
 
               <section className="mb-5">
