@@ -38,9 +38,9 @@ function TallyGroup({ count, size, gap }: GroupProps) {
           width={size}
           height={size}
           aria-hidden
-          style={{
+            style={{
             imageRendering: "pixelated",
-            transform: "rotate(90deg)",
+            transform: "rotate(45deg)",
             flexShrink: 0,
           }}
         />
@@ -58,7 +58,7 @@ function TallyGroup({ count, size, gap }: GroupProps) {
             height={diagSize}
             style={{
               imageRendering: "pixelated",
-              transform: "rotate(45deg)",
+              transform: "rotate(-45deg)",
             }}
           />
         </div>
