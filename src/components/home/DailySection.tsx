@@ -17,7 +17,11 @@ function CalendarIcon() {
   );
 }
 
-export function DailySection() {
+type Props = {
+  onViewLeaderboard: () => void;
+};
+
+export function DailySection({ onViewLeaderboard }: Props) {
   const router = useRouter();
   const dateStr = getPSTDate();
   const difficulty = dayDifficulty(dateStr);
@@ -46,7 +50,7 @@ export function DailySection() {
 
       <button
         type="button"
-        onClick={() => router.push("/play/daily")}
+        onClick={() => complete ? onViewLeaderboard() : router.push("/play/daily")}
         className="flex w-full items-center gap-3 rounded-2xl bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99]"
       >
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">

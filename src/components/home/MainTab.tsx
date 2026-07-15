@@ -36,6 +36,7 @@ type Props = {
   data: UserData;
   userData: UseUserData;
   onSignIn: () => void;
+  onViewDailyLeaderboard: () => void;
 };
 
 function PlayRow({
@@ -71,7 +72,7 @@ function PlayRow({
   );
 }
 
-export function MainTab({ data, userData, onSignIn }: Props) {
+export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Props) {
   const router = useRouter();
   const friends = useFriends(userData.user, data.profile);
   const { sheetRef, offset, pulling } = usePullableSheet();
@@ -175,7 +176,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
                 userEmail={userData.user?.email}
               />
 
-              <DailySection />
+              <DailySection onViewLeaderboard={onViewDailyLeaderboard} />
 
               <section className="mb-5">
                 <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
