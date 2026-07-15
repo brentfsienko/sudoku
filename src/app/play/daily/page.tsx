@@ -21,6 +21,7 @@ import {
   isTodayComplete,
 } from "@/lib/daily/puzzle";
 import { fetchMyDailyResult, submitDailyResult } from "@/lib/daily/api";
+import { saveDailyResultLocal } from "@/lib/daily/local";
 import { DailyLeaderboard } from "@/components/home/DailyLeaderboard";
 import { LoadingPaws } from "@/app/play/page";
 import { fetchFriends } from "@/lib/friends/api";
@@ -114,6 +115,9 @@ function DailyGame({
             },
             { activeId },
           );
+          // Save locally first so the home tab can display the time
+          // even if the Supabase table isn't available yet.
+          saveDailyResultLocal(dateStr, elapsedSeconds);
           await submitDailyResult(dateStr, elapsedSeconds, mistakes);
           onFinish(elapsedSeconds, mistakes);
         })()

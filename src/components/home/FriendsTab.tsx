@@ -15,6 +15,7 @@ import {
 import { AddFriendSheet } from "@/components/home/AddFriendSheet";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { DailyLeaderboard } from "@/components/home/DailyLeaderboard";
+import { isTodayComplete } from "@/lib/daily/puzzle";
 import { SearchIcon, UserPlusIcon } from "@/components/icons";
 import type { DogId } from "@/lib/theme/dogs";
 import { GAME_MODE_LABELS } from "@/lib/game/types";
@@ -145,10 +146,26 @@ export function FriendsTab({ userData, onSignIn, initialSubTab }: Props) {
 
   // Daily leaderboard sub-tab
   if (subTab === "daily") {
+    const dailyDone = isTodayComplete();
     return (
       <div className="flex flex-col gap-5">
         <TabScreenHeader title="Friends" />
         {subTabPill}
+        {!dailyDone && (
+          <button
+            type="button"
+            onClick={() => router.push("/play/daily")}
+            className="flex w-full items-center justify-between rounded-2xl bg-[var(--primary)] px-5 py-3.5 text-left text-white active:opacity-90"
+          >
+            <div>
+              <p className="font-display text-sm font-extrabold">Today's Daily Challenge</p>
+              <p className="text-xs opacity-80">Play now to get on the leaderboard</p>
+            </div>
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 shrink-0 opacity-80">
+              <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+            </svg>
+          </button>
+        )}
         <DailyLeaderboard
           friends={friends.friends}
           myId={userData.user?.id ?? ""}
