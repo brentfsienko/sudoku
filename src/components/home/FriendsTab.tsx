@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useOnlineFriends } from "@/lib/friends/useOnlineFriends";
 import { useRouter } from "next/navigation";
 import { DogAvatar } from "@/components/DogAvatar";
 import {
@@ -35,14 +34,15 @@ type Props = {
   userData: UseUserData;
   onSignIn: () => void;
   initialSubTab?: SubTab;
+  /** Passed from the root so presence is tracked even when this tab isn't active. */
+  onlineIds?: Set<string>;
 };
 
-export function FriendsTab({ userData, onSignIn, initialSubTab }: Props) {
+export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new Set() }: Props) {
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
   const profile = userData.data?.profile ?? null;
   const friends = useFriends(userData.user, profile);
-  const onlineIds = useOnlineFriends(userData.user?.id ?? null);
   const [subTab, setSubTab] = useState<SubTab>(initialSubTab ?? "friends");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicProfile[]>([]);
