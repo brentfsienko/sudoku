@@ -23,6 +23,11 @@ import { DIFFICULTY_LABELS, GAME_MODE_LABELS, type Difficulty } from "@/lib/game
 import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
 import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
+import {
+  getCoachmarkStep,
+  advanceCoachmarkToAvatar,
+  type CoachmarkStep,
+} from "@/lib/onboarding";
 import { useUserData } from "@/lib/stats/useUserData";
 import {
   COOP_ACCENT,
@@ -57,6 +62,19 @@ export default function Home() {
   // Desired sub-tab when switching to the Friends tab from elsewhere.
   // FriendsTab remounts on tab switch, so it reads this as initialSubTab.
   const [friendsInitSubTab, setFriendsInitSubTab] = useState<"friends" | "daily">("friends");
+  const [coachmarkStep, setCoachmarkStep] = useState<CoachmarkStep | null>(null);
+
+  useEffect(() => {
+    setCoachmarkStep(getCoachmarkStep());
+  }, []);
+
+  function handleTabChange(next: HomeTab) {
+    if (next === "me" && coachmarkStep === "nav") {
+      advanceCoachmarkToAvatar();
+      setCoachmarkStep("avatar");
+    }
+    setTab(next);
+  }
 
   const userData = useUserData();
   const data = userData.data;
@@ -135,14 +153,16 @@ export default function Home() {
                 }}
                 userData={userData}
                 onSignIn={() => setSignInGateOpen(true)}
+                coachmarkStep={coachmarkStep}
+                onCoachmarkDismiss={() => setCoachmarkStep(null)}
               />
             )}
             </div>
           )}
         </main>
-        <BottomNav active={tab} onChange={setTab} variant="inline" />
+        <BottomNav active={tab} onChange={handleTabChange} variant="inline" coachmarkStep={coachmarkStep} />
       </AppFrame>
-      <BottomNav active={tab} onChange={setTab} variant="dock" />
+      <BottomNav active={tab} onChange={handleTabChange} variant="dock" coachmarkStep={coachmarkStep} />
     </MobileAppRoot>
     </>
   );
@@ -168,6 +188,8 @@ function MeTab({
   data,
   userData,
   onSignIn,
+  coachmarkStep,
+  onCoachmarkDismiss,
 }: {
   data: {
     profile: Profile;
@@ -178,6 +200,8 @@ function MeTab({
   };
   userData: ReturnType<typeof useUserData>;
   onSignIn: () => void;
+  coachmarkStep?: import("@/lib/onboarding").CoachmarkStep | null;
+  onCoachmarkDismiss?: () => void;
 }) {
   const { profile, solo, multi, history } = data;
 
@@ -192,6 +216,8 @@ function MeTab({
         bones={data.bones ?? 0}
         userData={userData}
         onSignIn={onSignIn}
+        coachmarkStep={coachmarkStep}
+        onCoachmarkDismiss={onCoachmarkDismiss}
       />
 
       {/* Progress */}

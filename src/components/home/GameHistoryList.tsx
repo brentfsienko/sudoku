@@ -12,7 +12,9 @@ import {
 import { CrownIcon } from "@/components/icons";
 import { createGameInvite, lookupProfileByUsername } from "@/lib/friends/api";
 import { newRoomCode } from "@/lib/game/room";
-import { DIFFICULTY_LABELS, GAME_MODE_LABELS, type GameMode } from "@/lib/game/types";
+import { GAME_MODE_LABELS, type GameMode } from "@/lib/game/types";
+import { formatDurationExact } from "@/lib/stats/progress";
+import { BoneTally } from "@/components/BoneTally";
 import { boardSharePercents } from "@/lib/stats/boardShare";
 import { COOP_ACCENT, VERSUS_ACCENT } from "@/lib/stats/multi";
 import type { GameLog, MultiStats, OpponentRecord, Profile } from "@/lib/stats/types";
@@ -103,10 +105,13 @@ function RowTags({ log }: { log: GameLog }) {
   return (
     <div className="flex items-center gap-1">
       {log.daily && <Pill label="Daily" color="#f59e0b" />}
-      <Pill
-        label={log.mode === "solo" ? "Solo" : GAME_MODE_LABELS[log.mode]}
-        color={modeAccent(log.mode)}
-      />
+      {/* Skip the mode pill for daily solo puzzles — "Daily" already implies it */}
+      {!(log.daily && log.mode === "solo") && (
+        <Pill
+          label={log.mode === "solo" ? "Solo" : GAME_MODE_LABELS[log.mode]}
+          color={modeAccent(log.mode)}
+        />
+      )}
     </div>
   );
 }
@@ -216,8 +221,9 @@ function MultiplayerHistoryRow({
         {/* Tags row — always top-left */}
         <div className="mb-1.5 flex items-center gap-1.5">
           <RowTags log={log} />
-          <span className="truncate text-[10px] font-semibold text-[var(--muted)]">
-            {DIFFICULTY_LABELS[log.difficulty]} · {outcomeText(log)}
+          <span className="flex items-center gap-1 truncate text-[10px] font-semibold text-[var(--muted)]">
+            <BoneTally difficulty={log.difficulty} size={10} />
+            <span>· {outcomeText(log)}{log.seconds != null ? ` · ${formatDurationExact(log.seconds)}` : ""}</span>
           </span>
         </div>
         {/* Players row */}
@@ -277,8 +283,9 @@ function SoloHistoryRow({
         {/* Tags row — always top-left */}
         <div className="mb-1.5 flex items-center gap-1.5">
           <RowTags log={log} />
-          <span className="truncate text-[10px] font-semibold text-[var(--muted)]">
-            {DIFFICULTY_LABELS[log.difficulty]} · {outcomeText(log)}
+          <span className="flex items-center gap-1 truncate text-[10px] font-semibold text-[var(--muted)]">
+            <BoneTally difficulty={log.difficulty} size={10} />
+            <span>· {outcomeText(log)}{log.seconds != null ? ` · ${formatDurationExact(log.seconds)}` : ""}</span>
           </span>
         </div>
         {/* Player row */}

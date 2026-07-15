@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
-import { DifficultySelect } from "@/components/home/DifficultySelect";
+import { BoneTally } from "@/components/BoneTally";
+import { BoneDifficultySelect } from "@/components/home/BoneDifficultySelect";
 import {
   DIFFICULTIES,
-  DIFFICULTY_LABELS,
   GAME_MODE_LABELS,
   type Difficulty,
 } from "@/lib/game/types";
@@ -111,8 +111,8 @@ export function GameSetupSheet({
               }`}
             >
               <div>
-                <div className="font-display text-base font-bold text-[var(--foreground)]">
-                  {DIFFICULTY_LABELS[d]}
+                <div className="mb-0.5 flex items-center gap-2">
+                  <BoneTally difficulty={d} size={14} />
                 </div>
                 <div className="text-xs text-[var(--muted)]">
                   {SOLO_DIFFICULTY_HINTS[d]}
@@ -125,7 +125,7 @@ export function GameSetupSheet({
           ))}
         </div>
       ) : (
-        <DifficultySelect value={difficulty} onChange={setDifficulty} />
+        <BoneDifficultySelect value={difficulty} onChange={setDifficulty} />
       )}
 
       <button

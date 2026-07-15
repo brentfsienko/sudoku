@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { dismissCoachmark, type CoachmarkStep } from "@/lib/onboarding";
 import { BoneIcon } from "@/components/BoneIcon";
 import { DogAvatar } from "@/components/DogAvatar";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
@@ -22,6 +23,8 @@ type Props = {
   bones: number;
   userData: UseUserData;
   onSignIn: () => void;
+  coachmarkStep?: CoachmarkStep | null;
+  onCoachmarkDismiss?: () => void;
 };
 
 export function MeProfileHeader({
@@ -31,10 +34,22 @@ export function MeProfileHeader({
   bones,
   userData,
   onSignIn,
+  coachmarkStep,
+  onCoachmarkDismiss,
 }: Props) {
   const [editing, setEditing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [friendCodeOpen, setFriendCodeOpen] = useState(false);
+
+  const showAvatarCoachmark = coachmarkStep === "avatar";
+
+  function openEditing() {
+    setEditing(true);
+    if (showAvatarCoachmark) {
+      dismissCoachmark();
+      onCoachmarkDismiss?.();
+    }
+  }
   const friends = useFriends(userData.user, profile);
   const coop = coopWinLoss(multi);
   const versus = compWinLoss(multi);
@@ -69,7 +84,7 @@ export function MeProfileHeader({
                 type="button"
                 onClick={() => {
                   setSettingsOpen(false);
-                  setEditing(true);
+                  openEditing();
                 }}
                 className="block w-full py-2 text-left font-semibold text-[var(--foreground)]"
               >
@@ -102,10 +117,20 @@ export function MeProfileHeader({
         <div className="relative mx-auto w-fit px-12">
           <button
             type="button"
-            onClick={() => setEditing(true)}
+            onClick={openEditing}
             className="relative block rounded-full active:scale-95"
             aria-label="Edit profile"
           >
+            {/* Speech bubble positioned just above the pencil badge, coming out of the avatar */}
+            {showAvatarCoachmark && (
+              <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap">
+                <div className="relative rounded-2xl bg-[var(--foreground)] px-3.5 py-2 text-xs font-semibold text-white shadow-xl">
+                  Tap to customize your pup! 🐾
+                  {/* Downward caret pointing at pencil badge */}
+                  <span className="absolute left-1/2 top-full -translate-x-1/2 border-[6px] border-transparent border-t-[var(--foreground)]" />
+                </div>
+              </div>
+            )}
             <DogAvatar
               dogId={profile.dogId}
               size={128}
