@@ -222,7 +222,7 @@ function MultiplayerHistoryRow({
         <div className="mb-1.5 flex items-center gap-1.5">
           <RowTags log={log} />
           <span className="flex items-center gap-1 truncate text-[10px] font-semibold text-[var(--muted)]">
-            <BoneTally difficulty={log.difficulty} size={10} />
+            <BoneTally difficulty={log.difficulty} size={8} />
             <span>· {outcomeText(log)}{log.seconds != null ? ` · ${formatDurationExact(log.seconds)}` : ""}</span>
           </span>
         </div>
@@ -284,7 +284,7 @@ function SoloHistoryRow({
         <div className="mb-1.5 flex items-center gap-1.5">
           <RowTags log={log} />
           <span className="flex items-center gap-1 truncate text-[10px] font-semibold text-[var(--muted)]">
-            <BoneTally difficulty={log.difficulty} size={10} />
+            <BoneTally difficulty={log.difficulty} size={8} />
             <span>· {outcomeText(log)}{log.seconds != null ? ` · ${formatDurationExact(log.seconds)}` : ""}</span>
           </span>
         </div>

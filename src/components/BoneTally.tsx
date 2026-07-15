@@ -17,12 +17,16 @@ type GroupProps = { count: number; size: number; gap: number };
 function TallyGroup({ count, size, gap }: GroupProps) {
   const verticals = Math.min(count, 4);
   const hasDiagonal = count === 5;
-  // Width of the vertical column
   const colWidth = verticals * size + (verticals - 1) * gap;
 
+  // The diagonal bone is sized to visually span the group at 45°.
+  // hypotenuse of (colWidth × size) keeps it proportional without overflow.
+  const diagSize = Math.round(Math.sqrt(colWidth ** 2 + size ** 2) * 0.7);
+
   return (
+    // overflow:visible so the diagonal can poke outside without affecting layout
     <div
-      className="relative inline-flex items-center"
+      className="relative inline-flex items-center overflow-visible"
       style={{ gap, width: colWidth, height: size }}
     >
       {Array.from({ length: verticals }).map((_, i) => (
@@ -43,19 +47,18 @@ function TallyGroup({ count, size, gap }: GroupProps) {
       ))}
       {hasDiagonal && (
         <div
-          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-visible"
           aria-hidden
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={BONE_IMAGE}
             alt=""
-            width={Math.round(colWidth * 0.95)}
-            height={Math.round(colWidth * 0.95)}
+            width={diagSize}
+            height={diagSize}
             style={{
               imageRendering: "pixelated",
               transform: "rotate(45deg)",
-              opacity: 0.9,
             }}
           />
         </div>
