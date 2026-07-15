@@ -112,6 +112,7 @@ function DailyGame({
               hintsUsed,
               squaresFilled,
               bonesFound,
+              daily: true,
             },
             { activeId },
           );
@@ -135,14 +136,19 @@ function DailyInner() {
   const [userId, setUserId] = useState<string | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [alreadyDone, setAlreadyDone] = useState(() => isTodayComplete());
+  // useState lazy-initialiser runs on the server (where window is undefined),
+  // so isTodayComplete() always returns false there. Read localStorage in an
+  // effect instead so the real completion state is applied after hydration.
+  const [alreadyDone, setAlreadyDone] = useState(false);
 
-  // On mount, also check Supabase — if completed on another device, honour it.
   useEffect(() => {
-    if (alreadyDone) return;
+    if (isTodayComplete()) {
+      setAlreadyDone(true);
+      return;
+    }
+    // Also check Supabase — completed on another device.
     void fetchMyDailyResult(dateStr).then((r) => {
       if (r) {
-        // Mark complete on this device so the puzzle page redirects to leaderboard
         claimSoloFinish(getDailyActiveId(dateStr));
         setAlreadyDone(true);
       }
