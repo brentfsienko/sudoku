@@ -6,6 +6,8 @@ const TRIGGER_THRESHOLD = 72; // px of pull needed to trigger refresh
 const MAX_PULL = 100;          // max visual travel (with resistance)
 const RESISTANCE = 0.42;
 const REFRESH_DURATION_MS = 2500;
+/** Fraction of refresh time to hold at pull position before snapping back. */
+const HOLD_FRACTION = 0.8;
 
 export type PullToRefreshState = "idle" | "pulling" | "triggered" | "refreshing";
 
@@ -13,6 +15,8 @@ export function usePullToRefresh(onRefresh: () => void | Promise<void>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pull, setPull] = useState(0); // 0–MAX_PULL
   const [state, setState] = useState<PullToRefreshState>("idle");
+  /** True during the snap-back phase so callers can apply CSS transitions. */
+  const [snapping, setSnapping] = useState(false);
 
   const dragRef = useRef<{ startY: number } | null>(null);
   const pullRef = useRef(0);
@@ -22,22 +26,35 @@ export function usePullToRefresh(onRefresh: () => void | Promise<void>) {
   useEffect(() => { stateRef.current = state; }, [state]);
 
   const endRefresh = useCallback(() => {
+    setSnapping(false);
     setPull(0);
     setState("idle");
   }, []);
 
   const triggerRefresh = useCallback(() => {
     setState("refreshing");
-    setPull(TRIGGER_THRESHOLD); // hold at threshold while refreshing
+    setPull(TRIGGER_THRESHOLD); // hold at threshold while spinning
+    setSnapping(false);
+
     const result = onRefresh();
-    const done = () => {
-      // Animate back after the minimum display time
-      setTimeout(endRefresh, 300);
+    const holdMs = REFRESH_DURATION_MS * HOLD_FRACTION;       // 2000 ms
+    const snapMs = REFRESH_DURATION_MS * (1 - HOLD_FRACTION); // 500 ms
+
+    const snap = () => {
+      // Start the visual snap-back (CSS transition on the caller side)
+      setSnapping(true);
+      setPull(0);
+      setTimeout(endRefresh, snapMs);
     };
+
     if (result instanceof Promise) {
-      result.finally(() => setTimeout(done, 0));
+      // Wait for whichever is longer: promise or the hold period
+      const holdTimer = new Promise<void>((resolve) =>
+        setTimeout(resolve, holdMs),
+      );
+      void Promise.all([result, holdTimer]).then(snap);
     } else {
-      setTimeout(done, REFRESH_DURATION_MS);
+      setTimeout(snap, holdMs);
     }
   }, [onRefresh, endRefresh]);
 
@@ -46,7 +63,6 @@ export function usePullToRefresh(onRefresh: () => void | Promise<void>) {
     if (!el) return;
 
     function isAtTop(): boolean {
-      // Check if the scrollable child (first child) is scrolled to top
       const scrollable = el!.querySelector<HTMLElement>("[data-ptr-scroll]");
       return (scrollable?.scrollTop ?? 0) <= 1;
     }
@@ -107,5 +123,5 @@ export function usePullToRefresh(onRefresh: () => void | Promise<void>) {
   /** Progress 0–1 toward the trigger point */
   const progress = Math.min(1, pull / TRIGGER_THRESHOLD);
 
-  return { containerRef, pull, progress, state };
+  return { containerRef, pull, progress, state, snapping };
 }
