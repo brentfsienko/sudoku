@@ -10,6 +10,36 @@ export type DailyLeaderboardEntry = {
 };
 
 /**
+ * Fetches the current user's own result for a given date, or null if not completed.
+ */
+export async function fetchMyDailyResult(
+  dateStr: string,
+): Promise<DailyLeaderboardEntry | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+
+  const {
+    data: { session },
+  } = await sb.auth.getSession();
+  if (!session) return null;
+
+  const { data } = await sb
+    .from("daily_results")
+    .select("user_id, elapsed_seconds, mistakes, completed_at")
+    .eq("user_id", session.user.id)
+    .eq("puzzle_date", dateStr)
+    .single();
+
+  if (!data) return null;
+  return {
+    userId: data.user_id as string,
+    elapsedSeconds: data.elapsed_seconds as number,
+    mistakes: data.mistakes as number,
+    completedAt: data.completed_at as string,
+  };
+}
+
+/**
  * Upserts the current user's result for a given daily puzzle date.
  * Only the best result (shortest elapsed_seconds) is kept, using an
  * upsert that ignores if a better result already exists.

@@ -175,10 +175,7 @@ export function MainTab({ data, userData, onSignIn }: Props) {
                 userEmail={userData.user?.email}
               />
 
-              <DailySection
-                friends={friends.friends}
-                myId={userData.user?.id ?? null}
-              />
+              <DailySection />
 
               <section className="mb-5">
                 <h2 className={`${homeSectionTitleClass} mb-2.5`}>Play</h2>
