@@ -23,6 +23,7 @@ import { DIFFICULTY_LABELS, GAME_MODE_LABELS, type Difficulty } from "@/lib/game
 import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
 import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
+import { useOnlineFriends } from "@/lib/friends/useOnlineFriends";
 import {
   getCoachmarkStep,
   advanceCoachmarkToAvatar,
@@ -78,6 +79,8 @@ export default function Home() {
 
   const userData = useUserData();
   const data = userData.data;
+  // Always-on presence: tracks from app mount regardless of active tab
+  const onlineIds = useOnlineFriends(userData.user?.id ?? null);
   const statsForMe = data ?? emptyUserData();
   const [signInGateOpen, setSignInGateOpen] = useState(false);
 
@@ -127,6 +130,7 @@ export default function Home() {
                 userData={userData}
                 onSignIn={() => setSignInGateOpen(true)}
                 initialSubTab={friendsInitSubTab}
+                onlineIds={onlineIds}
               />
             </div>
           )}
