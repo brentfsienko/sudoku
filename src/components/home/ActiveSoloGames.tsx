@@ -10,6 +10,7 @@ import {
   isActiveSolo,
   loadActiveSolos,
 } from "@/lib/game/activeSolo";
+import { claimSoloFinish } from "@/lib/game/finishedSolo";
 import { deleteActiveSolo, loadUserData, STATS_UPDATED_EVENT } from "@/lib/stats/store";
 import { formatGameClock } from "@/lib/game/format";
 import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
@@ -221,7 +222,11 @@ export function ActiveSoloGames({ profile, userEmail }: Props) {
   }, []);
 
   function handleQuit(id: string) {
-    // Optimistically remove from UI immediately, then sync to cloud
+    // Mark as finished FIRST — this is the permanent, sync guard that prevents
+    // the game from ever reappearing via parseList/replaceActiveSolosLocal,
+    // even if a cloud-sync races to restore it from remote.
+    claimSoloFinish(id);
+    // Remove from UI immediately, then clean up cloud async
     setActives((prev) => prev.filter((a) => a.id !== id));
     void deleteActiveSolo(id);
   }
