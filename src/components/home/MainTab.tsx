@@ -136,34 +136,26 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   }
 
   const isRefreshing = ptrState === "refreshing";
-  // boneY: 0 → 72 while pulling; held at 72 while refreshing; 0 when snapping back
-  const boneY = Math.min(pull, 72);
+  // Bone is pinned — only opacity changes. Sheet moves to reveal/cover it.
   const boneOpacity = Math.min(1, progress * 1.4);
-  const boneScale = 0.6 + progress * 0.4;
-  // Sheet shifts down by the pull amount so content "drags" with the gesture
-  const sheetPullOffset = boneY;
+  const sheetPullOffset = Math.min(pull, 72);
 
   return (
     <div
       ref={containerRef}
       className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]"
     >
-      {/* Pull-to-refresh bone — settles just below the "Sudogku" title.
-          Formula: safe-area-inset-top + boneY lands at safe-area + 72 px
-          which is ~8 px below the 2.75 rem title that starts at safe-area + 1.25 rem. */}
+      {/* Bone is pinned just below "Sudogku" (safe-area + 72px) and never moves.
+          The sheet slides down to reveal it, then back up to cover it.
+          Spins whenever pull > 0 so it's already spinning as it's revealed. */}
       <div
         className={`pointer-events-none absolute inset-x-0 top-0 z-[15] flex justify-center ${
-          isRefreshing ? "animate-bone-spin" : ""
+          pull > 0 || isRefreshing ? "animate-bone-spin" : ""
         }`}
         style={{
-          transform: isRefreshing
-            ? `translateY(calc(env(safe-area-inset-top) + ${boneY}px))`
-            : `translateY(calc(env(safe-area-inset-top) + ${boneY}px)) scale(${boneScale}) rotate(${progress * 270}deg)`,
+          transform: "translateY(calc(env(safe-area-inset-top) + 72px))",
           opacity: boneOpacity,
-          // Smooth spring-back during the snap phase; no transition while pulling
-          transition: snapping
-            ? "transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s ease"
-            : "none",
+          transition: snapping ? "opacity 0.4s ease" : "none",
         }}
       >
         <BoneIcon size={32} />
