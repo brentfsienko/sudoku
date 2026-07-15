@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { fetchLeaderboard, type DailyLeaderboardEntry } from "@/lib/daily/api";
 import { getPSTDate } from "@/lib/daily/puzzle";
-import { formatDuration } from "@/lib/stats/progress";
+import { formatDurationExact } from "@/lib/stats/progress";
 import { fetchMyPublicProfile } from "@/lib/friends/api";
+import { DogAvatar } from "@/components/DogAvatar";
 import type { Friend } from "@/lib/friends/types";
 import type { PublicProfile } from "@/lib/friends/types";
 
@@ -122,6 +123,7 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
               const isMe = entry.userId === myId;
               const profile = profiles.get(entry.userId);
               const name = profile?.username ?? (isMe ? "You" : "Unknown");
+              const dogId = profile?.dogId ?? "golden";
               const medal = MEDALS[i] ?? `${i + 1}.`;
 
               return (
@@ -129,12 +131,20 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
                   key={entry.userId}
                   className={`flex items-center gap-3 px-4 py-3 ${i < entries.length - 1 ? "border-b border-[var(--border)]" : ""} ${isMe ? "bg-[var(--primary-soft)]" : ""}`}
                 >
-                  <span className="w-7 shrink-0 text-center text-base">
-                    {typeof medal === "string" && medal.length <= 2 ? medal : <span className="text-sm font-bold text-[var(--muted)]">{medal}</span>}
+                  {/* Rank */}
+                  <span className="w-6 shrink-0 text-center text-base leading-none">
+                    {typeof medal === "string" && medal.length <= 2
+                      ? medal
+                      : <span className="text-sm font-bold text-[var(--muted)]">{medal}</span>
+                    }
                   </span>
 
+                  {/* Avatar */}
+                  <DogAvatar dogId={dogId} username={name} size={36} bare />
+
+                  {/* Name + mistakes */}
                   <div className="min-w-0 flex-1">
-                    <p className={`font-display text-sm font-bold ${isMe ? "text-[var(--primary)]" : "text-[var(--foreground)]"}`}>
+                    <p className={`font-display text-sm font-bold leading-tight ${isMe ? "text-[var(--primary)]" : "text-[var(--foreground)]"}`}>
                       {name}
                       {isMe && <span className="ml-1 text-xs font-normal text-[var(--primary)]">(you)</span>}
                     </p>
@@ -145,8 +155,9 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
                     )}
                   </div>
 
-                  <span className="font-display text-sm font-extrabold text-[var(--foreground)]">
-                    {formatDuration(entry.elapsedSeconds)}
+                  {/* Time — M:SS precision */}
+                  <span className="font-display text-sm font-extrabold tabular-nums text-[var(--foreground)]">
+                    {formatDurationExact(entry.elapsedSeconds)}
                   </span>
                 </li>
               );

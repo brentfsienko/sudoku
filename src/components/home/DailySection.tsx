@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { getPSTDate, dayDifficulty, isTodayComplete } from "@/lib/daily/puzzle";
 import { fetchMyDailyResult } from "@/lib/daily/api";
 import { loadDailyResultLocal } from "@/lib/daily/local";
-import { formatDuration } from "@/lib/stats/progress";
+import { formatDurationExact } from "@/lib/stats/progress";
 import { DIFFICULTY_LABELS } from "@/lib/game/types";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 
@@ -79,7 +79,7 @@ export function DailySection({ onViewLeaderboard }: Props) {
               <>
                 {" · "}
                 <span className="text-[var(--primary)] font-semibold">
-                  {myTime !== null ? formatDuration(myTime) : "Completed ✓"}
+                  {myTime !== null ? formatDurationExact(myTime) : "Completed ✓"}
                 </span>
               </>
             )}
