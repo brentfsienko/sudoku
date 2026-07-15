@@ -78,7 +78,7 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   const router = useRouter();
   const friends = useFriends(userData.user, data.profile);
   const { sheetRef, offset, pulling } = usePullableSheet();
-  const { containerRef, pull, progress, state: ptrState } = usePullToRefresh(
+  const { containerRef, pull, progress, state: ptrState, snapping } = usePullToRefresh(
     () => userData.refresh(),
   );
   const [startSheetOpen, setStartSheetOpen] = useState(false);
@@ -136,29 +136,37 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   }
 
   const isRefreshing = ptrState === "refreshing";
+  // boneY: 0 → 72 while pulling; held at 72 while refreshing; 0 when snapping back
   const boneY = Math.min(pull, 72);
   const boneOpacity = Math.min(1, progress * 1.4);
   const boneScale = 0.6 + progress * 0.4;
+  // Sheet shifts down by the pull amount so content "drags" with the gesture
+  const sheetPullOffset = boneY;
 
   return (
     <div
       ref={containerRef}
       className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]"
     >
-      {/* Pull-to-refresh bone indicator — z-[15] sits above the header bg (z-10) but below the sheet (z-20) */}
+      {/* Pull-to-refresh bone — settles just below the "Sudogku" title.
+          Formula: safe-area-inset-top + boneY lands at safe-area + 72 px
+          which is ~8 px below the 2.75 rem title that starts at safe-area + 1.25 rem. */}
       <div
         className={`pointer-events-none absolute inset-x-0 top-0 z-[15] flex justify-center ${
           isRefreshing ? "animate-bone-spin" : ""
         }`}
         style={{
           transform: isRefreshing
-            ? `translateY(calc(env(safe-area-inset-top) + ${boneY}px - 40px))`
-            : `translateY(calc(env(safe-area-inset-top) + ${boneY}px - 40px)) scale(${boneScale}) rotate(${progress * 270}deg)`,
+            ? `translateY(calc(env(safe-area-inset-top) + ${boneY}px))`
+            : `translateY(calc(env(safe-area-inset-top) + ${boneY}px)) scale(${boneScale}) rotate(${progress * 270}deg)`,
           opacity: boneOpacity,
-          transition: isRefreshing ? "transform 0.3s ease" : "none",
+          // Smooth spring-back during the snap phase; no transition while pulling
+          transition: snapping
+            ? "transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s ease"
+            : "none",
         }}
       >
-        <BoneIcon size={28} />
+        <BoneIcon size={32} />
       </div>
 
       {/* Pinned title — lower z so the sheet can slide over it when scrolling */}
@@ -176,6 +184,15 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
         ref={sheetRef}
         data-ptr-scroll
         className="relative z-20 min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain"
+        style={{
+          transform: `translateY(${sheetPullOffset}px)`,
+          // Snap back smoothly; no transition while actively pulling
+          transition: snapping
+            ? "transform 0.5s cubic-bezier(0.32, 0.72, 0, 1)"
+            : isRefreshing
+              ? "none"
+              : "transform 0.2s ease",
+        }}
       >
         <div
           className="relative flex flex-col"
