@@ -83,7 +83,7 @@ type Props = {
  */
 export function BoneTally({ difficulty, size = 13 }: Props) {
   const count = DIFFICULTY_BONE_COUNT[difficulty];
-  const gap = Math.max(1, Math.round(size * 0.15));
+  const gap = Math.max(1, Math.round(size * 0.05));
 
   const groups: number[] = [];
   let remaining = count;

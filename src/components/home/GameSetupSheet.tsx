@@ -112,7 +112,7 @@ export function GameSetupSheet({
             >
               <div>
                 <div className="mb-0.5 flex items-center gap-2">
-                  <BoneTally difficulty={d} size={11} />
+                  <BoneTally difficulty={d} size={16} />
                 </div>
                 <div className="text-xs text-[var(--muted)]">
                   {SOLO_DIFFICULTY_HINTS[d]}

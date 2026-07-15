@@ -38,7 +38,7 @@ export function BoneDifficultySelect({ value, onChange }: Props) {
                   : "border-[var(--border)] bg-white"
               }`}
             >
-              <BoneTally difficulty={d} size={9} />
+              <BoneTally difficulty={d} size={14} />
             </button>
           );
         })}
