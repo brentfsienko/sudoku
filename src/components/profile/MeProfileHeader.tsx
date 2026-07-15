@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { hasSeenProfileCoachmark, markProfileCoachmarkSeen } from "@/lib/onboarding";
+import { shouldShowProfileCoachmark, markProfileCoachmarkSeen } from "@/lib/onboarding";
 import { BoneIcon } from "@/components/BoneIcon";
 import { DogAvatar } from "@/components/DogAvatar";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
@@ -39,7 +39,7 @@ export function MeProfileHeader({
   const [showCoachmark, setShowCoachmark] = useState(false);
 
   useEffect(() => {
-    setShowCoachmark(!hasSeenProfileCoachmark());
+    setShowCoachmark(shouldShowProfileCoachmark());
   }, []);
 
   function openEditing() {
