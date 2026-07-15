@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useOnlineFriends } from "@/lib/friends/useOnlineFriends";
 import { useRouter } from "next/navigation";
 import { DogAvatar } from "@/components/DogAvatar";
 import {
@@ -41,6 +42,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab }: Props) {
   const searchRef = useRef<HTMLInputElement>(null);
   const profile = userData.data?.profile ?? null;
   const friends = useFriends(userData.user, profile);
+  const onlineIds = useOnlineFriends(userData.user?.id ?? null);
   const [subTab, setSubTab] = useState<SubTab>(initialSubTab ?? "friends");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicProfile[]>([]);
@@ -272,21 +274,33 @@ export function FriendsTab({ userData, onSignIn, initialSubTab }: Props) {
               : undefined
         }
       >
-        {friends.friends.map((f) => (
-          <FriendListRow
-            key={f.userId}
-            avatar={<DogAvatar dogId={f.dogId as DogId} size={44} />}
-            primary={f.username}
-            secondary="Ready to play"
-            action={
-              <FriendPillButton
-                onClick={() => setInviteFriend(f)}
-              >
-                Start
-              </FriendPillButton>
-            }
-          />
-        ))}
+        {friends.friends.map((f) => {
+          const isOnline = onlineIds.has(f.userId);
+          return (
+            <FriendListRow
+              key={f.userId}
+              avatar={
+                <div className="relative">
+                  <DogAvatar dogId={f.dogId as DogId} size={44} />
+                  {isOnline && (
+                    <span
+                      className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-400"
+                      title="Online now"
+                      aria-label="Online"
+                    />
+                  )}
+                </div>
+              }
+              primary={f.username}
+              secondary={isOnline ? "Online now" : "Ready to play"}
+              action={
+                <FriendPillButton onClick={() => setInviteFriend(f)}>
+                  Start
+                </FriendPillButton>
+              }
+            />
+          );
+        })}
       </FriendListPanel>
 
       <FriendListPanel

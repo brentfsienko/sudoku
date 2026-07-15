@@ -8,8 +8,30 @@ import {
 } from "@/lib/theme/dogs";
 import type { Profile, UserData } from "./types";
 
+const FUN_ADJECTIVES = [
+  "lil", "tiny", "fluffy", "golden", "cozy", "fancy", "jolly", "dizzy",
+  "fuzzy", "cheeky", "sassy", "bouncy", "snuggly", "frisky", "peppy",
+  "zesty", "goofy", "chill", "plush", "speedy", "witty", "dreamy",
+  "spunky", "perky", "mellow", "zany", "silky", "dapper", "lucky",
+  "chunky", "puffy", "toasty", "crispy", "sleepy", "wiggly", "feisty",
+  "ice", "royal", "cosmic", "noodle", "velvet", "cloud",
+];
+
+const FUN_NAMES = [
+  "rex", "biscuit", "pretzel", "croissant", "waffle", "mochi", "peanut",
+  "cookie", "boba", "truffle", "maple", "pepper", "cheddar", "nacho",
+  "taco", "churro", "dumpling", "nugget", "pickle", "pumpkin", "scone",
+  "tofu", "wonton", "ziggy", "poppet", "sprout", "bubbles", "pudding",
+  "noodle", "bagel", "muffin", "donut", "pretzel", "custard", "gnocchi",
+  "pierogi", "bao", "flapjack", "clover", "breezy", "doodle", "smudge",
+  "snickerdoodle", "éclair", "macaron", "bon_bon", "s'more",
+];
+
 export function randomUsername(): string {
-  return `pup_${Math.floor(1000 + Math.random() * 9000)}`;
+  const adj = FUN_ADJECTIVES[Math.floor(Math.random() * FUN_ADJECTIVES.length)];
+  const name = FUN_NAMES[Math.floor(Math.random() * FUN_NAMES.length)];
+  // normalizeUsername strips non-alphanumeric/underscore, so é→e, ' →  stripped
+  return `${adj}_${name}`.toLowerCase().replace(/[^a-z0-9_]/g, "");
 }
 
 function coerceDogId(

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { hasSeenProfileCoachmark, markProfileCoachmarkSeen } from "@/lib/onboarding";
 import { BoneIcon } from "@/components/BoneIcon";
 import { DogAvatar } from "@/components/DogAvatar";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
@@ -35,6 +36,19 @@ export function MeProfileHeader({
   const [editing, setEditing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [friendCodeOpen, setFriendCodeOpen] = useState(false);
+  const [showCoachmark, setShowCoachmark] = useState(false);
+
+  useEffect(() => {
+    setShowCoachmark(!hasSeenProfileCoachmark());
+  }, []);
+
+  function openEditing() {
+    setEditing(true);
+    if (showCoachmark) {
+      markProfileCoachmarkSeen();
+      setShowCoachmark(false);
+    }
+  }
   const friends = useFriends(userData.user, profile);
   const coop = coopWinLoss(multi);
   const versus = compWinLoss(multi);
@@ -69,7 +83,7 @@ export function MeProfileHeader({
                 type="button"
                 onClick={() => {
                   setSettingsOpen(false);
-                  setEditing(true);
+                  openEditing();
                 }}
                 className="block w-full py-2 text-left font-semibold text-[var(--foreground)]"
               >
@@ -100,9 +114,18 @@ export function MeProfileHeader({
 
       <div className="flex flex-col items-center gap-4 text-center">
         <div className="relative mx-auto w-fit px-12">
+          {showCoachmark && (
+            <div className="absolute -top-14 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap">
+              <div className="relative rounded-xl bg-[var(--foreground)] px-3 py-2 text-xs font-semibold text-white shadow-lg">
+                Tap to customize your pup! 🐾
+                {/* Downward caret */}
+                <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[var(--foreground)]" />
+              </div>
+            </div>
+          )}
           <button
             type="button"
-            onClick={() => setEditing(true)}
+            onClick={openEditing}
             className="relative block rounded-full active:scale-95"
             aria-label="Edit profile"
           >

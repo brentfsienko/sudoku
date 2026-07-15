@@ -70,16 +70,24 @@ export function DailySection({ onViewLeaderboard }: Props) {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="font-display text-sm font-bold text-[var(--foreground)]">
-            {dateLabel}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-display text-sm font-bold text-[var(--foreground)]">
+              {dateLabel}
+            </p>
+            {complete && (
+              <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-green-500" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                <circle cx="8" cy="8" r="7" />
+                <path d="M5 8.5l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
           <p className="text-xs text-[var(--muted)]">
             {diffLabel}
-            {complete && (
+            {complete && myTime !== null && (
               <>
                 {" · "}
-                <span className="text-[var(--primary)] font-semibold">
-                  {myTime !== null ? formatDurationExact(myTime) : "Completed ✓"}
+                <span className="font-semibold text-[var(--primary)]">
+                  {formatDurationExact(myTime)}
                 </span>
               </>
             )}

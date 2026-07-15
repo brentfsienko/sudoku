@@ -153,7 +153,7 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
           pull > 0 || isRefreshing ? "animate-bone-spin" : ""
         }`}
         style={{
-          transform: "translateY(calc(env(safe-area-inset-top) + 72px))",
+          transform: `translateY(${PLAY_HEADER_HEIGHT})`,
           opacity: boneOpacity,
           transition: snapping ? "opacity 0.4s ease" : "none",
         }}
