@@ -14,6 +14,7 @@ import {
 } from "@/components/home/FriendListPanel";
 import { AddFriendSheet } from "@/components/home/AddFriendSheet";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
+import { DailyLeaderboard } from "@/components/home/DailyLeaderboard";
 import { SearchIcon, UserPlusIcon } from "@/components/icons";
 import type { DogId } from "@/lib/theme/dogs";
 import { GAME_MODE_LABELS } from "@/lib/game/types";
@@ -26,6 +27,8 @@ import { useFriends } from "@/lib/friends/useFriends";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { PublicProfile } from "@/lib/friends/types";
 
+type SubTab = "friends" | "daily";
+
 type Props = {
   userData: UseUserData;
   onSignIn: () => void;
@@ -36,6 +39,7 @@ export function FriendsTab({ userData, onSignIn }: Props) {
   const searchRef = useRef<HTMLInputElement>(null);
   const profile = userData.data?.profile ?? null;
   const friends = useFriends(userData.user, profile);
+  const [subTab, setSubTab] = useState<SubTab>("friends");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicProfile[]>([]);
   const [searching, setSearching] = useState(false);
@@ -118,6 +122,40 @@ export function FriendsTab({ userData, onSignIn }: Props) {
   const friendIds = new Set(friends.friends.map((f) => f.userId));
   const discover = results.filter((p) => !friendIds.has(p.userId));
 
+  // Segmented sub-tab pill (shared across both views)
+  const subTabPill = (
+    <div className="flex self-start rounded-full border border-[var(--border)] bg-[var(--surface-soft)] p-0.5">
+      {(["friends", "daily"] as SubTab[]).map((t) => (
+        <button
+          key={t}
+          type="button"
+          onClick={() => setSubTab(t)}
+          className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition ${
+            subTab === t
+              ? "bg-white text-[var(--foreground)] shadow-sm"
+              : "text-[var(--muted)]"
+          }`}
+        >
+          {t === "daily" ? "Daily" : "Friends"}
+        </button>
+      ))}
+    </div>
+  );
+
+  // Daily leaderboard sub-tab
+  if (subTab === "daily") {
+    return (
+      <div className="flex flex-col gap-5">
+        <TabScreenHeader title="Friends" />
+        {subTabPill}
+        <DailyLeaderboard
+          friends={friends.friends}
+          myId={userData.user?.id ?? ""}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <TabScreenHeader
@@ -133,6 +171,7 @@ export function FriendsTab({ userData, onSignIn }: Props) {
           </button>
         }
       />
+      {subTabPill}
 
       <div className="relative">
         <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]">
