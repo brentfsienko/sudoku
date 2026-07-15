@@ -126,6 +126,14 @@ export function FriendsTab({ userData, onSignIn, initialSubTab }: Props) {
   const friendIds = new Set(friends.friends.map((f) => f.userId));
   const discover = results.filter((p) => !friendIds.has(p.userId));
 
+  // Online friends first, then offline alphabetically
+  const sortedFriends = [...friends.friends].sort((a, b) => {
+    const aOnline = onlineIds.has(a.userId) ? 0 : 1;
+    const bOnline = onlineIds.has(b.userId) ? 0 : 1;
+    if (aOnline !== bOnline) return aOnline - bOnline;
+    return a.username.localeCompare(b.username);
+  });
+
   // Segmented sub-tab pill (shared across both views)
   const subTabPill = (
     <div className="flex self-start rounded-full border border-[var(--border)] bg-[var(--surface-soft)] p-0.5">
@@ -274,7 +282,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab }: Props) {
               : undefined
         }
       >
-        {friends.friends.map((f) => {
+        {sortedFriends.map((f) => {
           const isOnline = onlineIds.has(f.userId);
           return (
             <FriendListRow
