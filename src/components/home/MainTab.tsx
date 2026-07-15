@@ -145,9 +145,9 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
       ref={containerRef}
       className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]"
     >
-      {/* Pull-to-refresh bone indicator — z-5 so it stays behind the title */}
+      {/* Pull-to-refresh bone indicator — z-[15] sits above the header bg (z-10) but below the sheet (z-20) */}
       <div
-        className={`pointer-events-none absolute inset-x-0 top-0 z-5 flex justify-center ${
+        className={`pointer-events-none absolute inset-x-0 top-0 z-[15] flex justify-center ${
           isRefreshing ? "animate-bone-spin" : ""
         }`}
         style={{
