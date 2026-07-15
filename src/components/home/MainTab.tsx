@@ -145,27 +145,20 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
       ref={containerRef}
       className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]"
     >
-      {/* Pull-to-refresh bone indicator */}
+      {/* Pull-to-refresh bone indicator — z-5 so it stays behind the title */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center"
+        className={`pointer-events-none absolute inset-x-0 top-0 z-5 flex justify-center ${
+          isRefreshing ? "animate-bone-spin" : ""
+        }`}
         style={{
-          transform: `translateY(calc(env(safe-area-inset-top) + ${boneY}px - 56px))`,
+          transform: isRefreshing
+            ? `translateY(calc(env(safe-area-inset-top) + ${boneY}px - 40px))`
+            : `translateY(calc(env(safe-area-inset-top) + ${boneY}px - 40px)) scale(${boneScale}) rotate(${progress * 270}deg)`,
           opacity: boneOpacity,
           transition: isRefreshing ? "transform 0.3s ease" : "none",
         }}
       >
-        <div
-          className={`flex h-11 w-11 items-center justify-center rounded-full bg-[var(--primary-soft)] shadow-md ${
-            isRefreshing ? "animate-bone-spin" : ""
-          }`}
-          style={
-            !isRefreshing
-              ? { transform: `scale(${boneScale}) rotate(${progress * 270}deg)` }
-              : undefined
-          }
-        >
-          <BoneIcon size={22} />
-        </div>
+        <BoneIcon size={28} />
       </div>
 
       {/* Pinned title — lower z so the sheet can slide over it when scrolling */}

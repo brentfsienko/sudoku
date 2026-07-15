@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPSTDate, dayDifficulty, isTodayComplete } from "@/lib/daily/puzzle";
 import { fetchMyDailyResult } from "@/lib/daily/api";
+import { loadDailyResultLocal } from "@/lib/daily/local";
 import { formatDuration } from "@/lib/stats/progress";
 import { DIFFICULTY_LABELS } from "@/lib/game/types";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
@@ -28,8 +29,12 @@ export function DailySection({ onViewLeaderboard }: Props) {
   const diffLabel = DIFFICULTY_LABELS[difficulty];
   const complete = isTodayComplete();
 
-  const [myTime, setMyTime] = useState<number | null>(null);
+  // Initialise from localStorage immediately (no flash of missing time)
+  const [myTime, setMyTime] = useState<number | null>(() =>
+    complete ? loadDailyResultLocal(dateStr) : null,
+  );
 
+  // Also try Supabase in case the table is available or the result came from another device
   useEffect(() => {
     if (!complete) return;
     void fetchMyDailyResult(dateStr).then((r) => {
