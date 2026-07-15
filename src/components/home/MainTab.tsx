@@ -153,7 +153,11 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
           pull > 0 || isRefreshing ? "animate-bone-spin" : ""
         }`}
         style={{
-          transform: `translateY(${PLAY_HEADER_HEIGHT})`,
+          /* 7rem below safe-area = midpoint of the 72px max-pull revealed zone:
+             header bottom = safe-area + 4.75rem (76px),
+             max-pull sheet top = safe-area + 4.75rem + 72px (148px),
+             midpoint = safe-area + 4.75rem + 36px ≈ safe-area + 7rem */
+          transform: "translateY(calc(env(safe-area-inset-top) + 7rem))",
           opacity: boneOpacity,
           transition: snapping ? "opacity 0.4s ease" : "none",
         }}
