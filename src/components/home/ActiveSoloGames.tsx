@@ -9,9 +9,8 @@ import {
   type ActiveSoloSave,
   isActiveSolo,
   loadActiveSolos,
-  removeActiveSolo,
 } from "@/lib/game/activeSolo";
-import { loadUserData, STATS_UPDATED_EVENT } from "@/lib/stats/store";
+import { deleteActiveSolo, loadUserData, STATS_UPDATED_EVENT } from "@/lib/stats/store";
 import { formatGameClock } from "@/lib/game/format";
 import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
 import { DIFFICULTY_LABELS } from "@/lib/game/types";
@@ -222,11 +221,15 @@ export function ActiveSoloGames({ profile, userEmail }: Props) {
   }, []);
 
   function handleQuit(id: string) {
-    removeActiveSolo(id);
+    // Optimistically remove from UI immediately, then sync to cloud
     setActives((prev) => prev.filter((a) => a.id !== id));
+    void deleteActiveSolo(id);
   }
 
-  const rows = actives.filter((item) => isActiveSolo(item.snapshot));
+  // Exclude daily puzzle games — they have their own dedicated section
+  const rows = actives.filter(
+    (item) => isActiveSolo(item.snapshot) && !item.id.startsWith("daily-"),
+  );
   if (rows.length === 0) return null;
 
   return (

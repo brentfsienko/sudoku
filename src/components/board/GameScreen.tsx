@@ -184,7 +184,7 @@ export function GameScreen({
 
   return (
     <div
-      className="game-viewport mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col bg-[var(--background)]"
+      className="game-viewport mx-auto flex w-full max-w-md flex-1 flex-col bg-[var(--background)]"
       style={{
         paddingTop: "env(safe-area-inset-top)",
         paddingBottom: "env(safe-area-inset-bottom)",
@@ -264,19 +264,30 @@ export function GameScreen({
           onSelect={controller.select}
         />
         {paused && (
-          <button
-            type="button"
-            onClick={() => controller.setPaused(false)}
-            className="absolute inset-3 flex flex-col items-center justify-center gap-3 rounded-2xl bg-[var(--background)]/95"
-          >
+          <div className="absolute inset-3 flex flex-col items-center justify-center gap-5 rounded-2xl bg-[var(--background)]/95">
             <span className="text-[var(--primary)]">
-              <PlayIcon width={56} height={56} />
+              <PlayIcon width={52} height={52} />
             </span>
             <span className="font-display text-xl font-extrabold text-[var(--foreground)]">
               Paused
             </span>
-            <span className="text-sm text-[var(--muted)]">Tap to resume</span>
-          </button>
+            <div className="flex flex-col items-center gap-2.5 w-full max-w-[180px]">
+              <button
+                type="button"
+                onClick={() => controller.setPaused(false)}
+                className="font-display w-full rounded-full bg-[var(--primary)] py-3 text-base font-extrabold text-white shadow-sm active:scale-[0.98]"
+              >
+                Resume
+              </button>
+              <button
+                type="button"
+                onClick={onExit}
+                className="font-display w-full rounded-full border-2 border-[var(--border)] bg-white py-3 text-base font-extrabold text-[var(--foreground)] active:scale-[0.98]"
+              >
+                End Game
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
