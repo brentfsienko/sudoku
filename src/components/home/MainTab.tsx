@@ -2,6 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { BoneIcon } from "@/components/BoneIcon";
+import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh";
 import { ActiveSoloGames } from "@/components/home/ActiveSoloGames";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
 import { AppDogIcon } from "@/components/AppDogIcon";
@@ -76,6 +78,9 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   const router = useRouter();
   const friends = useFriends(userData.user, data.profile);
   const { sheetRef, offset, pulling } = usePullableSheet();
+  const { containerRef, pull, progress, state: ptrState } = usePullToRefresh(
+    () => userData.refresh(),
+  );
   const [startSheetOpen, setStartSheetOpen] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
   const [setupKind, setSetupKind] = useState<"solo" | "multiplayer">("solo");
@@ -130,8 +135,39 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
     );
   }
 
+  const isRefreshing = ptrState === "refreshing";
+  const boneY = Math.min(pull, 72);
+  const boneOpacity = Math.min(1, progress * 1.4);
+  const boneScale = 0.6 + progress * 0.4;
+
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]">
+    <div
+      ref={containerRef}
+      className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]"
+    >
+      {/* Pull-to-refresh bone indicator */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center"
+        style={{
+          transform: `translateY(calc(env(safe-area-inset-top) + ${boneY}px - 56px))`,
+          opacity: boneOpacity,
+          transition: isRefreshing ? "transform 0.3s ease" : "none",
+        }}
+      >
+        <div
+          className={`flex h-11 w-11 items-center justify-center rounded-full bg-[var(--primary-soft)] shadow-md ${
+            isRefreshing ? "animate-bone-spin" : ""
+          }`}
+          style={
+            !isRefreshing
+              ? { transform: `scale(${boneScale}) rotate(${progress * 270}deg)` }
+              : undefined
+          }
+        >
+          <BoneIcon size={22} />
+        </div>
+      </div>
+
       {/* Pinned title — lower z so the sheet can slide over it when scrolling */}
       <header
         className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-[var(--accent)] px-5"
@@ -145,6 +181,7 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
 
       <div
         ref={sheetRef}
+        data-ptr-scroll
         className="relative z-20 min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-y-contain"
       >
         <div
