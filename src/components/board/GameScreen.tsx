@@ -294,11 +294,9 @@ export function GameScreen({
       {/* Controls */}
       <div className="flex flex-col gap-3 px-4 pb-4">
         <ActionBar
-          canUndo={controller.canUndo}
           notesMode={controller.notesMode}
           hintsRemaining={controller.hintsRemaining}
           disabled={done || paused}
-          onUndo={controller.undo}
           onErase={controller.erase}
           onToggleNotes={controller.toggleNotes}
           onHint={controller.hint}

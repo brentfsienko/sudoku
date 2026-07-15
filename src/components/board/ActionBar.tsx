@@ -1,13 +1,11 @@
 "use client";
 
-import { BulbIcon, EraserIcon, PencilIcon, UndoIcon } from "@/components/icons";
+import { BulbIcon, EraserIcon, PencilIcon } from "@/components/icons";
 
 type Props = {
-  canUndo: boolean;
   notesMode: boolean;
   hintsRemaining: number;
   disabled?: boolean;
-  onUndo: () => void;
   onErase: () => void;
   onToggleNotes: () => void;
   onHint: () => void;
@@ -53,20 +51,15 @@ function ActionButton({
 }
 
 export function ActionBar({
-  canUndo,
   notesMode,
   hintsRemaining,
   disabled,
-  onUndo,
   onErase,
   onToggleNotes,
   onHint,
 }: Props) {
   return (
     <div className="flex items-start justify-around gap-2">
-      <ActionButton label="Undo" disabled={disabled || !canUndo} onClick={onUndo}>
-        <UndoIcon width={22} height={22} />
-      </ActionButton>
       <ActionButton label="Erase" disabled={disabled} onClick={onErase}>
         <EraserIcon width={22} height={22} />
       </ActionButton>
