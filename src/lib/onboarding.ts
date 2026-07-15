@@ -1,30 +1,49 @@
 "use client";
 
 /**
- * "show" key is written once when a brand-new profile is first created.
- * It is NOT written for returning users (even on a fresh device/browser).
- * The coachmark is shown only when this key exists and the "seen" key does not.
+ * Two-step onboarding coachmark for brand-new users only.
+ *
+ * Step "nav"    → pulsing badge on the Me tab in the bottom nav
+ * Step "avatar" → speech bubble coming out of the dog avatar on the Me tab
+ * Step absent   → coachmark fully dismissed or user is not new
+ *
+ * The step key is written only when a brand-new profile is first created
+ * (not for returning users loading their profile from storage).
  */
-const SHOW_KEY = "sudogku-profile-coachmark-show";
-const SEEN_KEY = "sudogku-profile-coachmark-seen";
+const STEP_KEY = "sudogku-coachmark-step"; // "nav" | "avatar" — absent means done
+
+export type CoachmarkStep = "nav" | "avatar";
 
 /** Called once from getProfile() when a profile is created for the very first time. */
 export function flagNewUserCoachmark(): void {
   if (typeof window === "undefined") return;
-  if (!localStorage.getItem(SEEN_KEY)) {
-    localStorage.setItem(SHOW_KEY, "1");
+  // Only flag if no previous coachmark flow has run
+  if (!localStorage.getItem(STEP_KEY)) {
+    localStorage.setItem(STEP_KEY, "nav");
   }
 }
 
-export function shouldShowProfileCoachmark(): boolean {
-  if (typeof window === "undefined") return false;
-  return (
-    !!localStorage.getItem(SHOW_KEY) && !localStorage.getItem(SEEN_KEY)
-  );
+/** Returns the current step, or null if the coachmark is done / user is not new. */
+export function getCoachmarkStep(): CoachmarkStep | null {
+  if (typeof window === "undefined") return null;
+  const v = localStorage.getItem(STEP_KEY);
+  if (v === "nav" || v === "avatar") return v;
+  return null;
 }
 
-export function markProfileCoachmarkSeen(): void {
+/** Advance from "nav" → "avatar" when the user taps the Me tab. */
+export function advanceCoachmarkToAvatar(): void {
   if (typeof window === "undefined") return;
-  localStorage.removeItem(SHOW_KEY);
-  localStorage.setItem(SEEN_KEY, "1");
+  if (localStorage.getItem(STEP_KEY) === "nav") {
+    localStorage.setItem(STEP_KEY, "avatar");
+  }
 }
+
+/** Fully dismiss the coachmark (user tapped to edit their profile). */
+export function dismissCoachmark(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(STEP_KEY);
+}
+
+// Legacy aliases kept so any stale imports don't break during transition
+export const markProfileCoachmarkSeen = dismissCoachmark;
