@@ -9,7 +9,7 @@ import {
   removeActiveSolo,
   upsertActiveSolo,
 } from "@/lib/game/activeSolo";
-import { claimSoloFinish } from "@/lib/game/finishedSolo";
+import { claimSoloFinish, isSoloFinished } from "@/lib/game/finishedSolo";
 import { createSnapshot, useLocalGame, type GameSnapshot } from "@/lib/game/store";
 import { getProfile } from "@/lib/profile";
 import { loadUserData, recordSoloGame, STATS_UPDATED_EVENT } from "@/lib/stats/store";
@@ -20,7 +20,7 @@ import {
   getPSTDate,
   isTodayComplete,
 } from "@/lib/daily/puzzle";
-import { submitDailyResult } from "@/lib/daily/api";
+import { fetchMyDailyResult, submitDailyResult } from "@/lib/daily/api";
 import { DailyLeaderboard } from "@/components/home/DailyLeaderboard";
 import { LoadingPaws } from "@/app/play/page";
 import { fetchFriends } from "@/lib/friends/api";
@@ -131,7 +131,20 @@ function DailyInner() {
   const [userId, setUserId] = useState<string | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [alreadyDone] = useState(() => isTodayComplete());
+  const [alreadyDone, setAlreadyDone] = useState(() => isTodayComplete());
+
+  // On mount, also check Supabase — if completed on another device, honour it.
+  useEffect(() => {
+    if (alreadyDone) return;
+    void fetchMyDailyResult(dateStr).then((r) => {
+      if (r) {
+        // Mark complete on this device so the puzzle page redirects to leaderboard
+        claimSoloFinish(getDailyActiveId(dateStr));
+        setAlreadyDone(true);
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     void loadUserData().then((d) => {

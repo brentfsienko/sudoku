@@ -94,6 +94,11 @@ export type UserData = {
   triviaGuesses?: Record<string, TriviaUserGuess>;
   /** In-progress solo boards — synced when signed in. */
   activeSolos?: ActiveSoloSave[];
+  /**
+   * IDs of games that have been finished or quit on any device.
+   * Synced to cloud so every device knows which games to permanently hide.
+   */
+  finishedSoloIds?: string[];
 };
 
 /** "Elevation" analog: harder puzzles climb higher. */
@@ -242,7 +247,21 @@ export function mergeUserData(local: UserData, remote: UserData): UserData {
       remote.triviaGuesses ?? {},
     ),
     activeSolos: mergeActiveSolos(local.activeSolos, remote.activeSolos),
+    finishedSoloIds: mergeFinishedIds(local.finishedSoloIds, remote.finishedSoloIds),
   });
+}
+
+const MAX_FINISHED_IDS = 500;
+
+function mergeFinishedIds(
+  a: string[] | undefined,
+  b: string[] | undefined,
+): string[] {
+  const merged = [...new Set([...(a ?? []), ...(b ?? [])])];
+  // Keep the tail (most recently added) when over the limit
+  return merged.length > MAX_FINISHED_IDS
+    ? merged.slice(merged.length - MAX_FINISHED_IDS)
+    : merged;
 }
 
 export function emptySolo(): SoloStats {
@@ -377,6 +396,9 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
       : [],
     triviaGuesses: normalizeTriviaGuesses(raw.triviaGuesses),
     activeSolos: mergeActiveSolos([], raw.activeSolos),
+    finishedSoloIds: Array.isArray(raw.finishedSoloIds)
+      ? (raw.finishedSoloIds as string[])
+      : [],
   };
   return {
     ...data,
