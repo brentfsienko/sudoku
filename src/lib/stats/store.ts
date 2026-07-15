@@ -6,6 +6,11 @@ import {
   removeActiveSolo,
   replaceActiveSolosLocal,
 } from "@/lib/game/activeSolo";
+import {
+  applyFinishedIds,
+  claimSoloFinish,
+  getFinishedIds,
+} from "@/lib/game/finishedSolo";
 import { getSupabase } from "@/lib/supabase/client";
 import { loadLocal, saveLocal } from "./local";
 import { fetchRemote, upsertRemote } from "./remote";
@@ -40,16 +45,27 @@ async function currentUserId(): Promise<string | null> {
   }
 }
 
-/** Include this device's in-progress solos in the stats blob used for merge/sync. */
-function withDeviceActiveSolos(data: UserData): UserData {
+/** Include this device's in-progress solos AND finished IDs in the blob. */
+function withDeviceData(data: UserData): UserData {
   return {
     ...data,
     activeSolos: mergeActiveSolos(data.activeSolos, loadActiveSolos()),
+    finishedSoloIds: [...new Set([...(data.finishedSoloIds ?? []), ...getFinishedIds()])],
   };
 }
 
+// Keep the old name as a thin alias so call-sites don't change.
+const withDeviceActiveSolos = withDeviceData;
+
 function applyActiveSolosToDeviceCache(data: UserData): void {
   replaceActiveSolosLocal(data.activeSolos ?? []);
+}
+
+/** Apply cloud-synced finished IDs to this device's localStorage set. */
+function applyFinishedIdsToDevice(data: UserData): void {
+  if (data.finishedSoloIds?.length) {
+    applyFinishedIds(data.finishedSoloIds);
+  }
 }
 
 /**
@@ -70,6 +86,9 @@ export async function loadUserData(): Promise<UserData> {
   if (remote) {
     data = mergeUserData(data, remote);
   }
+  // Propagate cloud-synced finished/quit IDs to this device's localStorage so
+  // games completed or quit on another device are immediately hidden here.
+  applyFinishedIdsToDevice(data);
   applyActiveSolosToDeviceCache(data);
   saveLocal(data);
   return data;
@@ -116,7 +135,12 @@ export async function recordSoloGame(
     activeSoloPersistTimer = null;
   }
 
-  if (opts?.activeId) removeActiveSolo(opts.activeId);
+  // claimSoloFinish is called by callers, but call it here too as a guard so
+  // the ID is in getFinishedIds() before withDeviceData runs below.
+  if (opts?.activeId) {
+    claimSoloFinish(opts.activeId);
+    removeActiveSolo(opts.activeId);
+  }
 
   let data = await loadForWrite();
   if (opts?.activeId) {
@@ -141,6 +165,9 @@ export async function deleteActiveSolo(id: string): Promise<void> {
     clearTimeout(activeSoloPersistTimer);
     activeSoloPersistTimer = null;
   }
+  // Ensure the ID is in finishedSolo before withDeviceData runs, so it gets
+  // included in finishedSoloIds and synced to other devices.
+  claimSoloFinish(id);
   removeActiveSolo(id);
   const uid = await currentUserId();
   if (!uid) return;

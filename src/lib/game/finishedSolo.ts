@@ -46,3 +46,26 @@ export function claimSoloFinish(activeId: string): boolean {
 export function isSoloFinished(activeId: string): boolean {
   return readSet().has(activeId);
 }
+
+/** Returns all finished IDs as an array (for cloud sync). */
+export function getFinishedIds(): string[] {
+  return [...readSet()];
+}
+
+/**
+ * Merges cloud-synced finished IDs into the local set.
+ * Called after loading remote user_data so other devices' completions/quits
+ * are honoured on this device.
+ */
+export function applyFinishedIds(ids: string[]): void {
+  if (!ids.length) return;
+  const set = readSet();
+  let changed = false;
+  for (const id of ids) {
+    if (!set.has(id)) {
+      set.add(id);
+      changed = true;
+    }
+  }
+  if (changed) writeSet(set);
+}
