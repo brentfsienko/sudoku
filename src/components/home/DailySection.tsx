@@ -9,6 +9,26 @@ import { formatDuration } from "@/lib/stats/progress";
 import { DIFFICULTY_LABELS } from "@/lib/game/types";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 
+// Re-check daily completion status from localStorage after mount so SSR
+// hydration mismatch (server has no window) doesn't leave the card stuck on "Play".
+function useDailyComplete(dateStr: string) {
+  const [complete, setComplete] = useState(false);
+  const [myTime, setMyTime] = useState<number | null>(null);
+
+  useEffect(() => {
+    const done = isTodayComplete();
+    setComplete(done);
+    if (!done) return;
+    const local = loadDailyResultLocal(dateStr);
+    if (local !== null) setMyTime(local);
+    void fetchMyDailyResult(dateStr).then((r) => {
+      if (r) setMyTime(r.elapsedSeconds);
+    });
+  }, [dateStr]);
+
+  return { complete, myTime };
+}
+
 function CalendarIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="h-6 w-6">
@@ -27,20 +47,7 @@ export function DailySection({ onViewLeaderboard }: Props) {
   const dateStr = getPSTDate();
   const difficulty = dayDifficulty(dateStr);
   const diffLabel = DIFFICULTY_LABELS[difficulty];
-  const complete = isTodayComplete();
-
-  // Initialise from localStorage immediately (no flash of missing time)
-  const [myTime, setMyTime] = useState<number | null>(() =>
-    complete ? loadDailyResultLocal(dateStr) : null,
-  );
-
-  // Also try Supabase in case the table is available or the result came from another device
-  useEffect(() => {
-    if (!complete) return;
-    void fetchMyDailyResult(dateStr).then((r) => {
-      if (r) setMyTime(r.elapsedSeconds);
-    });
-  }, [complete, dateStr]);
+  const { complete, myTime } = useDailyComplete(dateStr);
 
   const [year, month, day] = dateStr.split("-").map(Number);
   const dateLabel = new Date(year, month - 1, day).toLocaleDateString("en-US", {

@@ -74,6 +74,8 @@ export type GameLog = {
   opponentSquares?: number;
   /** Competitive mode only. */
   tied?: boolean;
+  /** Whether this entry came from the daily challenge puzzle. */
+  daily?: boolean;
 };
 
 /** Daily fact guess stored per account (synced with localStorage). */
@@ -617,6 +619,8 @@ export type SoloResult = {
   squaresFilled: number;
   /** Bones found on the board during this game. */
   bonesFound: number;
+  /** True when this was the daily challenge puzzle. */
+  daily?: boolean;
 };
 
 export type MultiResult = {
@@ -698,6 +702,7 @@ export function applySoloResult(data: UserData, r: SoloResult): UserData {
     squares: r.squaresFilled,
     difficulty: r.difficulty,
     score: r.score,
+    daily: r.daily,
   });
 
   const winBonus = r.won ? GAME_WIN_BONE_BONUS : 0;

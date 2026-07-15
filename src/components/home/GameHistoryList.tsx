@@ -82,15 +82,32 @@ function resolveOpponent(
   return { name: "friend", dogId: "golden" };
 }
 
-function ModeBadge({ log }: { log: GameLog }) {
-  const accent = modeAccent(log.mode);
+function Pill({
+  label,
+  color,
+}: {
+  label: string;
+  color: string;
+}) {
   return (
     <span
       className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
-      style={{ backgroundColor: accent }}
+      style={{ backgroundColor: color }}
     >
-      {log.mode === "solo" ? "Solo" : GAME_MODE_LABELS[log.mode]}
+      {label}
     </span>
+  );
+}
+
+function RowTags({ log }: { log: GameLog }) {
+  return (
+    <div className="flex items-center gap-1">
+      {log.daily && <Pill label="Daily" color="#f59e0b" />}
+      <Pill
+        label={log.mode === "solo" ? "Solo" : GAME_MODE_LABELS[log.mode]}
+        color={modeAccent(log.mode)}
+      />
+    </div>
   );
 }
 
@@ -191,17 +208,19 @@ function MultiplayerHistoryRow({
 
   return (
     <div
-      className={`flex items-center gap-2.5 px-3 py-2 ${
+      className={`flex items-start gap-2.5 px-3 py-2.5 ${
         divider ? "border-b border-white/70" : ""
       }`}
     >
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex items-center gap-1.5">
-          <ModeBadge log={log} />
+        {/* Tags row — always top-left */}
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <RowTags log={log} />
           <span className="truncate text-[10px] font-semibold text-[var(--muted)]">
             {DIFFICULTY_LABELS[log.difficulty]} · {outcomeText(log)}
           </span>
         </div>
+        {/* Players row */}
         <div className="flex items-center gap-1.5">
           <PlayerChip
             dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
@@ -250,27 +269,31 @@ function SoloHistoryRow({
 
   return (
     <div
-      className={`flex items-center gap-2.5 px-3 py-2 ${
+      className={`flex items-start gap-2.5 px-3 py-2.5 ${
         divider ? "border-b border-white/70" : ""
       }`}
     >
-      <DogAvatar
-        dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
-        username={meName}
-        email={userEmail}
-        size={40}
-        bare
-      />
       <div className="min-w-0 flex-1">
+        {/* Tags row — always top-left */}
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <RowTags log={log} />
+          <span className="truncate text-[10px] font-semibold text-[var(--muted)]">
+            {DIFFICULTY_LABELS[log.difficulty]} · {outcomeText(log)}
+          </span>
+        </div>
+        {/* Player row */}
         <div className="flex items-center gap-1.5">
-          <span className="truncate text-sm font-bold text-[var(--foreground)]">
+          <DogAvatar
+            dogId={dogIdForUsername(meName, profile.dogId, userEmail)}
+            username={meName}
+            email={userEmail}
+            size={32}
+            bare
+          />
+          <span className="text-xs font-bold text-[var(--foreground)]">
             @{meName}
           </span>
-          <ModeBadge log={log} />
         </div>
-        <span className="text-[10px] font-semibold text-[var(--muted)]">
-          {outcomeText(log)} · {DIFFICULTY_LABELS[log.difficulty]}
-        </span>
       </div>
       <RowActions
         when={formatWhen(log.t)}
