@@ -104,6 +104,21 @@ export function formatDuration(seconds: number): string {
   return `${seconds}s`;
 }
 
+/**
+ * Formats seconds as M:SS (or H:MM:SS for times over an hour).
+ * Used wherever second-level precision matters, e.g. the daily leaderboard.
+ */
+export function formatDurationExact(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  }
+  return `${m}:${String(sec).padStart(2, "0")}`;
+}
+
 /** Compact axis value for a metric's max gridline. */
 export function formatMetric(value: number, metric: Metric): string {
   if (metric === "time") return formatDuration(value);
