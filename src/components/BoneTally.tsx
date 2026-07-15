@@ -13,18 +13,21 @@ export const DIFFICULTY_BONE_COUNT: Record<Difficulty, number> = {
 
 type GroupProps = { count: number; size: number; gap: number };
 
+/**
+ * The bone PNG is naturally drawn at roughly −45° (diagonal).
+ * rotate(135deg) = −45° + 135° = 90° → stands upright vertically (knobs top & bottom).
+ * The crossing 5th bone uses rotate(90deg) = −45° + 90° = 45° → true "/" diagonal slash.
+ */
+const VERTICAL_ROTATE = "rotate(135deg)";
+const DIAGONAL_ROTATE = "rotate(90deg)";
+
 /** One tally group: up to 4 vertical bones + optional diagonal 5th. */
 function TallyGroup({ count, size, gap }: GroupProps) {
   const verticals = Math.min(count, 4);
   const hasDiagonal = count === 5;
   const colWidth = verticals * size + (verticals - 1) * gap;
 
-  // The diagonal bone is sized to visually span the group at 45°.
-  // hypotenuse of (colWidth × size) keeps it proportional without overflow.
-  const diagSize = Math.round(Math.sqrt(colWidth ** 2 + size ** 2) * 0.7);
-
   return (
-    // overflow:visible so the diagonal can poke outside without affecting layout
     <div
       className="relative inline-flex items-center overflow-visible"
       style={{ gap, width: colWidth, height: size }}
@@ -38,9 +41,9 @@ function TallyGroup({ count, size, gap }: GroupProps) {
           width={size}
           height={size}
           aria-hidden
-            style={{
+          style={{
             imageRendering: "pixelated",
-            transform: "rotate(45deg)",
+            transform: VERTICAL_ROTATE,
             flexShrink: 0,
           }}
         />
@@ -50,15 +53,16 @@ function TallyGroup({ count, size, gap }: GroupProps) {
           className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-visible"
           aria-hidden
         >
+          {/* Same size as each individual bone; rotated to slash diagonally across */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={BONE_IMAGE}
             alt=""
-            width={diagSize}
-            height={diagSize}
+            width={size}
+            height={size}
             style={{
               imageRendering: "pixelated",
-              transform: "rotate(-45deg)",
+              transform: DIAGONAL_ROTATE,
             }}
           />
         </div>
