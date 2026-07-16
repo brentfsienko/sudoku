@@ -15,6 +15,7 @@ import {
   MAX_HINTS,
   MAX_MISTAKES,
   pickHintCell,
+  relatedCells,
   solutionDigit,
 } from "@/lib/game/engine";
 import type {
@@ -113,6 +114,14 @@ export function useLiveGame(opts: {
       const correct = digit === solutionDigit(solution, index);
       cells.set(key, { value: digit, notes: [], owner: role, correct });
       if (!correct) m.set("mistakes", m.get("mistakes") + 1);
+
+      // Auto-erase: remove this digit from notes of every peer cell.
+      for (const peer of relatedCells(index)) {
+        const peerCell = cells.get(String(peer));
+        if (peerCell && peerCell.notes.includes(digit)) {
+          cells.set(String(peer), { ...peerCell, notes: peerCell.notes.filter((n) => n !== digit) });
+        }
+      }
 
       const board = readBoard(cells);
       if (isSolved(puzzle, solution, board)) {
