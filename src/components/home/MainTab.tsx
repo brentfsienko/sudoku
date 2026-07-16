@@ -6,7 +6,7 @@ import { BoneIcon } from "@/components/BoneIcon";
 import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh";
 import { ActiveSoloGames } from "@/components/home/ActiveSoloGames";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
-import { AppDogIcon } from "@/components/AppDogIcon";
+import { DogAvatar } from "@/components/DogAvatar";
 import { PlayTabHeader } from "@/components/home/PlayTabHeader";
 import {
   GameSetupSheet,
@@ -198,7 +198,14 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
           {/* Dog saddle — sheet edge only; no negative margin into title zone */}
           <div className="relative h-[3.25rem] shrink-0">
             <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
-              <AppDogIcon size={128} />
+              <DogAvatar
+                dogId={data.profile.dogId}
+                username={data.profile.username}
+                email={userData.user?.email}
+                userData={data}
+                size={128}
+                bare
+              />
             </div>
           </div>
 
