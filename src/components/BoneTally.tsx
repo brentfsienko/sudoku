@@ -22,16 +22,20 @@ type GroupProps = { count: number; size: number; gap: number };
 const VERTICAL_ROTATE = "rotate(135deg)";
 const DIAGONAL_ROTATE = "rotate(75deg)";
 
+// Each subsequent bone overlaps the previous by 85 % of its width.
+const OVERLAP = 0.85;
+
 /** One tally group: up to 4 vertical bones + optional diagonal 5th. */
 function TallyGroup({ count, size, gap }: GroupProps) {
   const verticals = Math.min(count, 4);
   const hasDiagonal = count === 5;
-  const colWidth = verticals * size + (verticals - 1) * gap;
+  // With 85 % overlap, each additional bone only adds 15 % of its width.
+  const colWidth = size + (verticals - 1) * size * (1 - OVERLAP);
 
   return (
     <div
       className="relative inline-flex items-center overflow-visible"
-      style={{ gap, width: colWidth, height: size }}
+      style={{ gap: 0, width: colWidth, height: size }}
     >
       {Array.from({ length: verticals }).map((_, i) => (
         // eslint-disable-next-line @next/next/no-img-element
@@ -46,6 +50,7 @@ function TallyGroup({ count, size, gap }: GroupProps) {
             imageRendering: "pixelated",
             transform: VERTICAL_ROTATE,
             flexShrink: 0,
+            marginLeft: i === 0 ? 0 : -(size * OVERLAP),
           }}
         />
       ))}
@@ -84,7 +89,6 @@ type Props = {
  */
 export function BoneTally({ difficulty, size = 13 }: Props) {
   const count = DIFFICULTY_BONE_COUNT[difficulty];
-  const gap = 0; // bones touch — visual rotation keeps them distinct
 
   const groups: number[] = [];
   let remaining = count;
@@ -94,9 +98,9 @@ export function BoneTally({ difficulty, size = 13 }: Props) {
   }
 
   return (
-    <div className="inline-flex items-center" style={{ gap: gap * 2 }}>
+    <div className="inline-flex items-center" style={{ gap: 4 }}>
       {groups.map((g, i) => (
-        <TallyGroup key={i} count={g} size={size} gap={gap} />
+        <TallyGroup key={i} count={g} size={size} gap={0} />
       ))}
     </div>
   );
