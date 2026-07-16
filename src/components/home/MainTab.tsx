@@ -15,6 +15,7 @@ import {
 import { FactGuessCard } from "@/components/home/FactGuessCard";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 import { StartGameSheet } from "@/components/home/StartGameSheet";
+import { DogGreetingBubble } from "@/components/home/DogGreetingBubble";
 import { StreakBonePill } from "@/components/home/StreakBonePill";
 import { DailySection } from "@/components/home/DailySection";
 import { PawIcon, UsersIcon } from "@/components/icons";
@@ -206,11 +207,12 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
                 size={128}
                 bare
               />
+              <DogGreetingBubble />
             </div>
           </div>
 
           <div className="relative">
-            <div className="pointer-events-none absolute right-3 top-0 z-50 -translate-y-1/2 sm:right-5">
+            <div className="pointer-events-none absolute right-1.5 top-0 z-50 -translate-y-1/2 sm:right-3">
               <StreakBonePill
                 streak={streak}
                 bones={bones}
