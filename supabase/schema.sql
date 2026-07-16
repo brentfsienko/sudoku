@@ -28,14 +28,19 @@ create policy "update own data"
 
 -- Daily challenge results — one row per (user, date).
 -- Times are stored in seconds; puzzle_date is the PST calendar date.
+-- solved=false means the user ran out of hearts (elapsed_seconds is ignored for ranking).
 create table if not exists public.daily_results (
   user_id         uuid    not null references auth.users (id) on delete cascade,
   puzzle_date     date    not null,
-  elapsed_seconds integer not null,
+  elapsed_seconds integer not null default 0,
   mistakes        integer not null default 0,
+  solved          boolean not null default true,
   completed_at    timestamptz not null default now(),
   primary key (user_id, puzzle_date)
 );
+
+-- Migration for existing tables (safe to run multiple times):
+-- alter table public.daily_results add column if not exists solved boolean not null default true;
 
 alter table public.daily_results enable row level security;
 
