@@ -123,8 +123,8 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
 
   return (
     <div
-      /* 25% narrower than prior max (15.5rem/52vw → ~11.6rem/39vw) */
-      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-[min(11.6rem,39vw)] sm:left-[7rem] sm:w-[min(12.4rem,40.5vw)]"
+      /* Cap width so the bubble stops short of the streak pill on all devices */
+      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-[min(7.75rem,26vw)] sm:left-[7rem] sm:w-[min(8rem,28vw)]"
       role="status"
     >
       <button
@@ -135,28 +135,20 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
           setShouldShow(false);
           setRevealed(false);
         }}
-        className="pointer-events-auto relative w-full rounded-md bg-[#fff6d6] px-2 py-1 text-left transition active:scale-[0.99]"
-        style={{
-          /* 1px pixel outline (was 2px) */
-          boxShadow:
-            "1px 0 0 0 #1a1208, -1px 0 0 0 #1a1208, 0 1px 0 0 #1a1208, 0 -1px 0 0 #1a1208, 1px 1px 0 0 #1a1208, -1px 1px 0 0 #1a1208, 1px -1px 0 0 #1a1208, -1px -1px 0 0 #1a1208",
-        }}
+        className="pointer-events-auto relative w-full rounded-md border-[0.5px] border-[#1a1208] bg-[#fff6d6] px-1.5 py-1 text-left transition active:scale-[0.99]"
         aria-label="Dismiss pup message"
       >
         {/* Diagonal speech tail from bottom-left toward the pup */}
         <span
           aria-hidden
-          className="pointer-events-none absolute -bottom-[5px] left-[7px] z-0 h-[9px] w-[9px] rotate-45 bg-[#fff6d6]"
-          style={{
-            boxShadow: "1px 1px 0 0 #1a1208",
-          }}
+          className="pointer-events-none absolute -bottom-[4px] left-[6px] z-0 h-[8px] w-[8px] rotate-45 border-b-[0.5px] border-r-[0.5px] border-[#1a1208] bg-[#fff6d6]"
         />
 
-        <p className="font-typewriter line-clamp-2 break-words text-[12px] font-normal leading-snug text-[var(--foreground)]">
+        <p className="font-typewriter line-clamp-2 break-words text-[11px] font-normal leading-snug text-[var(--foreground)]">
           <span>{typed}</span>
           {showBone && (
             <span className="ml-0.5 inline-flex translate-y-0.5 align-middle">
-              <BoneIcon size={12} />
+              <BoneIcon size={11} />
             </span>
           )}
           <TypeCursor />
