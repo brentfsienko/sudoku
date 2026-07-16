@@ -1,7 +1,6 @@
 "use client";
 
-import { BoneTally } from "@/components/BoneTally";
-import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
+import { DIFFICULTIES, DIFFICULTY_LABELS, type Difficulty } from "@/lib/game/types";
 
 type Props = {
   value: Difficulty;
@@ -38,7 +37,7 @@ export function BoneDifficultySelect({ value, onChange }: Props) {
                   : "border-[var(--border)] bg-white"
               }`}
             >
-              <BoneTally difficulty={d} size={20} />
+              <span className="font-display text-xs font-bold">{DIFFICULTY_LABELS[d]}</span>
             </button>
           );
         })}
