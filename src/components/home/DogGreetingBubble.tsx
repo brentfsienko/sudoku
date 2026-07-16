@@ -143,14 +143,14 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
         }}
         aria-label="Dismiss pup message"
       >
-        {/* Pixel speech tail — bottom-left corner */}
+        {/* Diagonal speech tail from bottom-left toward the pup */}
         <span
-          className="absolute bottom-0 left-1.5 translate-y-full"
           aria-hidden
-        >
-          <span className="absolute left-0 top-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-[#1a1208]" />
-          <span className="absolute left-px top-0 border-x-[4px] border-t-[5px] border-x-transparent border-t-[#fff6d6]" />
-        </span>
+          className="pointer-events-none absolute -bottom-[5px] left-[7px] z-0 h-[9px] w-[9px] rotate-45 bg-[#fff6d6]"
+          style={{
+            boxShadow: "1px 1px 0 0 #1a1208",
+          }}
+        />
 
         <p className="font-typewriter line-clamp-2 break-words text-[12px] font-normal leading-snug text-[var(--foreground)]">
           <span>{typed}</span>
