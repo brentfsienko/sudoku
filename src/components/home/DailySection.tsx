@@ -13,20 +13,32 @@ import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 // hydration mismatch (server has no window) doesn't leave the card stuck on "Play".
 function useDailyComplete(dateStr: string) {
   const [complete, setComplete] = useState(false);
+  // null = not attempted, true = solved, false = failed
+  const [solved, setSolved] = useState<boolean | null>(null);
   const [myTime, setMyTime] = useState<number | null>(null);
 
   useEffect(() => {
     const done = isTodayComplete();
     setComplete(done);
     if (!done) return;
+
+    // Check local storage first for instant feedback.
     const local = loadDailyResultLocal(dateStr);
-    if (local !== null) setMyTime(local);
+    if (local !== null) {
+      setSolved(local.solved);
+      if (local.solved) setMyTime(local.elapsedSeconds);
+    }
+
+    // Then reconcile with Supabase (may have solved on another device).
     void fetchMyDailyResult(dateStr).then((r) => {
-      if (r) setMyTime(r.elapsedSeconds);
+      if (r) {
+        setSolved(true);
+        setMyTime(r.elapsedSeconds);
+      }
     });
   }, [dateStr]);
 
-  return { complete, myTime };
+  return { complete, solved, myTime };
 }
 
 function CalendarIcon() {
@@ -47,7 +59,7 @@ export function DailySection({ onViewLeaderboard }: Props) {
   const dateStr = getPSTDate();
   const difficulty = dayDifficulty(dateStr);
   const diffLabel = DIFFICULTY_LABELS[difficulty];
-  const { complete, myTime } = useDailyComplete(dateStr);
+  const { complete, solved, myTime } = useDailyComplete(dateStr);
 
   const [year, month, day] = dateStr.split("-").map(Number);
   const dateLabel = new Date(year, month - 1, day).toLocaleDateString("en-US", {
@@ -74,22 +86,33 @@ export function DailySection({ onViewLeaderboard }: Props) {
             <p className="font-display text-sm font-bold text-[var(--foreground)]">
               {dateLabel}
             </p>
-            {complete && (
+            {complete && solved && (
+              /* Green checkmark — solved */
               <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-green-500" fill="none" stroke="currentColor" strokeWidth={2.5}>
                 <circle cx="8" cy="8" r="7" />
                 <path d="M5 8.5l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
+            {complete && solved === false && (
+              /* Red X — failed */
+              <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-red-500" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                <circle cx="8" cy="8" r="7" />
+                <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" strokeLinecap="round" />
+              </svg>
+            )}
           </div>
           <p className="text-xs text-[var(--muted)]">
             {diffLabel}
-            {complete && myTime !== null && (
+            {complete && solved && myTime !== null && (
               <>
                 {" · "}
                 <span className="font-semibold text-[var(--primary)]">
                   {formatDurationExact(myTime)}
                 </span>
               </>
+            )}
+            {complete && solved === false && (
+              <span className="font-semibold text-red-500"> · Not solved</span>
             )}
           </p>
         </div>
