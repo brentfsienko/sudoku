@@ -257,7 +257,8 @@ button {
   to   { transform: rotate(360deg); }
 }
 .animate-bone-spin {
-  animation: bone-spin 0.8s linear infinite;
+  /* 40% shorter than 0.8s → 0.48s per turn */
+  animation: bone-spin 0.48s linear infinite;
 }
 .animate-bone-spin-slow {
   animation: bone-spin 1.6s linear infinite;
