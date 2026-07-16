@@ -16,7 +16,6 @@ type Props = {
 };
 
 function formatDate(dateStr: string): string {
-  // dateStr: "YYYY-MM-DD"
   const [year, month, day] = dateStr.split("-").map(Number);
   const d = new Date(year, month - 1, day);
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
@@ -30,6 +29,70 @@ function addDays(dateStr: string, n: number): string {
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
+function LeaderboardRow({
+  entry,
+  rank,
+  isMe,
+  profile,
+  isLast,
+  isFailed,
+}: {
+  entry: DailyLeaderboardEntry;
+  rank: number | null;
+  isMe: boolean;
+  profile: PublicProfile | undefined;
+  isLast: boolean;
+  isFailed: boolean;
+}) {
+  const name = profile?.username ?? (isMe ? "You" : "Unknown");
+  const dogId = profile?.dogId ?? "golden";
+  const medal = rank !== null ? (MEDALS[rank] ?? `${rank + 1}.`) : null;
+
+  return (
+    <li
+      className={`flex items-center gap-3 px-4 py-3 ${!isLast ? "border-b border-[var(--border)]" : ""} ${isMe ? "bg-[var(--primary-soft)]" : ""}`}
+    >
+      {/* Rank / failure indicator */}
+      <span className="w-6 shrink-0 text-center text-base leading-none">
+        {isFailed ? (
+          <svg viewBox="0 0 16 16" className="mx-auto h-4 w-4 text-red-500" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <path d="M4 4l8 8M12 4l-8 8" strokeLinecap="round" />
+          </svg>
+        ) : typeof medal === "string" && medal.length <= 2 ? (
+          medal
+        ) : (
+          <span className="text-sm font-bold text-[var(--muted)]">{medal}</span>
+        )}
+      </span>
+
+      {/* Avatar */}
+      <DogAvatar dogId={dogId} username={name} size={36} bare />
+
+      {/* Name + mistakes */}
+      <div className="min-w-0 flex-1">
+        <p className={`font-display text-sm font-bold leading-tight ${isMe ? "text-[var(--primary)]" : "text-[var(--foreground)]"}`}>
+          {name}
+          {isMe && <span className="ml-1 text-xs font-normal text-[var(--primary)]">(you)</span>}
+        </p>
+        {entry.mistakes > 0 && (
+          <p className="text-[11px] text-[var(--muted)]">
+            {entry.mistakes} {entry.mistakes === 1 ? "mistake" : "mistakes"}
+          </p>
+        )}
+      </div>
+
+      {/* Time or "Not solved" */}
+      {isFailed ? (
+        <span className="text-sm font-semibold text-red-500">Not solved</span>
+      ) : (
+        <span className="font-display text-sm font-extrabold tabular-nums text-[var(--foreground)]">
+          {formatDurationExact(entry.elapsedSeconds)}
+        </span>
+      )}
+    </li>
+  );
+}
+
 export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
   const today = getPSTDate();
   const [viewingDate, setViewingDate] = useState(initialDate ?? today);
@@ -41,7 +104,6 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
 
   useEffect(() => {
     if (!myId) {
-      // Still waiting for auth to resolve — don't show stale "No results" yet
       setLoading(true);
       return;
     }
@@ -68,7 +130,9 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
   }, [viewingDate, myId, friendIds.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canGoForward = viewingDate < today;
-  const canGoBack = true; // no history limit enforced
+
+  const solvedEntries = entries.filter((e) => e.solved);
+  const failedEntries = entries.filter((e) => !e.solved);
 
   return (
     <div className="flex flex-col gap-3">
@@ -76,8 +140,7 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
       <div className="flex items-center justify-between rounded-2xl bg-[var(--list-panel)] px-4 py-2.5">
         <button
           onClick={() => setViewingDate((d) => addDays(d, -1))}
-          disabled={!canGoBack}
-          className="rounded-full p-1.5 text-[var(--primary)] disabled:opacity-30 active:bg-black/5"
+          className="rounded-full p-1.5 text-[var(--primary)] active:bg-black/5"
           aria-label="Previous day"
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
@@ -119,49 +182,38 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
           </div>
         ) : (
           <ul>
-            {entries.map((entry, i) => {
-              const isMe = entry.userId === myId;
-              const profile = profiles.get(entry.userId);
-              const name = profile?.username ?? (isMe ? "You" : "Unknown");
-              const dogId = profile?.dogId ?? "golden";
-              const medal = MEDALS[i] ?? `${i + 1}.`;
+            {solvedEntries.map((entry, i) => (
+              <LeaderboardRow
+                key={entry.userId}
+                entry={entry}
+                rank={i}
+                isMe={entry.userId === myId}
+                profile={profiles.get(entry.userId)}
+                isLast={i === entries.length - 1}
+                isFailed={false}
+              />
+            ))}
 
-              return (
-                <li
-                  key={entry.userId}
-                  className={`flex items-center gap-3 px-4 py-3 ${i < entries.length - 1 ? "border-b border-[var(--border)]" : ""} ${isMe ? "bg-[var(--primary-soft)]" : ""}`}
-                >
-                  {/* Rank */}
-                  <span className="w-6 shrink-0 text-center text-base leading-none">
-                    {typeof medal === "string" && medal.length <= 2
-                      ? medal
-                      : <span className="text-sm font-bold text-[var(--muted)]">{medal}</span>
-                    }
-                  </span>
+            {/* Divider between solvers and failures */}
+            {failedEntries.length > 0 && solvedEntries.length > 0 && (
+              <li className="border-t border-[var(--border)] px-4 py-1.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                  Did not solve
+                </p>
+              </li>
+            )}
 
-                  {/* Avatar */}
-                  <DogAvatar dogId={dogId} username={name} size={36} bare />
-
-                  {/* Name + mistakes */}
-                  <div className="min-w-0 flex-1">
-                    <p className={`font-display text-sm font-bold leading-tight ${isMe ? "text-[var(--primary)]" : "text-[var(--foreground)]"}`}>
-                      {name}
-                      {isMe && <span className="ml-1 text-xs font-normal text-[var(--primary)]">(you)</span>}
-                    </p>
-                    {entry.mistakes > 0 && (
-                      <p className="text-[11px] text-[var(--muted)]">
-                        {entry.mistakes} {entry.mistakes === 1 ? "mistake" : "mistakes"}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Time — M:SS precision */}
-                  <span className="font-display text-sm font-extrabold tabular-nums text-[var(--foreground)]">
-                    {formatDurationExact(entry.elapsedSeconds)}
-                  </span>
-                </li>
-              );
-            })}
+            {failedEntries.map((entry, i) => (
+              <LeaderboardRow
+                key={entry.userId}
+                entry={entry}
+                rank={null}
+                isMe={entry.userId === myId}
+                profile={profiles.get(entry.userId)}
+                isLast={i === failedEntries.length - 1}
+                isFailed={true}
+              />
+            ))}
           </ul>
         )}
       </div>

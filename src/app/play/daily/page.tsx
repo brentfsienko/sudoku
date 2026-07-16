@@ -138,14 +138,10 @@ function DailyGame({
             { activeId },
           );
 
-          // Only save & submit a time when the puzzle was actually solved.
-          if (solved) {
-            saveDailyResultLocal(dateStr, elapsedSeconds, true);
-            await submitDailyResult(dateStr, elapsedSeconds, mistakes);
-          } else {
-            // Mark locally as attempted-but-failed so the home tab can show ✗.
-            saveDailyResultLocal(dateStr, 0, false);
-          }
+          // Save result locally and submit to Supabase for both outcomes.
+          // For failures: elapsedSeconds is ignored in ranking (sorted to bottom).
+          saveDailyResultLocal(dateStr, solved ? elapsedSeconds : 0, solved);
+          await submitDailyResult(dateStr, elapsedSeconds, mistakes, solved);
 
           finishedSolvedRef.current = solved;
         })()
