@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BoneIcon } from "@/components/BoneIcon";
 import {
   clearGreetingDismiss,
   currentDayHalf,
+  dismissGreetingForHalf,
   greetingDateKey,
   greetingForUser,
   isGreetingDismissedForHalf,
@@ -17,9 +19,26 @@ type Props = {
   reopenToken?: number;
 };
 
+const APPEAR_DELAY_MS = 750;
+const CHAR_MS = 38;
+
+function TypeCursor() {
+  return (
+    <span
+      className="animate-greeting-cursor ml-0.5 inline-block h-[0.9em] w-[0.45em] translate-y-px bg-[var(--foreground)] align-[-0.05em]"
+      aria-hidden
+    />
+  );
+}
+
 export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
   const [message, setMessage] = useState<string | null>(null);
-  const [visible, setVisible] = useState(false);
+  const [shouldShow, setShouldShow] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [typedLen, setTypedLen] = useState(0);
+  const [showBone, setShowBone] = useState(false);
+  /** Bumps when a new talk sequence should start (load / reopen / noon). */
+  const [talkSeq, setTalkSeq] = useState(0);
 
   useEffect(() => {
     if (!userId) return;
@@ -31,17 +50,20 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
     const next = greetingForUser(userId, now);
     setMessage(next);
 
-    // Dog tap always reopens the current half's message.
     if (reopenToken > 0) {
       clearGreetingDismiss();
-      setVisible(true);
+      setShouldShow(true);
+      setTalkSeq((n) => n + 1);
       if (intro) markIntroGreetingSeen(intro);
       return;
     }
 
     const show = !isGreetingDismissedForHalf(dateKey, half);
-    setVisible(show);
-    if (show && intro) markIntroGreetingSeen(intro);
+    setShouldShow(show);
+    if (show) {
+      setTalkSeq((n) => n + 1);
+      if (intro) markIntroGreetingSeen(intro);
+    }
   }, [userId, reopenToken]);
 
   // When the clock crosses noon (or midnight), pick up the new half-day message.
@@ -55,9 +77,9 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
       const intro = pendingIntroHalf(now);
       const next = greetingForUser(userId, now);
       setMessage(next);
-      // New half (e.g. PM after dismissing AM) is not dismissed → show again.
       if (!isGreetingDismissedForHalf(dateKey, half)) {
-        setVisible(true);
+        setShouldShow(true);
+        setTalkSeq((n) => n + 1);
         if (intro) markIntroGreetingSeen(intro);
       }
     };
@@ -66,22 +88,59 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
     return () => window.clearInterval(id);
   }, [userId]);
 
-  if (!visible || !message) return null;
+  // Delay, then start the typewriter for each talk sequence.
+  useEffect(() => {
+    if (!shouldShow || !message || talkSeq === 0) {
+      setRevealed(false);
+      setTypedLen(0);
+      setShowBone(false);
+      return;
+    }
+
+    setRevealed(false);
+    setTypedLen(0);
+    setShowBone(false);
+
+    const t = window.setTimeout(() => setRevealed(true), APPEAR_DELAY_MS);
+    return () => window.clearTimeout(t);
+  }, [shouldShow, message, talkSeq]);
+
+  // Letter-by-letter reveal.
+  useEffect(() => {
+    if (!revealed || !message) return;
+    if (typedLen >= message.length) {
+      setShowBone(true);
+      return;
+    }
+    const t = window.setTimeout(() => setTypedLen((n) => n + 1), CHAR_MS);
+    return () => window.clearTimeout(t);
+  }, [revealed, typedLen, message]);
+
+  if (!shouldShow || !message || !revealed) return null;
+
+  const typed = message.slice(0, typedLen);
 
   return (
     <div
-      className="pointer-events-none absolute bottom-[52%] left-[6.5rem] z-[70] w-max max-w-[min(14rem,48vw)] sm:left-[7.25rem] sm:max-w-[min(15rem,52vw)]"
+      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-[min(15.5rem,52vw)] sm:left-[7rem] sm:w-[min(16.5rem,54vw)]"
       role="status"
     >
-      <div
-        className="relative rounded-md bg-[#fff6d6] px-3 py-1.5"
+      <button
+        type="button"
+        onClick={() => {
+          const now = new Date();
+          dismissGreetingForHalf(greetingDateKey(now), currentDayHalf(now));
+          setShouldShow(false);
+          setRevealed(false);
+        }}
+        className="pointer-events-auto relative w-full rounded-md bg-[#fff6d6] px-2.5 py-1.5 text-left transition active:scale-[0.99]"
         style={{
-          /* Chunky pixel-ish black outline */
           boxShadow:
             "2px 0 0 0 #1a1208, -2px 0 0 0 #1a1208, 0 2px 0 0 #1a1208, 0 -2px 0 0 #1a1208, 2px 2px 0 0 #1a1208, -2px 2px 0 0 #1a1208, 2px -2px 0 0 #1a1208, -2px -2px 0 0 #1a1208",
         }}
+        aria-label="Dismiss pup message"
       >
-        {/* Pixel speech tail — bottom-left corner, black outline + cream fill */}
+        {/* Pixel speech tail — bottom-left corner */}
         <span
           className="absolute bottom-0 left-1.5 translate-y-full"
           aria-hidden
@@ -90,10 +149,16 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
           <span className="absolute left-[2px] top-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-[#fff6d6]" />
         </span>
 
-        <p className="line-clamp-2 font-display text-sm font-extrabold leading-snug text-[var(--foreground)]">
-          {message}
+        <p className="font-display text-[12px] font-bold leading-snug text-[var(--foreground)]">
+          <span>{typed}</span>
+          {showBone && (
+            <span className="ml-1 inline-flex translate-y-0.5 align-middle">
+              <BoneIcon size={14} />
+            </span>
+          )}
+          <TypeCursor />
         </p>
-      </div>
+      </button>
     </div>
   );
 }
