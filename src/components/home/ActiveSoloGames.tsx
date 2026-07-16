@@ -173,7 +173,7 @@ function ActiveSoloRow({
           <span className="text-[10px] font-semibold text-[var(--muted)]">
             <span className="inline-flex items-center gap-1">
               {paused ? "Paused" : "In progress"} ·{" "}
-              <BoneTally difficulty={snapshot.difficulty} size={12} />
+              <BoneTally difficulty={snapshot.difficulty} size={13} />
             </span>
           </span>
         </div>
