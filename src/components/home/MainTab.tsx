@@ -199,15 +199,24 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
           {/* Dog saddle — sheet edge only; no negative margin into title zone */}
           <div className="relative h-[3.25rem] shrink-0">
             <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
-              <DogAvatar
-                dogId={data.profile.dogId}
-                username={data.profile.username}
-                email={userData.user?.email}
-                userData={data}
-                size={128}
-                bare
-              />
-              <DogGreetingBubble />
+              {/* Hold space until profile is loaded so we never flash the default golden pup. */}
+              {userData.loading || !userData.data ? (
+                <span
+                  className="block"
+                  style={{ width: 128, height: 128 }}
+                  aria-hidden
+                />
+              ) : (
+                <DogAvatar
+                  dogId={userData.data.profile.dogId}
+                  username={userData.data.profile.username}
+                  email={userData.user?.email}
+                  userData={userData.data}
+                  size={128}
+                  bare
+                />
+              )}
+              {!userData.loading && userData.data && <DogGreetingBubble />}
             </div>
           </div>
 
