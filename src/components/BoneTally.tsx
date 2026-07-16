@@ -16,10 +16,11 @@ type GroupProps = { count: number; size: number; gap: number };
 /**
  * The bone PNG is naturally drawn at roughly −45° (diagonal).
  * rotate(135deg) = −45° + 135° = 90° → stands upright vertically (knobs top & bottom).
- * The crossing 5th bone uses rotate(90deg) = −45° + 90° = 45° → true "/" diagonal slash.
+ * The crossing 5th bone uses rotate(75deg) = −45° + 75° = 30° → a gentle "/" slash
+ * (more horizontal than 45°, matching classic tally-mark stroke angle).
  */
 const VERTICAL_ROTATE = "rotate(135deg)";
-const DIAGONAL_ROTATE = "rotate(90deg)";
+const DIAGONAL_ROTATE = "rotate(75deg)";
 
 /** One tally group: up to 4 vertical bones + optional diagonal 5th. */
 function TallyGroup({ count, size, gap }: GroupProps) {
@@ -83,7 +84,7 @@ type Props = {
  */
 export function BoneTally({ difficulty, size = 13 }: Props) {
   const count = DIFFICULTY_BONE_COUNT[difficulty];
-  const gap = Math.max(1, Math.round(size * 0.05));
+  const gap = 0; // bones touch — visual rotation keeps them distinct
 
   const groups: number[] = [];
   let remaining = count;
