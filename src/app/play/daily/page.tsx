@@ -9,7 +9,7 @@ import {
   removeActiveSolo,
   upsertActiveSolo,
 } from "@/lib/game/activeSolo";
-import { claimSoloFinish, isSoloFinished } from "@/lib/game/finishedSolo";
+import { claimSoloFinish } from "@/lib/game/finishedSolo";
 import { createSnapshot, useLocalGame, type GameSnapshot } from "@/lib/game/store";
 import { getProfile } from "@/lib/profile";
 import { loadUserData, recordSoloGame, STATS_UPDATED_EVENT } from "@/lib/stats/store";
@@ -42,20 +42,29 @@ function buildInitialSnapshot(activeId: string): GameSnapshot {
   });
 }
 
+/**
+ * Renders the daily puzzle game.
+ *
+ * Two exit paths after the game ends (ResultsOverlay is shown by GameScreen):
+ *   - onDone(true)  → user finished and solved → caller shows leaderboard
+ *   - onDone(false) → user failed (3 mistakes) → caller navigates home
+ *
+ * Mid-game back-button taps call onExit() → caller navigates home.
+ */
 function DailyGame({
   activeId,
   dateStr,
   streak,
   savedBones,
   onExit,
-  onFinish,
+  onDone,
 }: {
   activeId: string;
   dateStr: string;
   streak: number;
   savedBones: number;
   onExit: () => void;
-  onFinish: (elapsedSeconds: number, mistakes: number) => void;
+  onDone: (solved: boolean) => void;
 }) {
   const [snapshot] = useState(() => buildInitialSnapshot(activeId));
   const [me] = useState(() => {
@@ -66,6 +75,10 @@ function DailyGame({
   const controller = useLocalGame(snapshot);
   const controllerRef = useRef(controller);
   controllerRef.current = controller;
+
+  // Track whether the finished game was solved so the exit handler can decide
+  // whether to show the leaderboard or navigate home.
+  const finishedSolvedRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     if (!isActiveSolo(controller.snapshot)) return;
@@ -84,10 +97,18 @@ function DailyGame({
     };
   }, [activeId]);
 
-  const persistAndExit = () => {
+  // Called when the user taps the back button (mid-game) or Home in the overlay.
+  const handleExit = () => {
     const s = controller.snapshot;
     if (isActiveSolo(s)) upsertActiveSolo(s, activeId, { pauseIfPlaying: true });
-    onExit();
+
+    if (s.status === "done") {
+      // Game is finished — route based on whether it was solved.
+      onDone(finishedSolvedRef.current === true);
+    } else {
+      // Mid-game back tap → just go home.
+      onExit();
+    }
   };
 
   return (
@@ -96,8 +117,8 @@ function DailyGame({
       me={me}
       streak={streak}
       savedBones={savedBones}
-      onExit={persistAndExit}
-      onRematch={onExit}
+      onExit={handleExit}
+      // No rematch for daily — the overlay will only show the Home button.
       onFinish={({ solved, score, elapsedSeconds, mistakes, hintsUsed, squaresFilled, bonesFound }) =>
         void (async () => {
           if (!claimSoloFinish(activeId)) return;
@@ -116,11 +137,17 @@ function DailyGame({
             },
             { activeId },
           );
-          // Save locally first so the home tab can display the time
-          // even if the Supabase table isn't available yet.
-          saveDailyResultLocal(dateStr, elapsedSeconds);
-          await submitDailyResult(dateStr, elapsedSeconds, mistakes);
-          onFinish(elapsedSeconds, mistakes);
+
+          // Only save & submit a time when the puzzle was actually solved.
+          if (solved) {
+            saveDailyResultLocal(dateStr, elapsedSeconds, true);
+            await submitDailyResult(dateStr, elapsedSeconds, mistakes);
+          } else {
+            // Mark locally as attempted-but-failed so the home tab can show ✗.
+            saveDailyResultLocal(dateStr, 0, false);
+          }
+
+          finishedSolvedRef.current = solved;
         })()
       }
     />
@@ -136,9 +163,6 @@ function DailyInner() {
   const [userId, setUserId] = useState<string | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  // useState lazy-initialiser runs on the server (where window is undefined),
-  // so isTodayComplete() always returns false there. Read localStorage in an
-  // effect instead so the real completion state is applied after hydration.
   const [alreadyDone, setAlreadyDone] = useState(false);
 
   useEffect(() => {
@@ -149,7 +173,6 @@ function DailyInner() {
     // Also check Supabase — completed on another device.
     void fetchMyDailyResult(dateStr).then((r) => {
       if (r) {
-        claimSoloFinish(getDailyActiveId(dateStr));
         setAlreadyDone(true);
       }
     });
@@ -213,7 +236,13 @@ function DailyInner() {
       streak={wallet.streak}
       savedBones={wallet.bones}
       onExit={() => router.push("/")}
-      onFinish={() => setShowLeaderboard(true)}
+      onDone={(solved) => {
+        if (solved) {
+          setShowLeaderboard(true);
+        } else {
+          router.push("/");
+        }
+      }}
     />
   );
 }
