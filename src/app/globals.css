@@ -33,6 +33,12 @@
 
   --list-panel: #e9eef5;
   --serif: var(--font-serif), Georgia, "Times New Roman", serif;
+  --typewriter: var(--font-typewriter), "Courier New", Courier, monospace;
+}
+
+.font-typewriter {
+  font-family: var(--typewriter);
+  letter-spacing: 0.02em;
 }
 
 @theme inline {
