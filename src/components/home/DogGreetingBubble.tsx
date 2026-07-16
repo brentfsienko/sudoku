@@ -20,7 +20,8 @@ type Props = {
 };
 
 const APPEAR_DELAY_MS = 750;
-const CHAR_MS = 38;
+/** Per-character delay — 50% slower than the original 38ms. */
+const CHAR_MS = 76;
 
 function TypeCursor() {
   return (
