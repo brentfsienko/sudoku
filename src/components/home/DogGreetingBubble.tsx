@@ -2,20 +2,64 @@
 
 import { useEffect, useState } from "react";
 import {
-  dismissGreeting,
-  isGreetingDismissed,
-  pickGreeting,
+  clearGreetingDismiss,
+  currentDayHalf,
+  dismissGreetingForHalf,
+  greetingDateKey,
+  greetingForUser,
+  isGreetingDismissedForHalf,
 } from "@/lib/greetings";
 
-export function DogGreetingBubble() {
+type Props = {
+  userId: string;
+  /** Incremented when the user taps the dog to reopen the bubble. */
+  reopenToken?: number;
+};
+
+export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
   const [message, setMessage] = useState<string | null>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (isGreetingDismissed()) return;
-    setMessage(pickGreeting());
-  }, []);
+    if (!userId) return;
 
-  if (!message) return null;
+    const now = new Date();
+    const dateKey = greetingDateKey(now);
+    const half = currentDayHalf(now);
+    const next = greetingForUser(userId, now);
+    setMessage(next);
+
+    // Dog tap always reopens the current half's message.
+    if (reopenToken > 0) {
+      clearGreetingDismiss();
+      setVisible(true);
+      return;
+    }
+
+    setVisible(!isGreetingDismissedForHalf(dateKey, half));
+  }, [userId, reopenToken]);
+
+  // When the clock crosses noon (or midnight), pick up the new half-day message.
+  useEffect(() => {
+    if (!userId) return;
+
+    const tick = () => {
+      const now = new Date();
+      const dateKey = greetingDateKey(now);
+      const half = currentDayHalf(now);
+      const next = greetingForUser(userId, now);
+      setMessage(next);
+      // New half (e.g. PM after dismissing AM) is not dismissed → show again.
+      if (!isGreetingDismissedForHalf(dateKey, half)) {
+        setVisible(true);
+      }
+    };
+
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
+  }, [userId]);
+
+  if (!visible || !message) return null;
 
   return (
     <div
@@ -29,13 +73,14 @@ export function DogGreetingBubble() {
           aria-hidden
         />
 
-        <p className="line-clamp-2 font-display text-[12px] font-semibold leading-snug text-[var(--foreground)]">
+        <p className="line-clamp-2 font-display text-[11px] font-semibold leading-snug text-[var(--foreground)]">
           <span>{message}</span>
           <button
             type="button"
             onClick={() => {
-              dismissGreeting();
-              setMessage(null);
+              const now = new Date();
+              dismissGreetingForHalf(greetingDateKey(now), currentDayHalf(now));
+              setVisible(false);
             }}
             className="ml-1 inline-flex h-3.5 w-3.5 translate-y-px items-center justify-center rounded-full align-middle text-[9px] font-bold leading-none text-[var(--muted)] transition hover:bg-black/5 active:text-[var(--foreground)]"
             aria-label="Dismiss greeting"
