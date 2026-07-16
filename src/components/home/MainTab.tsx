@@ -219,7 +219,7 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
             </div>
 
             <div
-              className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-8 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
+              className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-12 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
               style={{ minHeight: PLAY_SHEET_MIN_HEIGHT }}
             >
               <ActiveSoloGames
