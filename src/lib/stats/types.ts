@@ -88,6 +88,12 @@ export type TriviaUserGuess = {
 
 export type UserData = {
   profile: Profile;
+  /**
+   * Epoch ms when username/dogId were last customized on any device.
+   * Used to merge profiles across devices (last-write-wins). Prefer remote
+   * when both are missing/equal so a fresh device doesn't overwrite cloud.
+   */
+  profileUpdatedAt?: number;
   solo: SoloStats;
   multi: MultiStats;
   history: GameLog[];
@@ -102,6 +108,23 @@ export type UserData = {
    */
   finishedSoloIds?: string[];
 };
+
+/** Pick the newer profile customization when merging two device copies. */
+export function mergeProfiles(
+  local: UserData,
+  remote: UserData,
+): { profile: Profile; profileUpdatedAt: number } {
+  const localAt =
+    typeof local.profileUpdatedAt === "number" ? local.profileUpdatedAt : 0;
+  const remoteAt =
+    typeof remote.profileUpdatedAt === "number" ? remote.profileUpdatedAt : 0;
+  if (localAt > remoteAt) {
+    return { profile: local.profile, profileUpdatedAt: localAt };
+  }
+  // Prefer remote on ties / missing timestamps so a new device's random
+  // local pup doesn't clobber an existing cloud customization.
+  return { profile: remote.profile, profileUpdatedAt: Math.max(localAt, remoteAt) };
+}
 
 /** "Elevation" analog: harder puzzles climb higher. */
 export const DIFFICULTY_RANK: Record<Difficulty, number> = {
@@ -232,8 +255,10 @@ export function mergeActiveSolos(
 
 /** Merge two device copies without losing solo (or any) history rows. */
 export function mergeUserData(local: UserData, remote: UserData): UserData {
+  const { profile, profileUpdatedAt } = mergeProfiles(local, remote);
   return normalizeUserData({
-    profile: local.profile.username?.trim() ? local.profile : remote.profile,
+    profile,
+    profileUpdatedAt,
     solo: mergeSoloStats(local.solo, remote.solo),
     multi: mergeMultiStats(local.multi, remote.multi),
     history: mergeHistory(local.history, remote.history),
@@ -389,6 +414,10 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
       ...base.profile,
       ...(raw.profile as Partial<Profile> & { name?: string }),
     }),
+    profileUpdatedAt:
+      typeof raw.profileUpdatedAt === "number" && raw.profileUpdatedAt > 0
+        ? raw.profileUpdatedAt
+        : undefined,
     solo,
     multi: { ...multi, opponents: reconcileOpponents(multi.opponents, history) },
     history,
