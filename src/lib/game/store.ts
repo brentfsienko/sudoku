@@ -15,6 +15,7 @@ import {
   isGiven,
   isSolved,
   pickHintCell,
+  relatedCells,
   solutionDigit,
 } from "./engine";
 
@@ -144,9 +145,19 @@ function reducer(state: State, action: Action): State {
       const correct = digit === solutionDigit(s.solution, index);
       const entry: CellEntry = { value: digit, notes: [], owner: role, correct };
       const frame = frameFor(s, index);
+
+      // Auto-erase: remove this digit from notes of every peer cell.
+      const updatedCells: BoardCells = { ...s.cells, [index]: entry };
+      for (const peer of relatedCells(index)) {
+        const peerCell = updatedCells[peer];
+        if (peerCell && peerCell.notes.includes(digit)) {
+          updatedCells[peer] = { ...peerCell, notes: peerCell.notes.filter((n) => n !== digit) };
+        }
+      }
+
       let next: GameSnapshot = {
         ...s,
-        cells: { ...s.cells, [index]: entry },
+        cells: updatedCells,
         mistakes: correct ? s.mistakes : s.mistakes + 1,
       };
       next = checkFinished(next);
