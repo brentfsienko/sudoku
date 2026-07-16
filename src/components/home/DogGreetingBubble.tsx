@@ -19,17 +19,17 @@ export function DogGreetingBubble() {
 
   return (
     <div
-      className="pointer-events-auto absolute bottom-[40%] left-[6.75rem] z-40 max-w-[min(11.5rem,40vw)] sm:left-[7.5rem]"
+      className="pointer-events-auto absolute bottom-[52%] left-[6.5rem] z-40 w-max max-w-[min(14rem,48vw)] sm:left-[7.25rem] sm:max-w-[min(15rem,52vw)]"
       role="status"
     >
-      <div className="relative rounded-2xl bg-[#fff6d6] px-2.5 py-1.5 shadow-[0_2px_8px_rgba(74,59,47,0.12)] ring-1 ring-[rgba(74,59,47,0.12)]">
-        {/* Speech-tail pointing left toward the dog */}
+      <div className="relative rounded-2xl bg-[#fff6d6] px-3 py-1.5 pb-2 shadow-[0_2px_8px_rgba(74,59,47,0.12)] ring-1 ring-[rgba(74,59,47,0.12)]">
+        {/* Speech tail from bottom-left, pointing down toward the dog */}
         <span
-          className="absolute left-0 top-1/2 -translate-x-[6px] -translate-y-1/2 border-y-[6px] border-r-[7px] border-y-transparent border-r-[#fff6d6]"
+          className="absolute bottom-0 left-3 translate-y-[95%] border-x-[6px] border-t-[8px] border-x-transparent border-t-[#fff6d6]"
           aria-hidden
         />
 
-        <p className="font-display text-[12px] font-semibold leading-snug text-[var(--foreground)]">
+        <p className="line-clamp-2 font-display text-[12px] font-semibold leading-snug text-[var(--foreground)]">
           <span>{message}</span>
           <button
             type="button"
