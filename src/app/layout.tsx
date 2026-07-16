@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Lora, Nunito, Special_Elite } from "next/font/google";
+import localFont from "next/font/local";
+import { Baloo_2, Lora, Nunito } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
@@ -28,11 +29,12 @@ const lora = Lora({
   weight: ["400", "600", "700"],
 });
 
-/** Typewriter face for the home-tab pup speech bubble. */
-const specialElite = Special_Elite({
+/** Self-hosted typewriter face — avoids Google Fonts fetch during Vercel builds. */
+const specialElite = localFont({
+  src: "./fonts/SpecialElite-Regular.woff2",
   variable: "--font-typewriter",
-  subsets: ["latin"],
-  weight: ["400"],
+  weight: "400",
+  display: "swap",
 });
 
 export const metadata: Metadata = ROOT_METADATA;
