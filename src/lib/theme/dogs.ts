@@ -188,6 +188,8 @@ export type PlayerColor = {
 export const PLAYER_COLORS: Record<PlayerRole, PlayerColor> = {
   "player-1": { hex: "#1d6fd8", soft: "#dbeafe", label: "Blue" },
   "player-2": { hex: "#e85d04", soft: "#ffedd5", label: "Orange" },
+  "player-3": { hex: "#16a34a", soft: "#dcfce7", label: "Green" },
+  "player-4": { hex: "#7c3aed", soft: "#ede9fe", label: "Purple" },
 };
 
 export function playerColor(role: PlayerRole | null | undefined): PlayerColor {

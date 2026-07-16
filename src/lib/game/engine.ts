@@ -141,16 +141,15 @@ export function cellContributions(
   puzzle: string,
   solution: string,
   cells: BoardCells,
-): { "player-1": number; "player-2": number; total: number } {
-  const result = { "player-1": 0, "player-2": 0, total: 0 };
+): Record<string, number> & { total: number } {
+  const result: Record<string, number> & { total: number } = { total: 0 };
   for (let i = 0; i < 81; i++) {
     if (isGiven(puzzle, i)) continue;
     const entry = cells[i];
     if (!entry || !entry.correct || entry.value == null) continue;
     if (entry.value !== solutionDigit(solution, i)) continue;
     result.total++;
-    if (entry.owner === "player-1") result["player-1"]++;
-    else if (entry.owner === "player-2") result["player-2"]++;
+    if (entry.owner) result[entry.owner] = (result[entry.owner] ?? 0) + 1;
   }
   return result;
 }

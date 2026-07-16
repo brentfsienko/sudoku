@@ -25,9 +25,11 @@ import {
   DIFFICULTIES,
   DIFFICULTY_LABELS,
   GAME_MODE_LABELS,
+  MAX_PLAYERS,
   type Difficulty,
   type GameMode,
 } from "@/lib/game/types";
+import type { LivePlayer } from "@/lib/liveblocks/useLiveGame";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -62,7 +64,7 @@ function RoomRoute() {
         initialPresence={{
           name: profile.username,
           dogId: profile.dogId,
-          role: isHost ? "player-1" : "player-2",
+          role: null, // claimed dynamically in useLiveGame
           selectedCell: null,
           online: true,
         }}
@@ -137,8 +139,10 @@ function RoomInner({
         isHost={isHost}
         mode={game.controller?.snapshot.mode ?? seedMode}
         difficulty={game.controller?.snapshot.difficulty ?? seedDifficulty}
-        me={game.me}
-        opponent={game.opponent}
+        allPlayers={game.allPlayers}
+        canStart={game.canStart}
+        isFull={game.isFull}
+        onStart={game.startGame}
         onExit={exit}
       />
     );
@@ -149,6 +153,7 @@ function RoomInner({
       controller={game.controller}
       me={game.me}
       opponent={game.opponent}
+      allPlayers={game.allPlayers}
       peers={game.peers}
       onExit={exit}
       onRematch={game.rematch}
@@ -235,16 +240,20 @@ function Lobby({
   isHost,
   mode,
   difficulty,
-  me,
-  opponent,
+  allPlayers,
+  canStart,
+  isFull,
+  onStart,
   onExit,
 }: {
   code: string;
   isHost: boolean;
   mode: GameMode;
   difficulty: Difficulty;
-  me: { name: string; dogId: string; role: "player-1" | "player-2" };
-  opponent: { name: string; dogId: string; role: "player-1" | "player-2" } | null;
+  allPlayers: LivePlayer[];
+  canStart: boolean;
+  isFull: boolean;
+  onStart: () => void;
   onExit: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -264,6 +273,8 @@ function Lobby({
       // user cancelled or clipboard unavailable
     }
   }
+
+  const slots = Array.from({ length: MAX_PLAYERS });
 
   return (
     <div
@@ -288,74 +299,91 @@ function Lobby({
         <div className="h-9 w-9" />
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-6">
+      <div className="flex flex-1 flex-col items-center justify-center gap-5">
+        {/* Room code card */}
         <div className="w-full rounded-3xl bg-white p-6 text-center shadow-sm">
-          <div className="text-sm font-semibold text-[var(--muted)]">
-            Room code
-          </div>
+          <div className="text-sm font-semibold text-[var(--muted)]">Room code</div>
           <div className="font-display my-1 text-5xl font-extrabold tracking-[0.3em] text-[var(--primary)]">
             {code}
           </div>
           <div className="text-xs text-[var(--muted)]">
             {DIFFICULTY_LABELS[difficulty]} · {GAME_MODE_LABELS[mode]}
           </div>
-          <button
-            type="button"
-            onClick={share}
-            className="font-display mt-4 w-full rounded-full bg-[var(--accent)] py-3 font-extrabold text-white transition active:scale-[0.98]"
-          >
-            {copied ? "Link copied!" : "Share invite"}
-          </button>
+          {!isFull && (
+            <button
+              type="button"
+              onClick={share}
+              className="font-display mt-4 w-full rounded-full bg-[var(--accent)] py-3 font-extrabold text-white transition active:scale-[0.98]"
+            >
+              {copied ? "Link copied!" : "Share invite"}
+            </button>
+          )}
+          {isFull && (
+            <p className="mt-3 text-sm font-semibold text-[var(--muted)]">Room full (4/4)</p>
+          )}
         </div>
 
-        <div className="flex w-full items-center justify-around rounded-3xl bg-[var(--surface-soft)] p-5">
-          <div className="flex flex-col items-center gap-2">
-            <PlayerBadge
-              name=""
-              dogId={me.dogId}
-              role={me.role}
-              size={56}
-              compact
-            />
-            <span className="font-display text-sm font-bold text-[var(--foreground)]">
-              {me.name} (You)
-            </span>
-          </div>
-          <span className="text-2xl">🐾</span>
-          <div className="flex flex-col items-center gap-2">
-            {opponent ? (
-              <>
-                <PlayerBadge
-                  name=""
-                  dogId={opponent.dogId}
-                  role={opponent.role}
-                  size={56}
-                  compact
-                />
-                <span className="font-display text-sm font-bold text-[var(--foreground)]">
-                  {opponent.name}
-                </span>
-              </>
-            ) : (
-              <>
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-[var(--muted)] text-2xl text-[var(--muted)]">
-                  ?
-                </div>
-                <span className="font-display animate-pulse text-sm font-bold text-[var(--muted)]">
-                  Waiting…
-                </span>
-              </>
-            )}
-          </div>
+        {/* Player slots — 2×2 grid */}
+        <div className="grid w-full grid-cols-2 gap-3">
+          {slots.map((_, i) => {
+            const player = allPlayers[i];
+            const isMe = player?.role === allPlayers[0]?.role && i === 0;
+            return (
+              <div
+                key={i}
+                className="flex flex-col items-center gap-2 rounded-2xl bg-[var(--surface-soft)] py-4"
+              >
+                {player ? (
+                  <>
+                    <PlayerBadge
+                      name=""
+                      dogId={player.dogId}
+                      role={player.role}
+                      size={52}
+                      compact
+                    />
+                    <span className="font-display text-sm font-bold text-[var(--foreground)]">
+                      {player.name}
+                      {isMe && (
+                        <span className="ml-1 text-xs font-normal text-[var(--muted)]">(you)</span>
+                      )}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-2 border-dashed border-[var(--muted)] text-xl text-[var(--muted)]">
+                      ?
+                    </div>
+                    <span className="font-display animate-pulse text-sm font-bold text-[var(--muted)]">
+                      Waiting…
+                    </span>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        <p className="text-center text-sm text-[var(--muted)]">
-          {opponent
-            ? "Starting the game…"
-            : isHost
-              ? "Share the code with your friend. The game starts when they join."
-              : "Waiting for the host to start the game…"}
-        </p>
+        {/* Host controls / status */}
+        {isHost ? (
+          <div className="w-full space-y-2">
+            <button
+              type="button"
+              onClick={onStart}
+              disabled={!canStart}
+              className="font-display w-full rounded-full bg-[var(--primary)] py-3.5 font-extrabold text-white transition active:scale-[0.98] disabled:opacity-40"
+            >
+              {canStart ? `Start game (${allPlayers.length} players)` : "Waiting for players…"}
+            </button>
+            <p className="text-center text-xs text-[var(--muted)]">
+              You can start with 2–{MAX_PLAYERS} players
+            </p>
+          </div>
+        ) : (
+          <p className="text-center text-sm text-[var(--muted)]">
+            Waiting for the host to start the game…
+          </p>
+        )}
       </div>
     </div>
   );

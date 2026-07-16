@@ -35,6 +35,9 @@ type Props = {
   controller: GameController;
   me: Player;
   opponent?: Player | null;
+  /** Full player list (self + all peers) in role order. When provided, used
+   *  to render the players strip instead of the 2-player me/opponent layout. */
+  allPlayers?: Player[];
   peers?: PeerCursor[];
   onExit: () => void;
   onRematch?: () => void;
@@ -67,6 +70,7 @@ export function GameScreen({
   controller,
   me,
   opponent,
+  allPlayers,
   peers = [],
   onExit,
   onRematch,
@@ -212,29 +216,35 @@ export function GameScreen({
 
       {/* Players strip (multiplayer) */}
       {isMulti && (
-        <div className="flex items-center justify-between gap-2 px-4 pb-2">
-          <PlayerStat
-            player={me}
-            you
-            count={contrib[me.role]}
-            showCount={mode === "competitive"}
-            online
-          />
-          <span className="font-display text-sm font-bold text-[var(--muted)]">
-            {mode === "competitive" ? "vs" : "🐾"}
-          </span>
-          {opponent ? (
-            <PlayerStat
-              player={opponent}
-              count={contrib[opponent.role]}
-              showCount={mode === "competitive"}
-              online={peers.some((p) => p.role === opponent.role)}
-              alignRight
-            />
-          ) : (
-            <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
-              <span className="animate-pulse">Waiting for friend…</span>
-            </div>
+        <div className="flex items-center justify-between gap-1.5 px-4 pb-2">
+          {(allPlayers ?? [me, ...(opponent ? [opponent] : [])]).map((player, idx) => {
+            const isMe = player.role === me.role;
+            const isOnline = isMe || peers.some((p) => p.role === player.role);
+            const sep = mode === "competitive" ? "vs" : "🐾";
+            return (
+              <div key={player.role} className="flex min-w-0 flex-1 items-center gap-1.5">
+                {idx > 0 && (
+                  <span className="shrink-0 font-display text-xs font-bold text-[var(--muted)]">
+                    {sep}
+                  </span>
+                )}
+                <div className={`min-w-0 flex-1 ${idx > 0 ? "" : ""}`}>
+                  <PlayerStat
+                    player={player}
+                    you={isMe}
+                    count={contrib[player.role]}
+                    showCount={mode === "competitive"}
+                    online={isOnline}
+                    alignRight={idx > 0 && (allPlayers ?? []).length <= 2}
+                  />
+                </div>
+              </div>
+            );
+          })}
+          {!allPlayers && !opponent && (
+            <span className="animate-pulse text-sm text-[var(--muted)]">
+              Waiting for friend…
+            </span>
           )}
         </div>
       )}
