@@ -86,6 +86,7 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   const [setupOpen, setSetupOpen] = useState(false);
   const [setupKind, setSetupKind] = useState<"solo" | "multiplayer">("solo");
   const [pickedOpponent, setPickedOpponent] = useState<PublicProfile | null>(null);
+  const [greetingReopenToken, setGreetingReopenToken] = useState(0);
 
   const streak = data.solo.streak;
   const bones = data.bones ?? 0;
@@ -199,15 +200,38 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
           {/* Dog saddle — sheet edge only; no negative margin into title zone */}
           <div className="relative h-[3.25rem] shrink-0">
             <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
-              <DogAvatar
-                dogId={data.profile.dogId}
-                username={data.profile.username}
-                email={userData.user?.email}
-                userData={data}
-                size={128}
-                bare
-              />
-              <DogGreetingBubble />
+              {/* Hold space until profile is loaded so we never flash the default golden pup. */}
+              {userData.loading || !userData.data ? (
+                <span
+                  className="block"
+                  style={{ width: 128, height: 128 }}
+                  aria-hidden
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="pointer-events-auto block rounded-full active:scale-[0.98]"
+                  onClick={() => setGreetingReopenToken((n) => n + 1)}
+                  aria-label="Show pup message"
+                >
+                  <DogAvatar
+                    dogId={userData.data.profile.dogId}
+                    username={userData.data.profile.username}
+                    email={userData.user?.email}
+                    userData={userData.data}
+                    size={128}
+                    bare
+                  />
+                </button>
+              )}
+              {!userData.loading && userData.data && (
+                <DogGreetingBubble
+                  userId={
+                    userData.user?.id ?? userData.data.profile.username
+                  }
+                  reopenToken={greetingReopenToken}
+                />
+              )}
             </div>
           </div>
 
