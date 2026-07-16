@@ -24,7 +24,10 @@ export const GAME_MODE_LABELS: Record<GameMode, string> = {
   competitive: "Competitive",
 };
 
-export type PlayerRole = "player-1" | "player-2";
+export type PlayerRole = "player-1" | "player-2" | "player-3" | "player-4";
+
+export const ALL_ROLES: PlayerRole[] = ["player-1", "player-2", "player-3", "player-4"];
+export const MAX_PLAYERS = 4;
 
 /** A single cell entry in the shared/local board state. */
 export type CellEntry = {

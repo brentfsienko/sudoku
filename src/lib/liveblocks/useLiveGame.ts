@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LiveMap, LiveObject } from "@liveblocks/client";
 import {
   useMutation,
@@ -25,6 +25,7 @@ import type {
   PeerCursor,
   PlayerRole,
 } from "@/lib/game/types";
+import { MAX_PLAYERS } from "@/lib/game/types";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 
 type UndoFrame = { index: number; prev: CellEntry | undefined };
@@ -35,16 +36,24 @@ function readBoard(cells: LiveMap<string, CellEntry>): Record<number, CellEntry>
   return board;
 }
 
+export type LivePlayer = { name: string; dogId: string; role: PlayerRole };
+
 export type LiveGame = {
   ready: boolean;
   /** Storage still loading. */
   loading: boolean;
   status: "lobby" | "playing" | "paused" | "done";
   controller: GameController | null;
-  me: { name: string; dogId: string; role: PlayerRole };
-  opponent: { name: string; dogId: string; role: PlayerRole } | null;
+  me: LivePlayer;
+  /** First non-self player — kept for backward compat with 2-player UI paths. */
+  opponent: LivePlayer | null;
+  /** All players including self, in role order. */
+  allPlayers: LivePlayer[];
   peers: PeerCursor[];
   playerCount: number;
+  isFull: boolean;
+  canStart: boolean;
+  startGame: () => void;
   rematch: () => void;
 };
 
@@ -199,22 +208,32 @@ export function useLiveGame(opts: {
     });
   }, []);
 
-  // Host responsibilities: generate the puzzle and start once a friend joins.
+  // Host responsibilities: generate puzzle on mount.
   useEffect(() => {
     if (isHost && meta && !meta.puzzle) ensurePuzzle(opts.hostName);
   }, [isHost, meta, ensurePuzzle, opts.hostName]);
 
+  // Dynamic role claiming: host is always player-1; non-hosts grab the first
+  // unclaimed slot among player-2/3/4.  We use a ref to avoid infinite loops.
+  const roleClaimed = useRef(false);
   useEffect(() => {
-    if (
-      isHost &&
-      meta &&
-      meta.status === "lobby" &&
-      meta.puzzle &&
-      others.length >= 1
-    ) {
-      startGame();
+    if (isHost) {
+      updateMyPresence({ role: "player-1" });
+      roleClaimed.current = true;
+      return;
     }
-  }, [isHost, meta, others.length, startGame]);
+    if (roleClaimed.current) return;
+    const taken = new Set(others.map((o) => o.presence.role).filter(Boolean) as PlayerRole[]);
+    const slot = (["player-2", "player-3", "player-4"] as PlayerRole[]).find(
+      (r) => !taken.has(r),
+    );
+    if (slot) {
+      updateMyPresence({ role: slot });
+      roleClaimed.current = true;
+    }
+  // re-run whenever others list changes until we've claimed a slot
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHost, others]);
 
   // Reset local undo history on a new round (render-time state adjustment).
   const [roundStartedAt, setRoundStartedAt] = useState(meta?.startedAt ?? null);
@@ -272,6 +291,15 @@ export function useLiveGame(opts: {
       }
     : null;
 
+  // All players (self + peers) sorted by role for consistent display order.
+  const allPlayers: LivePlayer[] = useMemo(() => {
+    const self: LivePlayer = { name: myPresence.name, dogId: myPresence.dogId, role: myRole };
+    const others_: LivePlayer[] = peers
+      .filter((p) => p.role != null)
+      .map((p) => ({ name: p.name, dogId: p.dogId, role: p.role as PlayerRole }));
+    return [self, ...others_].sort((a, b) => a.role.localeCompare(b.role));
+  }, [myPresence.name, myPresence.dogId, myRole, peers]);
+
   const controller: GameController | null =
     snapshot &&
     ({
@@ -309,6 +337,8 @@ export function useLiveGame(opts: {
       setPaused: () => {},
     } satisfies GameController);
 
+  const playerCount = others.length + 1;
+
   return {
     ready: !!snapshot && snapshot.status !== "lobby",
     loading: !meta || !cellsMap,
@@ -316,8 +346,12 @@ export function useLiveGame(opts: {
     controller,
     me: { name: myPresence.name, dogId: myPresence.dogId, role: myRole },
     opponent,
+    allPlayers,
     peers,
-    playerCount: others.length + 1,
+    playerCount,
+    isFull: playerCount >= MAX_PLAYERS,
+    canStart: isHost && others.length >= 1 && meta?.status === "lobby",
+    startGame: () => startGame(),
     rematch: () => rematchMutation(),
   };
 }
