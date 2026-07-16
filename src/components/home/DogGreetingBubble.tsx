@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {
   clearGreetingDismiss,
   currentDayHalf,
-  dismissGreetingForHalf,
   greetingDateKey,
   greetingForUser,
   isGreetingDismissedForHalf,
@@ -71,30 +70,28 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
 
   return (
     <div
-      className="pointer-events-auto absolute bottom-[52%] left-[6.5rem] z-40 w-max max-w-[min(14rem,48vw)] sm:left-[7.25rem] sm:max-w-[min(15rem,52vw)]"
+      className="pointer-events-none absolute bottom-[52%] left-[6.5rem] z-[70] w-max max-w-[min(14rem,48vw)] sm:left-[7.25rem] sm:max-w-[min(15rem,52vw)]"
       role="status"
     >
-      <div className="relative rounded-2xl bg-[#fff6d6] px-3 py-1.5 pb-2 shadow-[0_2px_8px_rgba(74,59,47,0.12)] ring-1 ring-[rgba(74,59,47,0.12)]">
-        {/* Speech tail from bottom-left, pointing down toward the dog */}
+      <div
+        className="relative rounded-md bg-[#fff6d6] px-3 py-1.5"
+        style={{
+          /* Chunky pixel-ish black outline */
+          boxShadow:
+            "2px 0 0 0 #1a1208, -2px 0 0 0 #1a1208, 0 2px 0 0 #1a1208, 0 -2px 0 0 #1a1208, 2px 2px 0 0 #1a1208, -2px 2px 0 0 #1a1208, 2px -2px 0 0 #1a1208, -2px -2px 0 0 #1a1208",
+        }}
+      >
+        {/* Pixel speech tail — bottom-left corner, black outline + cream fill */}
         <span
-          className="absolute bottom-0 left-3 translate-y-[95%] border-x-[6px] border-t-[8px] border-x-transparent border-t-[#fff6d6]"
+          className="absolute bottom-0 left-1.5 translate-y-full"
           aria-hidden
-        />
+        >
+          <span className="absolute left-0 top-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-[#1a1208]" />
+          <span className="absolute left-[2px] top-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-[#fff6d6]" />
+        </span>
 
-        <p className="line-clamp-2 font-display text-[11px] font-semibold leading-snug text-[var(--foreground)]">
-          <span>{message}</span>
-          <button
-            type="button"
-            onClick={() => {
-              const now = new Date();
-              dismissGreetingForHalf(greetingDateKey(now), currentDayHalf(now));
-              setVisible(false);
-            }}
-            className="ml-1 inline-flex h-3.5 w-3.5 translate-y-px items-center justify-center rounded-full align-middle text-[9px] font-bold leading-none text-[var(--muted)] transition hover:bg-black/5 active:text-[var(--foreground)]"
-            aria-label="Dismiss greeting"
-          >
-            ×
-          </button>
+        <p className="line-clamp-2 font-display text-sm font-extrabold leading-snug text-[var(--foreground)]">
+          {message}
         </p>
       </div>
     </div>
