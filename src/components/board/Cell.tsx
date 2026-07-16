@@ -60,7 +60,7 @@ function CellInner({ cell, onSelect }: Props) {
           : undefined
       }
     >
-      {cell.hasBone && !cell.value && (
+      {cell.hasBone && !cell.value && cell.notes.length === 0 && (
         <span className="pointer-events-none absolute right-0.5 top-0.5 opacity-70">
           <BoneIcon size={10} />
         </span>
