@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Lora, Nunito } from "next/font/google";
+import { Baloo_2, Lora, Nunito, Special_Elite } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
@@ -28,6 +28,13 @@ const lora = Lora({
   weight: ["400", "600", "700"],
 });
 
+/** Typewriter face for the home-tab pup speech bubble. */
+const specialElite = Special_Elite({
+  variable: "--font-typewriter",
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
 export const metadata: Metadata = ROOT_METADATA;
 
 export const viewport: Viewport = {
@@ -47,7 +54,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${baloo.variable} ${nunito.variable} ${lora.variable} h-full antialiased`}
+      className={`${baloo.variable} ${nunito.variable} ${lora.variable} ${specialElite.variable} h-full antialiased`}
     >
       <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh max-md:h-[var(--app-height,100dvh)] max-md:max-h-[var(--app-height,100dvh)]">
         <JsonLd data={[webApplicationJsonLd(), organizationJsonLd()]} />

@@ -152,7 +152,7 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
           <span className="absolute left-px top-0 border-x-[4px] border-t-[5px] border-x-transparent border-t-[#fff6d6]" />
         </span>
 
-        <p className="line-clamp-2 break-words font-display text-[12px] font-bold leading-snug text-[var(--foreground)]">
+        <p className="font-typewriter line-clamp-2 break-words text-[12px] font-normal leading-snug text-[var(--foreground)]">
           <span>{typed}</span>
           {showBone && (
             <span className="ml-0.5 inline-flex translate-y-0.5 align-middle">
