@@ -8,6 +8,8 @@ import {
   greetingDateKey,
   greetingForUser,
   isGreetingDismissedForHalf,
+  markIntroGreetingSeen,
+  pendingIntroHalf,
 } from "@/lib/greetings";
 
 type Props = {
@@ -26,6 +28,7 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
     const now = new Date();
     const dateKey = greetingDateKey(now);
     const half = currentDayHalf(now);
+    const intro = pendingIntroHalf(now);
     const next = greetingForUser(userId, now);
     setMessage(next);
 
@@ -33,10 +36,13 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
     if (reopenToken > 0) {
       clearGreetingDismiss();
       setVisible(true);
+      if (intro) markIntroGreetingSeen(intro);
       return;
     }
 
-    setVisible(!isGreetingDismissedForHalf(dateKey, half));
+    const show = !isGreetingDismissedForHalf(dateKey, half);
+    setVisible(show);
+    if (show && intro) markIntroGreetingSeen(intro);
   }, [userId, reopenToken]);
 
   // When the clock crosses noon (or midnight), pick up the new half-day message.
@@ -47,11 +53,13 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
       const now = new Date();
       const dateKey = greetingDateKey(now);
       const half = currentDayHalf(now);
+      const intro = pendingIntroHalf(now);
       const next = greetingForUser(userId, now);
       setMessage(next);
       // New half (e.g. PM after dismissing AM) is not dismissed → show again.
       if (!isGreetingDismissedForHalf(dateKey, half)) {
         setVisible(true);
+        if (intro) markIntroGreetingSeen(intro);
       }
     };
 
