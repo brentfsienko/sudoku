@@ -145,24 +145,25 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
       ref={containerRef}
       className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--accent)]"
     >
-      {/* Bone is pinned just below "Sudogku" (safe-area + 72px) and never moves.
-          The sheet slides down to reveal it, then back up to cover it.
-          Spins whenever pull > 0 so it's already spinning as it's revealed. */}
+      {/* Bone pinned in dog-saddle zone (below title, above white card).
+          IMPORTANT: animation transform and position transform must live on
+          separate elements — CSS animations override inline style.transform,
+          so combining them would snap the bone to the container origin. */}
       <div
-        className={`pointer-events-none absolute inset-x-0 top-0 z-[15] flex justify-center ${
-          pull > 0 || isRefreshing ? "animate-bone-spin" : ""
-        }`}
+        className="pointer-events-none absolute inset-x-0 z-[15] flex justify-center"
         style={{
-          /* 6rem below safe-area = midpoint between title bottom and white card top:
-             title bottom  = safe-area + 4rem    (font 2.75rem + pad 1.25rem)
-             white card top = safe-area + 8rem   (header 4.75rem + dog-saddle 3.25rem)
-             midpoint       = safe-area + 6rem                                       */
-          transform: "translateY(calc(env(safe-area-inset-top) + 6rem))",
+          /* Center the 32 px bone in the dog-saddle zone (3.25 rem tall) that
+             sits between the header bottom and the white card top.
+             Bone top = PLAY_HEADER_HEIGHT + (3.25rem - 2rem) / 2 ≈ header + 0.625rem */
+          top: `calc(${PLAY_HEADER_HEIGHT} + 0.625rem)`,
           opacity: boneOpacity,
           transition: snapping ? "opacity 0.4s ease" : "none",
         }}
       >
-        <BoneIcon size={32} />
+        {/* Animation on inner element so rotate() doesn't fight with top positioning */}
+        <div className={pull > 0 || isRefreshing ? "animate-bone-spin" : ""}>
+          <BoneIcon size={32} />
+        </div>
       </div>
 
       {/* Pinned title — lower z so the sheet can slide over it when scrolling */}
