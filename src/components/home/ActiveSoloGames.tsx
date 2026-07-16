@@ -14,7 +14,7 @@ import { claimSoloFinish } from "@/lib/game/finishedSolo";
 import { deleteActiveSolo, loadUserData, STATS_UPDATED_EVENT } from "@/lib/stats/store";
 import { formatGameClock } from "@/lib/game/format";
 import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
-import { BoneTally } from "@/components/BoneTally";
+import { DIFFICULTY_LABELS } from "@/lib/game/types";
 import type { Profile } from "@/lib/stats/types";
 import { dogIdForUsername } from "@/lib/theme/dogs";
 
@@ -171,10 +171,7 @@ function ActiveSoloRow({
             <SoloModeBadge />
           </div>
           <span className="text-[10px] font-semibold text-[var(--muted)]">
-            <span className="inline-flex items-center gap-1">
-              {paused ? "Paused" : "In progress"} ·{" "}
-              <BoneTally difficulty={snapshot.difficulty} size={16} />
-            </span>
+            {paused ? "Paused" : "In progress"} · {DIFFICULTY_LABELS[snapshot.difficulty]}
           </span>
         </div>
         <span className="shrink-0 text-[10px] font-semibold leading-none text-[var(--muted)]">
