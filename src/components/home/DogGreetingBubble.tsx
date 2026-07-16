@@ -122,7 +122,8 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
 
   return (
     <div
-      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-[min(15.5rem,52vw)] sm:left-[7rem] sm:w-[min(16.5rem,54vw)]"
+      /* 25% narrower than prior max (15.5rem/52vw → ~11.6rem/39vw) */
+      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-[min(11.6rem,39vw)] sm:left-[7rem] sm:w-[min(12.4rem,40.5vw)]"
       role="status"
     >
       <button
@@ -133,10 +134,11 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
           setShouldShow(false);
           setRevealed(false);
         }}
-        className="pointer-events-auto relative w-full rounded-md bg-[#fff6d6] px-2.5 py-1.5 text-left transition active:scale-[0.99]"
+        className="pointer-events-auto relative w-full rounded-md bg-[#fff6d6] px-2 py-1 text-left transition active:scale-[0.99]"
         style={{
+          /* 1px pixel outline (was 2px) */
           boxShadow:
-            "2px 0 0 0 #1a1208, -2px 0 0 0 #1a1208, 0 2px 0 0 #1a1208, 0 -2px 0 0 #1a1208, 2px 2px 0 0 #1a1208, -2px 2px 0 0 #1a1208, 2px -2px 0 0 #1a1208, -2px -2px 0 0 #1a1208",
+            "1px 0 0 0 #1a1208, -1px 0 0 0 #1a1208, 0 1px 0 0 #1a1208, 0 -1px 0 0 #1a1208, 1px 1px 0 0 #1a1208, -1px 1px 0 0 #1a1208, 1px -1px 0 0 #1a1208, -1px -1px 0 0 #1a1208",
         }}
         aria-label="Dismiss pup message"
       >
@@ -145,15 +147,15 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
           className="absolute bottom-0 left-1.5 translate-y-full"
           aria-hidden
         >
-          <span className="absolute left-0 top-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-[#1a1208]" />
-          <span className="absolute left-[2px] top-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-[#fff6d6]" />
+          <span className="absolute left-0 top-0 border-x-[5px] border-t-[6px] border-x-transparent border-t-[#1a1208]" />
+          <span className="absolute left-px top-0 border-x-[4px] border-t-[5px] border-x-transparent border-t-[#fff6d6]" />
         </span>
 
-        <p className="font-display text-[12px] font-bold leading-snug text-[var(--foreground)]">
+        <p className="line-clamp-2 break-words font-display text-[12px] font-bold leading-snug text-[var(--foreground)]">
           <span>{typed}</span>
           {showBone && (
-            <span className="ml-1 inline-flex translate-y-0.5 align-middle">
-              <BoneIcon size={14} />
+            <span className="ml-0.5 inline-flex translate-y-0.5 align-middle">
+              <BoneIcon size={12} />
             </span>
           )}
           <TypeCursor />
