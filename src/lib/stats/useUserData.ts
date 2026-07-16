@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { syncPublicProfile } from "@/lib/friends/api";
+import { fetchMyPublicProfile, syncPublicProfile } from "@/lib/friends/api";
 import { resetPasswordRedirectUrl } from "@/lib/auth/password";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { loadLocal } from "./local";
@@ -16,6 +16,31 @@ import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import type { ExclusiveDogId } from "@/lib/theme/dogs";
 import { coerceProfile } from "./profile";
 import { emptyUserData, type Profile, type UserData } from "./types";
+
+/**
+ * Adopt the canonical public @username onto local/cloud user_data.
+ * Dog skin stays whatever mergeUserData already picked from user_data.
+ */
+async function reconcileProfileFromCloud(
+  data: UserData,
+  userId: string,
+  email?: string | null,
+): Promise<UserData> {
+  const pub = await fetchMyPublicProfile(userId);
+  if (!pub?.username) return data;
+
+  const next = coerceProfile(
+    {
+      username: pub.username,
+      dogId: data.profile.dogId,
+    },
+    data,
+    email,
+  );
+
+  if (next.username === data.profile.username) return data;
+  return { ...data, profile: next };
+}
 
 export type AuthUser = { id: string; email: string | null };
 
@@ -82,19 +107,28 @@ export function useUserData(): UseUserData {
           userRef.current = authUser;
           if (active) setUser(authUser);
         }
-        const d = withOwnerProfile(await loadUserData(), authUser?.email);
+        let d = withOwnerProfile(await loadUserData(), authUser?.email);
+        if (authUser) {
+          d = withOwnerProfile(
+            await reconcileProfileFromCloud(d, authUser.id, authUser.email),
+            authUser.email,
+          );
+        }
         if (active) setDataBoth(d);
         if (authUser && active) void seedRemoteIfMissing();
         if (authUser && active) {
+          // Push reconciled dog/username to the public profile so friends see
+          // the same pup across devices — never the other way around first.
           const synced = await syncPublicProfile(authUser.id, d.profile);
-          if (synced.username && active) {
-            const merged = {
-              ...d,
-              profile: { ...d.profile, username: synced.username },
-            };
-            setDataBoth(merged);
-            await saveUserData(merged);
-          }
+          const next = {
+            ...d,
+            profile: {
+              ...d.profile,
+              username: synced.username ?? d.profile.username,
+            },
+          };
+          if (active) setDataBoth(next);
+          await saveUserData(next);
         }
       } catch (err) {
         console.warn("[stats] init failed, using local data:", err);
@@ -124,18 +158,23 @@ export function useUserData(): UseUserData {
           if (event === "PASSWORD_RECOVERY" || event === "USER_UPDATED") {
             return;
           }
-          const d = withOwnerProfile(await loadUserData(), u.email ?? null);
+          let d = withOwnerProfile(await loadUserData(), u.email ?? null);
+          d = withOwnerProfile(
+            await reconcileProfileFromCloud(d, u.id, u.email ?? null),
+            u.email ?? null,
+          );
           if (!active) return;
           setDataBoth(d);
           const synced = await syncPublicProfile(u.id, d.profile);
-          if (synced.username && active) {
-            const merged = {
-              ...d,
-              profile: { ...d.profile, username: synced.username },
-            };
-            setDataBoth(merged);
-            void saveUserData(merged);
-          }
+          const merged = {
+            ...d,
+            profile: {
+              ...d.profile,
+              username: synced.username ?? d.profile.username,
+            },
+          };
+          if (active) setDataBoth(merged);
+          void saveUserData(merged);
         } catch {
           if (active) setDataBoth(loadLocal());
         } finally {
@@ -166,22 +205,28 @@ export function useUserData(): UseUserData {
   const updateProfile = useCallback(
     async (next: Partial<Profile>) => {
       const current = dataRef.current ?? (await loadUserData());
-      const merged: UserData = {
+      let merged: UserData = {
         ...current,
         profile: coerceProfile(
           { ...current.profile, ...next },
           { ...current, profile: { ...current.profile, ...next } },
           userRef.current?.email,
         ),
+        // Stamp so other devices take this customization on merge.
+        profileUpdatedAt: Date.now(),
       };
       setDataBoth(merged);
       await saveUserData(merged);
       const uid = (await getSupabase()?.auth.getSession())?.data.session?.user?.id;
       if (uid) {
         const synced = await syncPublicProfile(uid, merged.profile);
-        if (synced.username) {
-          merged.profile.username = synced.username;
+        if (synced.username && synced.username !== merged.profile.username) {
+          merged = {
+            ...merged,
+            profile: { ...merged.profile, username: synced.username },
+          };
           setDataBoth(merged);
+          await saveUserData(merged);
         }
       }
     },
@@ -199,7 +244,7 @@ export function useUserData(): UseUserData {
       const nextOwned = ownsExclusiveDog(dogId, current)
         ? owned
         : [...owned, dogId];
-      const merged: UserData = {
+      let merged: UserData = {
         ...current,
         bones: ownsExclusiveDog(dogId, current)
           ? current.bones
@@ -216,6 +261,7 @@ export function useUserData(): UseUserData {
           },
           userRef.current?.email,
         ),
+        profileUpdatedAt: Date.now(),
       };
       setDataBoth(merged);
       await saveUserData(merged);
@@ -223,9 +269,13 @@ export function useUserData(): UseUserData {
         ?.id;
       if (uid) {
         const synced = await syncPublicProfile(uid, merged.profile);
-        if (synced.username) {
-          merged.profile.username = synced.username;
+        if (synced.username && synced.username !== merged.profile.username) {
+          merged = {
+            ...merged,
+            profile: { ...merged.profile, username: synced.username },
+          };
           setDataBoth(merged);
+          await saveUserData(merged);
         }
       }
       return { ok: true };
