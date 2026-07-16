@@ -199,7 +199,7 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
         >
           {/* Dog saddle — sheet edge only; no negative margin into title zone */}
           <div className="relative h-[3.25rem] shrink-0">
-            <div className="pointer-events-none absolute bottom-0 left-3 z-30 translate-y-1/2 sm:left-5">
+            <div className="pointer-events-none absolute bottom-0 left-3 z-[60] translate-y-1/2 sm:left-5">
               {/* Hold space until profile is loaded so we never flash the default golden pup. */}
               {userData.loading || !userData.data ? (
                 <span
