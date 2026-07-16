@@ -22,8 +22,8 @@ type GroupProps = { count: number; size: number; gap: number };
 const VERTICAL_ROTATE = "rotate(135deg)";
 const DIAGONAL_ROTATE = "rotate(75deg)";
 
-// Each subsequent bone overlaps the previous by 80 % of its width.
-const OVERLAP = 0.80;
+// Each subsequent bone overlaps the previous by 75 % of its width.
+const OVERLAP = 0.75;
 
 /** One tally group: up to 4 vertical bones + optional diagonal 5th. */
 function TallyGroup({ count, size, gap }: GroupProps) {
@@ -79,7 +79,7 @@ function TallyGroup({ count, size, gap }: GroupProps) {
 
 type Props = {
   difficulty: Difficulty;
-  /** Bone icon size in px (default 14). */
+  /** Bone icon size in px (default 15). */
   size?: number;
 };
 
@@ -87,7 +87,7 @@ type Props = {
  * Renders a difficulty rating as tally-mark bones (1–5).
  * Groups of 5 use the classic 4-vertical + 1-diagonal tally style.
  */
-export function BoneTally({ difficulty, size = 14 }: Props) {
+export function BoneTally({ difficulty, size = 15 }: Props) {
   const count = DIFFICULTY_BONE_COUNT[difficulty];
 
   const groups: number[] = [];
