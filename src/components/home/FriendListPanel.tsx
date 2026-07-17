@@ -79,17 +79,20 @@ export function FriendPillButton({
   onClick,
   variant = "neutral",
   compact = false,
+  disabled = false,
 }: {
   children: ReactNode;
   onClick: () => void;
   variant?: "neutral" | "primary";
   compact?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 rounded-full font-bold transition active:scale-95 ${
+      disabled={disabled}
+      className={`shrink-0 rounded-full font-bold transition active:scale-95 disabled:opacity-40 disabled:active:scale-100 ${
         compact ? "px-2.5 py-0.5 text-[11px]" : "px-4 py-1.5 text-sm"
       } ${
         variant === "primary"

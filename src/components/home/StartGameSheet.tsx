@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { DogAvatar } from "@/components/DogAvatar";
 import { AddFriendSheet } from "@/components/home/AddFriendSheet";
 import { FriendPillButton } from "@/components/home/FriendListPanel";
@@ -18,14 +18,13 @@ type Props = {
   onClose: () => void;
   userData: UseUserData;
   friends: UseFriends;
-  onPickOpponent: (profile: PublicProfile) => void;
+  /** Max friends to invite (playerCount − 1). */
+  maxGuests: number;
+  onConfirmGuests: (guests: PublicProfile[]) => void;
+  /** Optional mode/difficulty for quick-start (open lobby without invites). */
+  onQuickStart?: () => void;
   onSignIn: () => void;
 };
-
-function lastPlayedLabel(profile: PublicProfile, friendIds: Set<string>): string {
-  if (friendIds.has(profile.userId)) return "On your friends list";
-  return "Found by search";
-}
 
 function JoinCodeInput({ onJoin }: { onJoin: (code: string) => void }) {
   const [code, setCode] = useState("");
@@ -61,45 +60,47 @@ function JoinCodeInput({ onJoin }: { onJoin: (code: string) => void }) {
   );
 }
 
-function QuickStartSection({ onQuickStart }: { onQuickStart: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onQuickStart}
-      className="mt-3 flex w-full items-center justify-between rounded-2xl border-2 border-dashed border-[var(--border)] bg-white px-4 py-3 text-left transition active:scale-[0.99]"
-    >
-      <div>
-        <p className="font-display text-sm font-bold text-[var(--foreground)]">
-          Quick game (no friends needed)
-        </p>
-        <p className="text-xs text-[var(--muted)]">
-          Get a code to share with anyone
-        </p>
-      </div>
-      <span className="shrink-0 rounded-full bg-[var(--primary)] px-3 py-1 text-[11px] font-bold text-white">
-        Create
-      </span>
-    </button>
-  );
-}
-
 export function StartGameSheet({
   open,
   onClose,
   userData,
   friends,
-  onPickOpponent,
+  maxGuests,
+  onConfirmGuests,
+  onQuickStart,
   onSignIn,
 }: Props) {
   const router = useRouter();
+  const [selected, setSelected] = useState<PublicProfile[]>([]);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicProfile[]>([]);
   const [searching, setSearching] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
 
-  const friendIds = new Set(friends.friends.map((f) => f.userId));
+  useEffect(() => {
+    if (!open) {
+      setSelected([]);
+      setQuery("");
+      setResults([]);
+      setMsg(null);
+    }
+  }, [open]);
+
+  const friendIds = useMemo(
+    () => new Set(friends.friends.map((f) => f.userId)),
+    [friends.friends],
+  );
   const discover = results.filter((p) => !friendIds.has(p.userId));
+
+  function toggle(friend: PublicProfile) {
+    setSelected((prev) => {
+      const exists = prev.some((p) => p.userId === friend.userId);
+      if (exists) return prev.filter((p) => p.userId !== friend.userId);
+      if (prev.length >= maxGuests) return prev;
+      return [...prev, friend];
+    });
+  }
 
   async function runSearch() {
     setSearching(true);
@@ -113,9 +114,6 @@ export function StartGameSheet({
   }
 
   function handleClose() {
-    setQuery("");
-    setResults([]);
-    setMsg(null);
     onClose();
   }
 
@@ -125,14 +123,20 @@ export function StartGameSheet({
   }
 
   function handleQuickStart() {
+    if (onQuickStart) {
+      onQuickStart();
+      return;
+    }
     handleClose();
     const code = newRoomCode();
     router.push(`/game/${code}?host=1&m=coop&d=medium`);
   }
 
+  const canConfirm = selected.length > 0;
+
   if (!userData.authConfigured) {
     return (
-      <BottomSheet open={open} onClose={handleClose} title="Start game">
+      <BottomSheet open={open} onClose={handleClose} title="Invite friends">
         <p className="text-center text-sm text-[var(--muted)]">
           Multiplayer needs Supabase on this deployment.
         </p>
@@ -143,7 +147,7 @@ export function StartGameSheet({
 
   if (!userData.user) {
     return (
-      <BottomSheet open={open} onClose={handleClose} title="Start game">
+      <BottomSheet open={open} onClose={handleClose} title="Invite friends">
         <p className="mb-4 text-center font-serif-title text-lg text-[var(--foreground)]">
           Sign in to play with friends
         </p>
@@ -158,52 +162,65 @@ export function StartGameSheet({
           Sign in
         </button>
         <JoinCodeInput onJoin={handleJoinCode} />
-        <QuickStartSection onQuickStart={handleQuickStart} />
       </BottomSheet>
     );
   }
 
   return (
     <>
-      <BottomSheet open={open} onClose={handleClose} title="Start game" tall>
+      <BottomSheet
+        open={open}
+        onClose={handleClose}
+        title="Invite friends"
+        tall
+      >
+        <p className="mb-3 text-sm text-[var(--muted)]">
+          Pick up to {maxGuests} {maxGuests === 1 ? "friend" : "friends"} (
+          {selected.length}/{maxGuests} selected)
+        </p>
+
         <h3 className="font-serif-title mb-2 text-lg text-[var(--foreground)]">
-          Suggested matches
+          Your friends
         </h3>
 
         <div className="mb-4 overflow-hidden rounded-2xl bg-[var(--list-panel)]">
           {friends.loading ? (
-            <p className="px-4 py-6 text-center text-sm text-[var(--muted)]">Loading…</p>
+            <p className="px-4 py-6 text-center text-sm text-[var(--muted)]">
+              Loading…
+            </p>
           ) : friends.friends.length === 0 ? (
             <p className="px-4 py-6 text-center text-sm text-[var(--muted)]">
               No friends yet — search below or add a friend.
             </p>
           ) : (
-            friends.friends.map((f, i) => (
-              <div
-                key={f.userId}
-                className={`flex items-center gap-3 px-4 py-3 ${
-                  i < friends.friends.length - 1 ? "border-b border-white/80" : ""
-                }`}
-              >
-                <DogAvatar dogId={f.dogId as DogId} size={40} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold text-[var(--foreground)]">
-                    @{f.username}
-                  </div>
-                  <div className="text-xs text-[var(--muted)]">Ready to play</div>
-                </div>
-                <FriendPillButton
-                  compact
-                  variant="neutral"
-                  onClick={() => {
-                    handleClose();
-                    onPickOpponent(f);
-                  }}
+            friends.friends.map((f, i) => {
+              const isSelected = selected.some((p) => p.userId === f.userId);
+              const atCap = !isSelected && selected.length >= maxGuests;
+              return (
+                <div
+                  key={f.userId}
+                  className={`flex items-center gap-3 px-4 py-3 ${
+                    i < friends.friends.length - 1 ? "border-b border-white/80" : ""
+                  }`}
                 >
-                  Start
-                </FriendPillButton>
-              </div>
-            ))
+                  <DogAvatar dogId={f.dogId as DogId} size={40} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold text-[var(--foreground)]">
+                      @{f.username}
+                    </div>
+                    <div className="text-xs text-[var(--muted)]">Ready to play</div>
+                  </div>
+                  <FriendPillButton
+                    compact
+                    variant={isSelected ? "primary" : "neutral"}
+                    disabled={atCap}
+                    onClick={() => toggle(f)}
+                  >
+                    {isSelected ? "Added" : atCap ? "Full" : "Add"}
+                  </FriendPillButton>
+                </div>
+              );
+            })
           )}
         </div>
 
@@ -241,42 +258,72 @@ export function StartGameSheet({
         </button>
 
         {msg && (
-          <p className="mb-3 text-center text-xs font-semibold text-[var(--muted)]">{msg}</p>
+          <p className="mb-3 text-center text-xs font-semibold text-[var(--muted)]">
+            {msg}
+          </p>
         )}
 
         {discover.length > 0 && (
           <div className="mb-4 overflow-hidden rounded-2xl bg-[var(--list-panel)]">
-            {discover.map((p, i) => (
-              <div
-                key={p.userId}
-                className={`flex items-center gap-3 px-4 py-3 ${
-                  i < discover.length - 1 ? "border-b border-white/80" : ""
-                }`}
-              >
-                <DogAvatar dogId={p.dogId as DogId} size={40} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold">@{p.username}</div>
-                  <div className="text-xs text-[var(--muted)]">
-                    {lastPlayedLabel(p, friendIds)}
-                  </div>
-                </div>
-                <FriendPillButton
-                  compact
-                  variant="primary"
-                  onClick={() => {
-                    handleClose();
-                    onPickOpponent(p);
-                  }}
+            {discover.map((p, i) => {
+              const isSelected = selected.some((s) => s.userId === p.userId);
+              const atCap = !isSelected && selected.length >= maxGuests;
+              return (
+                <div
+                  key={p.userId}
+                  className={`flex items-center gap-3 px-4 py-3 ${
+                    i < discover.length - 1 ? "border-b border-white/80" : ""
+                  }`}
                 >
-                  Start
-                </FriendPillButton>
-              </div>
-            ))}
+                  <DogAvatar dogId={p.dogId as DogId} size={40} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold">@{p.username}</div>
+                    <div className="text-xs text-[var(--muted)]">Found by search</div>
+                  </div>
+                  <FriendPillButton
+                    compact
+                    variant={isSelected ? "primary" : "neutral"}
+                    disabled={atCap}
+                    onClick={() => toggle(p)}
+                  >
+                    {isSelected ? "Added" : atCap ? "Full" : "Add"}
+                  </FriendPillButton>
+                </div>
+              );
+            })}
           </div>
         )}
 
+        <button
+          type="button"
+          disabled={!canConfirm}
+          onClick={() => onConfirmGuests(selected)}
+          className="font-display mb-3 w-full rounded-2xl bg-[var(--primary)] py-3.5 text-sm font-bold text-white shadow-md transition active:scale-[0.98] disabled:opacity-40"
+        >
+          {canConfirm
+            ? `Send ${selected.length} invite${selected.length === 1 ? "" : "s"} & play`
+            : "Select at least one friend"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleQuickStart}
+          className="mb-1 flex w-full items-center justify-between rounded-2xl border-2 border-dashed border-[var(--border)] bg-white px-4 py-3 text-left transition active:scale-[0.99]"
+        >
+          <div>
+            <p className="font-display text-sm font-bold text-[var(--foreground)]">
+              Start without inviting
+            </p>
+            <p className="text-xs text-[var(--muted)]">
+              Get a code to share with anyone
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-[var(--primary)] px-3 py-1 text-[11px] font-bold text-white">
+            Create
+          </span>
+        </button>
+
         <JoinCodeInput onJoin={handleJoinCode} />
-        <QuickStartSection onQuickStart={handleQuickStart} />
       </BottomSheet>
 
       <AddFriendSheet

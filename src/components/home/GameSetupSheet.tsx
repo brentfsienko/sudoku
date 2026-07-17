@@ -7,13 +7,20 @@ import {
   DIFFICULTIES,
   DIFFICULTY_LABELS,
   GAME_MODE_LABELS,
+  MAX_PLAYERS,
   type Difficulty,
 } from "@/lib/game/types";
 import { COOP_ACCENT, VERSUS_ACCENT } from "@/lib/stats/multi";
 
 export type GameSetupResult =
   | { kind: "solo"; difficulty: Difficulty }
-  | { kind: "multiplayer"; difficulty: Difficulty; mode: "coop" | "competitive" };
+  | {
+      kind: "multiplayer";
+      difficulty: Difficulty;
+      mode: "coop" | "competitive";
+      /** Total players including the host (2–MAX_PLAYERS). */
+      playerCount: number;
+    };
 
 type Props = {
   open: boolean;
@@ -31,6 +38,11 @@ const SOLO_DIFFICULTY_HINTS: Record<Difficulty, string> = {
   master: "Maximum difficulty",
 };
 
+const PLAYER_COUNTS = Array.from(
+  { length: MAX_PLAYERS - 1 },
+  (_, i) => i + 2,
+); // 2, 3, 4
+
 export function GameSetupSheet({
   open,
   onClose,
@@ -40,11 +52,13 @@ export function GameSetupSheet({
 }: Props) {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [mode, setMode] = useState<"coop" | "competitive">("coop");
+  const [playerCount, setPlayerCount] = useState(2);
 
   useEffect(() => {
     if (open) {
       setDifficulty("medium");
       setMode("coop");
+      setPlayerCount(2);
     }
   }, [open]);
 
@@ -52,7 +66,7 @@ export function GameSetupSheet({
     if (kind === "solo") {
       onConfirm({ kind: "solo", difficulty });
     } else {
-      onConfirm({ kind: "multiplayer", difficulty, mode });
+      onConfirm({ kind: "multiplayer", difficulty, mode, playerCount });
     }
   }
 
@@ -61,7 +75,7 @@ export function GameSetupSheet({
       ? "Solo practice"
       : opponentName
         ? `Play with @${opponentName}`
-        : "Start game";
+        : "Multiplayer";
 
   return (
     <BottomSheet open={open} onClose={onClose} title={title}>
@@ -128,12 +142,47 @@ export function GameSetupSheet({
         <BoneDifficultySelect value={difficulty} onChange={setDifficulty} />
       )}
 
+      {kind === "multiplayer" && !opponentName && (
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+            Players
+          </p>
+          <div className="flex gap-2">
+            {PLAYER_COUNTS.map((n) => {
+              const active = playerCount === n;
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setPlayerCount(n)}
+                  className={`font-display flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition active:scale-[0.98] ${
+                    active
+                      ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--foreground)]"
+                      : "border-[var(--border)] bg-white text-[var(--muted)]"
+                  }`}
+                >
+                  {n}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1.5 text-[11px] text-[var(--muted)]">
+            You plus up to {playerCount - 1}{" "}
+            {playerCount - 1 === 1 ? "friend" : "friends"} (max {MAX_PLAYERS}).
+          </p>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={handleStart}
         className="font-display mt-5 w-full rounded-2xl bg-[var(--foreground)] py-4 text-lg font-extrabold text-white transition active:scale-[0.98]"
       >
-        {kind === "solo" ? "Start puzzle" : "Send invite & play"}
+        {kind === "solo"
+          ? "Start puzzle"
+          : opponentName
+            ? "Send invite & play"
+            : "Next: invite friends"}
       </button>
     </BottomSheet>
   );
