@@ -123,8 +123,8 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
 
   return (
     <div
-      /* Cap width so the bubble stops short of the streak pill on all devices */
-      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-[min(7.75rem,26vw)] sm:left-[7rem] sm:w-[min(8rem,28vw)]"
+      /* Max width reaches just shy of the streak/bones pill on typical phones */
+      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-[min(10.25rem,34vw)] sm:left-[7rem] sm:w-[min(10.75rem,36vw)]"
       role="status"
     >
       <button
@@ -147,7 +147,7 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
         <p className="font-typewriter line-clamp-2 break-words text-[11px] font-normal leading-snug text-[var(--foreground)]">
           <span>{typed}</span>
           {showBone && (
-            <span className="ml-0.5 inline-flex -translate-y-px align-middle">
+            <span className="ml-0.5 inline-flex -translate-y-0.5 align-middle">
               <BoneIcon size={11} />
             </span>
           )}
