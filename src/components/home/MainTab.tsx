@@ -82,10 +82,13 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   const { containerRef, pull, progress, state: ptrState, snapping } = usePullToRefresh(
     () => userData.refresh(),
   );
-  const [startSheetOpen, setStartSheetOpen] = useState(false);
+  const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
   const [setupKind, setSetupKind] = useState<"solo" | "multiplayer">("solo");
-  const [pickedOpponent, setPickedOpponent] = useState<PublicProfile | null>(null);
+  const [pendingMulti, setPendingMulti] = useState<Extract<
+    GameSetupResult,
+    { kind: "multiplayer" }
+  > | null>(null);
   const [greetingReopenToken, setGreetingReopenToken] = useState(0);
 
   const streak = data.solo.streak;
@@ -97,18 +100,22 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   };
 
   function openSoloSetup() {
-    setPickedOpponent(null);
+    setPendingMulti(null);
     setSetupKind("solo");
     setSetupOpen(true);
   }
 
-  function openMultiSetup(opponent: PublicProfile) {
-    setPickedOpponent(opponent);
+  function openMultiSetup() {
+    if (!userData.authConfigured || !userData.user) {
+      onSignIn();
+      return;
+    }
+    setPendingMulti(null);
     setSetupKind("multiplayer");
     setSetupOpen(true);
   }
 
-  async function handleSetupConfirm(result: GameSetupResult) {
+  function handleSetupConfirm(result: GameSetupResult) {
     setSetupOpen(false);
 
     if (result.kind === "solo") {
@@ -121,20 +128,35 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
       return;
     }
 
+    setPendingMulti(result);
+    setInviteSheetOpen(true);
+  }
+
+  async function handleConfirmGuests(guests: PublicProfile[]) {
+    if (!userData.user || !pendingMulti) return;
     const code = newRoomCode();
-    const opponent = pickedOpponent;
-    if (opponent) {
+    for (const guest of guests) {
       await createGameInvite(
         userData.user.id,
-        opponent.userId,
+        guest.userId,
         code,
-        result.mode,
-        result.difficulty,
+        pendingMulti.mode,
+        pendingMulti.difficulty,
       );
     }
-    router.push(
-      `/game/${code}?host=1&m=${result.mode}&d=${result.difficulty}`,
-    );
+    const { mode, difficulty } = pendingMulti;
+    setInviteSheetOpen(false);
+    setPendingMulti(null);
+    router.push(`/game/${code}?host=1&m=${mode}&d=${difficulty}`);
+  }
+
+  function handleQuickStartLobby() {
+    if (!pendingMulti) return;
+    const code = newRoomCode();
+    const { mode, difficulty } = pendingMulti;
+    setInviteSheetOpen(false);
+    setPendingMulti(null);
+    router.push(`/game/${code}?host=1&m=${mode}&d=${difficulty}`);
   }
 
   const isRefreshing = ptrState === "refreshing";
@@ -224,11 +246,9 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
                   />
                 </button>
               )}
-              {!userData.loading && userData.data && (
+              {!userData.loading && userData.user && userData.data && (
                 <DogGreetingBubble
-                  userId={
-                    userData.user?.id ?? userData.data.profile.username
-                  }
+                  userId={userData.user.id}
                   reopenToken={greetingReopenToken}
                 />
               )}
@@ -268,7 +288,7 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
                     icon={<UsersIcon width={24} height={24} />}
                     title="Multiplayer"
                     subtitle="Friends, search, and invites"
-                    onClick={() => setStartSheetOpen(true)}
+                    onClick={openMultiSetup}
                   />
                 </div>
               </section>
@@ -290,21 +310,25 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
         </div>
       </div>
 
-      <StartGameSheet
-        open={startSheetOpen}
-        onClose={() => setStartSheetOpen(false)}
-        userData={userData}
-        friends={friends}
-        onPickOpponent={openMultiSetup}
-        onSignIn={onSignIn}
-      />
-
       <GameSetupSheet
         open={setupOpen}
         onClose={() => setSetupOpen(false)}
         kind={setupKind}
-        opponentName={pickedOpponent?.username}
-        onConfirm={(r) => void handleSetupConfirm(r)}
+        onConfirm={handleSetupConfirm}
+      />
+
+      <StartGameSheet
+        open={inviteSheetOpen}
+        onClose={() => {
+          setInviteSheetOpen(false);
+          setPendingMulti(null);
+        }}
+        userData={userData}
+        friends={friends}
+        maxGuests={Math.max(1, (pendingMulti?.playerCount ?? 2) - 1)}
+        onConfirmGuests={(guests) => void handleConfirmGuests(guests)}
+        onQuickStart={handleQuickStartLobby}
+        onSignIn={onSignIn}
       />
     </div>
   );

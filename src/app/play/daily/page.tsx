@@ -45,11 +45,8 @@ function buildInitialSnapshot(activeId: string): GameSnapshot {
 /**
  * Renders the daily puzzle game.
  *
- * Two exit paths after the game ends (ResultsOverlay is shown by GameScreen):
- *   - onDone(true)  → user finished and solved → caller shows leaderboard
- *   - onDone(false) → user failed (3 mistakes) → caller navigates home
- *
- * Mid-game back-button taps call onExit() → caller navigates home.
+ * After the game ends, ResultsOverlay Home calls onDone() → friends/daily tab.
+ * Mid-game back-button taps call onExit() → home.
  */
 function DailyGame({
   activeId,
@@ -64,7 +61,7 @@ function DailyGame({
   streak: number;
   savedBones: number;
   onExit: () => void;
-  onDone: (solved: boolean) => void;
+  onDone: () => void;
 }) {
   const [snapshot] = useState(() => buildInitialSnapshot(activeId));
   const [me] = useState(() => {
@@ -76,9 +73,7 @@ function DailyGame({
   const controllerRef = useRef(controller);
   controllerRef.current = controller;
 
-  // Track whether the finished game was solved so the exit handler can decide
-  // whether to show the leaderboard or navigate home.
-  const finishedSolvedRef = useRef<boolean | null>(null);
+  const finishedRef = useRef(false);
 
   useEffect(() => {
     if (!isActiveSolo(controller.snapshot)) return;
@@ -102,11 +97,9 @@ function DailyGame({
     const s = controller.snapshot;
     if (isActiveSolo(s)) upsertActiveSolo(s, activeId, { pauseIfPlaying: true });
 
-    if (s.status === "done") {
-      // Game is finished — route based on whether it was solved.
-      onDone(finishedSolvedRef.current === true);
+    if (s.status === "done" || finishedRef.current) {
+      onDone();
     } else {
-      // Mid-game back tap → just go home.
       onExit();
     }
   };
@@ -143,7 +136,7 @@ function DailyGame({
           saveDailyResultLocal(dateStr, solved ? elapsedSeconds : 0, solved);
           await submitDailyResult(dateStr, elapsedSeconds, mistakes, solved);
 
-          finishedSolvedRef.current = solved;
+          finishedRef.current = true;
         })()
       }
     />
@@ -158,7 +151,6 @@ function DailyInner() {
   const [wallet, setWallet] = useState({ streak: 0, bones: 0 });
   const [userId, setUserId] = useState<string | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [alreadyDone, setAlreadyDone] = useState(false);
 
   useEffect(() => {
@@ -200,7 +192,7 @@ function DailyInner() {
     return () => window.removeEventListener(STATS_UPDATED_EVENT, onStats);
   }, []);
 
-  if (alreadyDone || showLeaderboard) {
+  if (alreadyDone) {
     return (
       <div className="flex min-h-dvh flex-1 flex-col items-center bg-[var(--background)] p-4 pt-safe">
         <div className="w-full max-w-md pt-8">
@@ -209,7 +201,7 @@ function DailyInner() {
               Daily Leaderboard
             </h1>
             <button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/?tab=friends&sub=daily")}
               className="text-sm font-semibold text-[var(--primary)]"
             >
               Done
@@ -232,13 +224,7 @@ function DailyInner() {
       streak={wallet.streak}
       savedBones={wallet.bones}
       onExit={() => router.push("/")}
-      onDone={(solved) => {
-        if (solved) {
-          setShowLeaderboard(true);
-        } else {
-          router.push("/");
-        }
-      }}
+      onDone={() => router.push("/?tab=friends&sub=daily")}
     />
   );
 }

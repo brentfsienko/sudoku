@@ -69,6 +69,20 @@ export default function Home() {
     setCoachmarkStep(getCoachmarkStep());
   }, []);
 
+  // Deep-link from daily finish (and similar): /?tab=friends&sub=daily
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get("tab");
+    const subParam = params.get("sub");
+    if (tabParam !== "main" && tabParam !== "friends" && tabParam !== "me") return;
+
+    if (tabParam === "friends" && (subParam === "daily" || subParam === "friends")) {
+      setFriendsInitSubTab(subParam);
+    }
+    setTab(tabParam);
+    window.history.replaceState(null, "", "/");
+  }, []);
+
   function handleTabChange(next: HomeTab) {
     if (next === "me" && coachmarkStep === "nav") {
       advanceCoachmarkToAvatar();
