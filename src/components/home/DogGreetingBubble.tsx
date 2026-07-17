@@ -147,7 +147,7 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
         <p className="font-typewriter line-clamp-2 break-words text-[11px] font-normal leading-snug text-[var(--foreground)]">
           <span>{typed}</span>
           {showBone && (
-            <span className="ml-0.5 inline-flex translate-y-0.5 align-middle">
+            <span className="ml-0.5 inline-flex -translate-y-px align-middle">
               <BoneIcon size={11} />
             </span>
           )}
