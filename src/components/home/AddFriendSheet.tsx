@@ -70,10 +70,7 @@ export function AddFriendSheet({
   }
 
   return (
-    <div
-      data-modal-layer
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
-    >
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
       <div
         className="animate-float-in w-full max-w-md rounded-t-3xl bg-white px-5 pb-8 pt-4 shadow-xl"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}
