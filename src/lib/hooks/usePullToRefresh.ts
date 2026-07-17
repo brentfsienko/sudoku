@@ -67,8 +67,14 @@ export function usePullToRefresh(onRefresh: () => void | Promise<void>) {
       return (scrollable?.scrollTop ?? 0) <= 1;
     }
 
+    function fromModal(e: TouchEvent): boolean {
+      const t = e.target;
+      return t instanceof Element && !!t.closest("[data-modal-layer]");
+    }
+
     function onTouchStart(e: TouchEvent) {
       if (stateRef.current === "refreshing") return;
+      if (fromModal(e)) return;
       if (!isAtTop()) return;
       dragRef.current = { startY: e.touches[0].clientY };
     }
@@ -76,6 +82,10 @@ export function usePullToRefresh(onRefresh: () => void | Promise<void>) {
     function onTouchMove(e: TouchEvent) {
       if (!dragRef.current) return;
       if (stateRef.current === "refreshing") return;
+      if (fromModal(e)) {
+        dragRef.current = null;
+        return;
+      }
 
       const dy = e.touches[0].clientY - dragRef.current.startY;
       if (dy <= 0 && pullRef.current === 0) {

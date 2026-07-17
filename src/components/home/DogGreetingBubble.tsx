@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BoneIcon } from "@/components/BoneIcon";
 import {
   clearGreetingDismiss,
@@ -40,6 +40,9 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
   const [showBone, setShowBone] = useState(false);
   /** Bumps when a new talk sequence should start (load / reopen / noon). */
   const [talkSeq, setTalkSeq] = useState(0);
+
+  const bubbleRef = useRef<HTMLButtonElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -117,17 +120,44 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
     return () => window.clearTimeout(t);
   }, [revealed, typedLen, message]);
 
+  // Hug the longest wrapped line so the bubble doesn't keep max-width slack.
+  useLayoutEffect(() => {
+    const bubble = bubbleRef.current;
+    const textEl = textRef.current;
+    if (!bubble || !textEl || !revealed) return;
+
+    bubble.style.width = "";
+
+    const range = document.createRange();
+    range.selectNodeContents(textEl);
+    const rects = Array.from(range.getClientRects());
+    if (!rects.length) return;
+
+    let maxLineW = 0;
+    for (const r of rects) maxLineW = Math.max(maxLineW, r.width);
+
+    const style = getComputedStyle(bubble);
+    const pad =
+      (parseFloat(style.paddingLeft) || 0) +
+      (parseFloat(style.paddingRight) || 0) +
+      (parseFloat(style.borderLeftWidth) || 0) +
+      (parseFloat(style.borderRightWidth) || 0);
+
+    bubble.style.width = `${Math.ceil(maxLineW + pad)}px`;
+  }, [revealed, typedLen, showBone, message]);
+
   if (!shouldShow || !message || !revealed) return null;
 
   const typed = message.slice(0, typedLen);
 
   return (
     <div
-      /* Max width reaches just shy of the streak/bones pill on typical phones */
-      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-[min(10.25rem,34vw)] sm:left-[7rem] sm:w-[min(10.75rem,36vw)]"
+      /* Caps width near the streak/bones pill; actual width hugs text */
+      className="absolute bottom-[52%] left-[6.25rem] z-[70] w-fit max-w-[min(10.25rem,34vw)] sm:left-[7rem] sm:max-w-[min(10.75rem,36vw)]"
       role="status"
     >
       <button
+        ref={bubbleRef}
         type="button"
         onClick={() => {
           const now = new Date();
@@ -135,7 +165,7 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
           setShouldShow(false);
           setRevealed(false);
         }}
-        className="pointer-events-auto relative w-full rounded-md border-[0.5px] border-[#1a1208] bg-[#fff6d6] px-1.5 py-1 text-left transition active:scale-[0.99]"
+        className="pointer-events-auto relative max-w-full rounded-md border-[0.5px] border-[#1a1208] bg-[#fff6d6] px-1.5 py-1 text-left transition active:scale-[0.99]"
         aria-label="Dismiss pup message"
       >
         {/* Diagonal speech tail from bottom-left toward the pup */}
@@ -144,7 +174,10 @@ export function DogGreetingBubble({ userId, reopenToken = 0 }: Props) {
           className="pointer-events-none absolute -bottom-[4px] left-[6px] z-0 h-[8px] w-[8px] rotate-45 border-b-[0.5px] border-r-[0.5px] border-[#1a1208] bg-[#fff6d6]"
         />
 
-        <p className="font-typewriter line-clamp-2 break-words text-[11px] font-normal leading-snug text-[var(--foreground)]">
+        <p
+          ref={textRef}
+          className="font-typewriter line-clamp-2 break-words text-[11px] font-normal leading-snug text-[var(--foreground)]"
+        >
           <span>{typed}</span>
           {showBone && (
             <span className="ml-0.5 inline-flex -translate-y-0.5 align-middle">
