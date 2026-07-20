@@ -62,3 +62,6 @@ create policy "update own daily result"
 
 -- Index for fast daily leaderboard queries.
 create index if not exists daily_results_date_idx on public.daily_results (puzzle_date);
+
+-- Bone wallet / purchases (authoritative balance): also run wallet.sql
+-- for purchase_exclusive_dog, add_bones, and upsert_user_stats RPCs.

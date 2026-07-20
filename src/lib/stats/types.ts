@@ -3,9 +3,9 @@ import {
   type ActiveSoloSave,
 } from "@/lib/game/activeSolo";
 import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
+import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import type { DogId, ExclusiveDogId } from "@/lib/theme/dogs";
 import { isExclusiveDogId, resolveDogId } from "@/lib/theme/dogs";
-import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { coerceProfile } from "./profile";
 
 export type { ActiveSoloSave };
@@ -267,31 +267,28 @@ function mergeMultiStats(a: MultiStats, b: MultiStats): MultiStats {
   };
 }
 
-/** Merge bone balances: last-write-wins when stamped; else Math.max for legacy. */
+/**
+ * Merge bone balances. When a remote row exists, the server wallet is source of
+ * truth — local bones/owned are ignored here (see loadUserData).
+ * Kept for unsigned/local-only merges and tests.
+ */
 export function mergeBones(
   local: UserData,
   remote: UserData,
+  ownedUnion: ExclusiveDogId[],
 ): { bones: number; bonesUpdatedAt?: number } {
-  const localAt =
-    typeof local.bonesUpdatedAt === "number" ? local.bonesUpdatedAt : 0;
-  const remoteAt =
-    typeof remote.bonesUpdatedAt === "number" ? remote.bonesUpdatedAt : 0;
-  const localBones = Math.max(0, local.bones ?? 0);
-  const remoteBones = Math.max(0, remote.bones ?? 0);
-
-  if (localAt === 0 && remoteAt === 0) {
-    return { bones: Math.max(localBones, remoteBones) };
-  }
-  if (localAt >= remoteAt) {
-    return {
-      bones: localBones,
-      bonesUpdatedAt: localAt > 0 ? localAt : undefined,
-    };
-  }
+  // Prefer remote wallet entirely when present (signed-in sync path passes remote).
   return {
-    bones: remoteBones,
-    bonesUpdatedAt: remoteAt > 0 ? remoteAt : undefined,
+    bones: Math.max(0, remote.bones ?? local.bones ?? 0),
+    bonesUpdatedAt:
+      typeof remote.bonesUpdatedAt === "number"
+        ? remote.bonesUpdatedAt
+        : typeof local.bonesUpdatedAt === "number"
+          ? local.bonesUpdatedAt
+          : undefined,
   };
+  // ownedUnion is applied by caller from remote (authoritative) ownership list.
+  void ownedUnion;
 }
 
 function normalizeOwnedExclusiveDogs(
@@ -330,7 +327,15 @@ export function mergeActiveSolos(
 /** Merge two device copies without losing solo (or any) history rows. */
 export function mergeUserData(local: UserData, remote: UserData): UserData {
   const { profile, profileUpdatedAt } = mergeProfiles(local, remote);
-  const { bones, bonesUpdatedAt } = mergeBones(local, remote);
+  // Server wallet is authoritative whenever a remote row exists.
+  const ownedExclusiveDogs = normalizeOwnedExclusiveDogs(
+    remote.ownedExclusiveDogs,
+  );
+  const { bones, bonesUpdatedAt } = mergeBones(
+    local,
+    remote,
+    ownedExclusiveDogs,
+  );
   return normalizeUserData({
     profile,
     profileUpdatedAt,
@@ -339,12 +344,7 @@ export function mergeUserData(local: UserData, remote: UserData): UserData {
     history: mergeHistory(local.history, remote.history),
     bones,
     bonesUpdatedAt,
-    ownedExclusiveDogs: [
-      ...new Set([
-        ...normalizeOwnedExclusiveDogs(local.ownedExclusiveDogs),
-        ...normalizeOwnedExclusiveDogs(remote.ownedExclusiveDogs),
-      ]),
-    ],
+    ownedExclusiveDogs,
     triviaGuesses: mergeTriviaGuesses(
       local.triviaGuesses ?? {},
       remote.triviaGuesses ?? {},

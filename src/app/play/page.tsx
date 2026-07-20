@@ -11,12 +11,12 @@ import {
   removeActiveSolo,
   upsertActiveSolo,
 } from "@/lib/game/activeSolo";
-import { claimSoloFinish } from "@/lib/game/finishedSolo";
 import { createSnapshot, useLocalGame, type GameSnapshot } from "@/lib/game/store";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
 import { getProfile } from "@/lib/profile";
 import {
+  abandonSoloGame,
   loadUserData,
   recordSoloGame,
   STATS_UPDATED_EVENT,
@@ -103,6 +103,15 @@ function SoloGame({
     onExit();
   };
 
+  const abandonAndExit = () => {
+    void (async () => {
+      const s = controller.snapshot;
+      await abandonSoloGame(activeId, s);
+      onWalletSync();
+      onExit();
+    })();
+  };
+
   return (
     <GameScreen
       controller={controller}
@@ -110,6 +119,7 @@ function SoloGame({
       streak={streak}
       savedBones={savedBones}
       onExit={persistAndExit}
+      onAbandon={abandonAndExit}
       onRematch={onRematch}
       onFinish={({
         solved,
@@ -121,8 +131,6 @@ function SoloGame({
         bonesFound,
       }) =>
         void (async () => {
-          if (!claimSoloFinish(activeId)) return;
-          removeActiveSolo(activeId);
           await recordSoloGame(
             {
               won: solved,

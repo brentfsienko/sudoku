@@ -16,6 +16,10 @@ import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import type { ExclusiveDogId } from "@/lib/theme/dogs";
 import { coerceProfile } from "./profile";
 import { emptyUserData, type Profile, type UserData } from "./types";
+import {
+  applyWallet,
+  purchaseExclusiveDogRemote,
+} from "./remote";
 
 /**
  * Adopt the canonical public @username onto local/cloud user_data.
@@ -235,6 +239,49 @@ export function useUserData(): UseUserData {
 
   const purchaseExclusiveDog = useCallback(
     async (dogId: ExclusiveDogId) => {
+      const sb = getSupabase();
+      const uid = (await sb?.auth.getSession())?.data.session?.user?.id;
+
+      // Signed-in: charge on the central wallet (source of truth).
+      if (uid) {
+        const result = await purchaseExclusiveDogRemote(dogId);
+        if (!result) {
+          return {
+            ok: false,
+            error: "Could not reach the shop. Try again in a moment.",
+          };
+        }
+        let current = await loadUserData();
+        current = applyWallet(current, result.wallet);
+        if (!result.ok) {
+          setDataBoth(current);
+          await saveUserData(current);
+          return { ok: false, error: result.error ?? "Need more bones." };
+        }
+        let merged: UserData = {
+          ...current,
+          profile: coerceProfile(
+            { ...current.profile, dogId },
+            current,
+            userRef.current?.email,
+          ),
+          profileUpdatedAt: Date.now(),
+        };
+        setDataBoth(merged);
+        await saveUserData(merged);
+        const synced = await syncPublicProfile(uid, merged.profile);
+        if (synced.username && synced.username !== merged.profile.username) {
+          merged = {
+            ...merged,
+            profile: { ...merged.profile, username: synced.username },
+          };
+          setDataBoth(merged);
+          await saveUserData(merged);
+        }
+        return { ok: true };
+      }
+
+      // Signed-out: local-only shop.
       const current = dataRef.current ?? (await loadUserData());
       const cost = EXCLUSIVE_BONE_COSTS[dogId];
       if ((current.bones ?? 0) < cost) {
@@ -244,7 +291,7 @@ export function useUserData(): UseUserData {
       const alreadyOwned = ownsExclusiveDog(dogId, current);
       const nextOwned = alreadyOwned ? owned : [...owned, dogId];
       const nextBones = alreadyOwned ? current.bones : current.bones - cost;
-      let merged: UserData = {
+      const merged: UserData = {
         ...current,
         bones: nextBones,
         bonesUpdatedAt: alreadyOwned ? current.bonesUpdatedAt : Date.now(),
@@ -262,19 +309,6 @@ export function useUserData(): UseUserData {
       };
       setDataBoth(merged);
       await saveUserData(merged);
-      const uid = (await getSupabase()?.auth.getSession())?.data.session?.user
-        ?.id;
-      if (uid) {
-        const synced = await syncPublicProfile(uid, merged.profile);
-        if (synced.username && synced.username !== merged.profile.username) {
-          merged = {
-            ...merged,
-            profile: { ...merged.profile, username: synced.username },
-          };
-          setDataBoth(merged);
-          await saveUserData(merged);
-        }
-      }
       return { ok: true };
     },
     [setDataBoth],
