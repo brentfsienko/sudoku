@@ -4,6 +4,7 @@ import {
 } from "@/lib/game/activeSolo";
 import { DIFFICULTIES, type Difficulty } from "@/lib/game/types";
 import type { DogId, ExclusiveDogId } from "@/lib/theme/dogs";
+import { isExclusiveDogId, resolveDogId } from "@/lib/theme/dogs";
 import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { coerceProfile } from "./profile";
 
@@ -98,6 +99,12 @@ export type UserData = {
   multi: MultiStats;
   history: GameLog[];
   bones: number;
+  /**
+   * Epoch ms when bones last changed (earn or spend) on any device.
+   * Last-write-wins on merge so a purchase on one device isn't undone by
+   * Math.max with a stale higher balance from another.
+   */
+  bonesUpdatedAt?: number;
   ownedExclusiveDogs: ExclusiveDogId[];
   triviaGuesses?: Record<string, TriviaUserGuess>;
   /** In-progress solo boards — synced when signed in. */
@@ -183,7 +190,33 @@ function mergeSoloStats(a: SoloStats, b: SoloStats): SoloStats {
       b.playsByDifficulty[d] ?? 0,
     );
   }
-  const lastDates = [a.lastPlayedDate, b.lastPlayedDate].filter(Boolean) as string[];
+  const lastA = a.lastPlayedDate;
+  const lastB = b.lastPlayedDate;
+  let streak: number;
+  let lastPlayedDate: string | null;
+  if (lastA && lastB) {
+    if (lastA === lastB) {
+      streak = Math.max(a.streak, b.streak);
+      lastPlayedDate = lastA;
+    } else if (lastA > lastB) {
+      streak = a.streak;
+      lastPlayedDate = lastA;
+    } else {
+      streak = b.streak;
+      lastPlayedDate = lastB;
+    }
+  } else if (lastA) {
+    streak = a.streak;
+    lastPlayedDate = lastA;
+  } else if (lastB) {
+    streak = b.streak;
+    lastPlayedDate = lastB;
+  } else {
+    streak = Math.max(a.streak, b.streak);
+    lastPlayedDate = null;
+  }
+  const bestStreak = Math.max(a.bestStreak, b.bestStreak, streak);
+
   return {
     played: Math.max(a.played, b.played),
     won: Math.max(a.won, b.won),
@@ -195,9 +228,9 @@ function mergeSoloStats(a: SoloStats, b: SoloStats): SoloStats {
         ? Math.min(a.fastestSolveSeconds, b.fastestSolveSeconds)
         : a.fastestSolveSeconds ?? b.fastestSolveSeconds ?? null,
     perfectGames: Math.max(a.perfectGames, b.perfectGames),
-    streak: Math.max(a.streak, b.streak),
-    bestStreak: Math.max(a.bestStreak, b.bestStreak),
-    lastPlayedDate: lastDates.sort().at(-1) ?? null,
+    streak,
+    bestStreak,
+    lastPlayedDate,
     bestTimeByDifficulty,
     playsByDifficulty,
     totalSquares: Math.max(a.totalSquares, b.totalSquares),
@@ -234,6 +267,47 @@ function mergeMultiStats(a: MultiStats, b: MultiStats): MultiStats {
   };
 }
 
+/** Merge bone balances: last-write-wins when stamped; else Math.max for legacy. */
+export function mergeBones(
+  local: UserData,
+  remote: UserData,
+): { bones: number; bonesUpdatedAt?: number } {
+  const localAt =
+    typeof local.bonesUpdatedAt === "number" ? local.bonesUpdatedAt : 0;
+  const remoteAt =
+    typeof remote.bonesUpdatedAt === "number" ? remote.bonesUpdatedAt : 0;
+  const localBones = Math.max(0, local.bones ?? 0);
+  const remoteBones = Math.max(0, remote.bones ?? 0);
+
+  if (localAt === 0 && remoteAt === 0) {
+    return { bones: Math.max(localBones, remoteBones) };
+  }
+  if (localAt >= remoteAt) {
+    return {
+      bones: localBones,
+      bonesUpdatedAt: localAt > 0 ? localAt : undefined,
+    };
+  }
+  return {
+    bones: remoteBones,
+    bonesUpdatedAt: remoteAt > 0 ? remoteAt : undefined,
+  };
+}
+
+function normalizeOwnedExclusiveDogs(
+  raw: ExclusiveDogId[] | string[] | undefined,
+): ExclusiveDogId[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ExclusiveDogId[] = [];
+  for (const id of raw) {
+    const resolved = resolveDogId(String(id));
+    if (isExclusiveDogId(resolved) && !out.includes(resolved)) {
+      out.push(resolved);
+    }
+  }
+  return out;
+}
+
 /** Merge in-progress solo games from two devices (newer `updatedAt` wins per id). */
 export function mergeActiveSolos(
   a: ActiveSoloSave[] | undefined,
@@ -256,17 +330,19 @@ export function mergeActiveSolos(
 /** Merge two device copies without losing solo (or any) history rows. */
 export function mergeUserData(local: UserData, remote: UserData): UserData {
   const { profile, profileUpdatedAt } = mergeProfiles(local, remote);
+  const { bones, bonesUpdatedAt } = mergeBones(local, remote);
   return normalizeUserData({
     profile,
     profileUpdatedAt,
     solo: mergeSoloStats(local.solo, remote.solo),
     multi: mergeMultiStats(local.multi, remote.multi),
     history: mergeHistory(local.history, remote.history),
-    bones: Math.max(local.bones ?? 0, remote.bones ?? 0),
+    bones,
+    bonesUpdatedAt,
     ownedExclusiveDogs: [
       ...new Set([
-        ...(local.ownedExclusiveDogs ?? []),
-        ...(remote.ownedExclusiveDogs ?? []),
+        ...normalizeOwnedExclusiveDogs(local.ownedExclusiveDogs),
+        ...normalizeOwnedExclusiveDogs(remote.ownedExclusiveDogs),
       ]),
     ],
     triviaGuesses: mergeTriviaGuesses(
@@ -422,9 +498,13 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
     multi: { ...multi, opponents: reconcileOpponents(multi.opponents, history) },
     history,
     bones: typeof raw.bones === "number" ? Math.max(0, raw.bones) : 0,
-    ownedExclusiveDogs: Array.isArray(raw.ownedExclusiveDogs)
-      ? (raw.ownedExclusiveDogs as ExclusiveDogId[])
-      : [],
+    bonesUpdatedAt:
+      typeof raw.bonesUpdatedAt === "number" && raw.bonesUpdatedAt > 0
+        ? raw.bonesUpdatedAt
+        : undefined,
+    ownedExclusiveDogs: normalizeOwnedExclusiveDogs(
+      raw.ownedExclusiveDogs as ExclusiveDogId[] | undefined,
+    ),
     triviaGuesses: normalizeTriviaGuesses(raw.triviaGuesses),
     activeSolos: mergeActiveSolos([], raw.activeSolos),
     finishedSoloIds: Array.isArray(raw.finishedSoloIds)
@@ -735,9 +815,16 @@ export function applySoloResult(data: UserData, r: SoloResult): UserData {
   });
 
   const winBonus = r.won ? GAME_WIN_BONE_BONUS : 0;
-  const bones = (data.bones ?? 0) + r.bonesFound + winBonus;
+  const boneDelta = r.bonesFound + winBonus;
+  const bones = (data.bones ?? 0) + boneDelta;
 
-  return { ...data, solo, history, bones };
+  return {
+    ...data,
+    solo,
+    history,
+    bones,
+    ...(boneDelta > 0 ? { bonesUpdatedAt: Date.now() } : null),
+  };
 }
 
 /** Returns a new UserData with the multiplayer game result merged in. */
@@ -813,9 +900,17 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
       : myWin && !tie
         ? GAME_WIN_BONE_BONUS
         : 0;
-  const bones = (data.bones ?? 0) + r.bonesFound + winBonus;
+  const boneDelta = r.bonesFound + winBonus;
+  const bones = (data.bones ?? 0) + boneDelta;
 
-  return { ...data, solo, multi, history, bones };
+  return {
+    ...data,
+    solo,
+    multi,
+    history,
+    bones,
+    ...(boneDelta > 0 ? { bonesUpdatedAt: Date.now() } : null),
+  };
 }
 
 export function mostPlayedOpponent(multi: MultiStats): OpponentRecord | null {

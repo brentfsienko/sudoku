@@ -104,7 +104,7 @@ export function defaultProfileDogId(opts?: {
   return "golden";
 }
 
-/** Profile dog for a user, including fixed usernames and party → pug migration. */
+/** Profile dog for a user, including fixed usernames and legacy id migration. */
 export function dogIdForUsername(
   username: string,
   storedDogId?: string | null,
@@ -114,7 +114,6 @@ export function dogIdForUsername(
   const override = usernameDogOverride(u);
   if (override) return override;
   const id = storedDogId?.trim() || "golden";
-  if (id === "party") return "pug";
   if (id === "bee") {
     return canUseBeePup({ username: u, email }) ? "bee" : "golden";
   }
@@ -186,10 +185,10 @@ export type PlayerColor = {
 };
 
 export const PLAYER_COLORS: Record<PlayerRole, PlayerColor> = {
-  "player-1": { hex: "#1d6fd8", soft: "#dbeafe", label: "Blue" },
-  "player-2": { hex: "#e85d04", soft: "#ffedd5", label: "Orange" },
-  "player-3": { hex: "#16a34a", soft: "#dcfce7", label: "Green" },
-  "player-4": { hex: "#7c3aed", soft: "#ede9fe", label: "Purple" },
+  "player-1": { hex: "#4DB8E0", soft: "#d9f3fb", label: "Sky" },
+  "player-2": { hex: "#2EAD7A", soft: "#d8f5e9", label: "Jade" },
+  "player-3": { hex: "#9B8AD4", soft: "#ebe6fa", label: "Lavender" },
+  "player-4": { hex: "#F4A261", soft: "#ffe8d6", label: "Peach" },
 };
 
 export function playerColor(role: PlayerRole | null | undefined): PlayerColor {

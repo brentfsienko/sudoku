@@ -42,7 +42,6 @@ function coerceDogId(
 ): DogId {
   let raw = dogId?.trim();
   if (!raw) raw = defaultProfileDogId({ username, email });
-  if (raw === "party") raw = "pug";
 
   const resolved = resolveDogId(raw, { username, email });
   if (
