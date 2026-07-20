@@ -6,13 +6,16 @@ import { GameScreen } from "@/components/board/GameScreen";
 import {
   isActiveSolo,
   loadActiveSolo,
-  removeActiveSolo,
   upsertActiveSolo,
 } from "@/lib/game/activeSolo";
-import { claimSoloFinish } from "@/lib/game/finishedSolo";
 import { createSnapshot, useLocalGame, type GameSnapshot } from "@/lib/game/store";
 import { getProfile } from "@/lib/profile";
-import { loadUserData, recordSoloGame, STATS_UPDATED_EVENT } from "@/lib/stats/store";
+import {
+  abandonSoloGame,
+  loadUserData,
+  recordSoloGame,
+  STATS_UPDATED_EVENT,
+} from "@/lib/stats/store";
 import { loadLocal } from "@/lib/stats/local";
 import {
   getDailyActiveId,
@@ -104,6 +107,14 @@ function DailyGame({
     }
   };
 
+  const abandonAndExit = () => {
+    void (async () => {
+      await abandonSoloGame(activeId, controller.snapshot);
+      finishedRef.current = true;
+      onDone();
+    })();
+  };
+
   return (
     <GameScreen
       controller={controller}
@@ -111,11 +122,10 @@ function DailyGame({
       streak={streak}
       savedBones={savedBones}
       onExit={handleExit}
+      onAbandon={abandonAndExit}
       // No rematch for daily — the overlay will only show the Home button.
       onFinish={({ solved, score, elapsedSeconds, mistakes, hintsUsed, squaresFilled, bonesFound }) =>
         void (async () => {
-          if (!claimSoloFinish(activeId)) return;
-          removeActiveSolo(activeId);
           await recordSoloGame(
             {
               won: solved,

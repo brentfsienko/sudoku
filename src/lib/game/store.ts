@@ -53,10 +53,6 @@ export type GameController = {
 type UndoFrame = {
   index: number;
   prev: CellEntry | undefined;
-  mistakes: number;
-  hintsUsed: number;
-  status: GameStatus;
-  finishedAt: number | null;
 };
 
 type State = {
@@ -97,10 +93,6 @@ function frameFor(s: GameSnapshot, index: number): UndoFrame {
   return {
     index,
     prev: s.cells[index] ? { ...s.cells[index] } : undefined,
-    mistakes: s.mistakes,
-    hintsUsed: s.hintsUsed,
-    status: s.status,
-    finishedAt: s.finishedAt,
   };
 }
 
@@ -203,16 +195,10 @@ function reducer(state: State, action: Action): State {
       const cells = { ...s.cells };
       if (frame.prev) cells[frame.index] = frame.prev;
       else delete cells[frame.index];
+      // Only restore the cell — mistakes / hints / game status stay as-is.
       return {
         undoStack: state.undoStack.slice(0, -1),
-        snapshot: {
-          ...s,
-          cells,
-          mistakes: frame.mistakes,
-          hintsUsed: frame.hintsUsed,
-          status: frame.status,
-          finishedAt: frame.finishedAt,
-        },
+        snapshot: { ...s, cells },
       };
     }
 

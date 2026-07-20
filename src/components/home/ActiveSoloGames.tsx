@@ -8,10 +8,11 @@ import {
   ACTIVE_SOLO_UPDATED_EVENT,
   type ActiveSoloSave,
   isActiveSolo,
+  loadActiveSolo,
   loadActiveSolos,
 } from "@/lib/game/activeSolo";
 import { claimSoloFinish } from "@/lib/game/finishedSolo";
-import { deleteActiveSolo, loadUserData, STATS_UPDATED_EVENT } from "@/lib/stats/store";
+import { abandonSoloGame, loadUserData, STATS_UPDATED_EVENT } from "@/lib/stats/store";
 import { formatGameClock } from "@/lib/game/format";
 import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
 import { DIFFICULTY_LABELS } from "@/lib/game/types";
@@ -19,6 +20,7 @@ import type { Profile } from "@/lib/stats/types";
 import { dogIdForUsername } from "@/lib/theme/dogs";
 
 const SOLO_ACCENT = "#a06bd6";
+const DAILY_ACCENT = "#f59e0b";
 const SWIPE_THRESHOLD = 60; // px to trigger quit confirm
 
 function displayUsername(raw: string): string {
@@ -26,13 +28,13 @@ function displayUsername(raw: string): string {
   return clean || "pup";
 }
 
-function SoloModeBadge() {
+function ModeBadge({ daily }: { daily: boolean }) {
   return (
     <span
       className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
-      style={{ backgroundColor: SOLO_ACCENT }}
+      style={{ backgroundColor: daily ? DAILY_ACCENT : SOLO_ACCENT }}
     >
-      Solo
+      {daily ? "Daily" : "Solo"}
     </span>
   );
 }
@@ -41,6 +43,7 @@ function ActiveSoloRow({
   snapshot,
   profile,
   userEmail,
+  daily,
   divider,
   onOpen,
   onQuit,
@@ -48,6 +51,7 @@ function ActiveSoloRow({
   snapshot: GameSnapshot;
   profile: Profile;
   userEmail?: string | null;
+  daily: boolean;
   divider: boolean;
   onOpen: () => void;
   onQuit: () => void;
@@ -168,7 +172,7 @@ function ActiveSoloRow({
             <span className="truncate text-sm font-bold text-[var(--foreground)]">
               @{meName}
             </span>
-            <SoloModeBadge />
+            <ModeBadge daily={daily} />
           </div>
           <span className="text-[10px] font-semibold text-[var(--muted)]">
             {paused ? "Paused" : "In progress"} · {DIFFICULTY_LABELS[snapshot.difficulty]}
@@ -222,35 +226,44 @@ export function ActiveSoloGames({ profile, userEmail }: Props) {
   }, []);
 
   function handleQuit(id: string) {
-    // Mark as finished FIRST — this is the permanent, sync guard that prevents
-    // the game from ever reappearing via parseList/replaceActiveSolosLocal,
-    // even if a cloud-sync races to restore it from remote.
-    claimSoloFinish(id);
-    // Remove from UI immediately, then clean up cloud async
+    const saved = loadActiveSolo(id) ?? actives.find((a) => a.id === id);
+    // Remove from UI immediately
     setActives((prev) => prev.filter((a) => a.id !== id));
-    void deleteActiveSolo(id);
+    if (saved?.snapshot) {
+      void abandonSoloGame(id, saved.snapshot);
+    } else {
+      // Fallback if snapshot already gone
+      claimSoloFinish(id);
+    }
   }
 
-  // Exclude daily puzzle games — they have their own dedicated section
-  const rows = actives.filter(
-    (item) => isActiveSolo(item.snapshot) && !item.id.startsWith("daily-"),
-  );
+  const rows = actives.filter((item) => isActiveSolo(item.snapshot));
   if (rows.length === 0) return null;
 
   return (
     <section className="mb-5">
       <FriendListPanel title="Active games" titleClassName={homeSectionTitleClass}>
-        {rows.map((item, index) => (
-          <ActiveSoloRow
-            key={item.id}
-            snapshot={item.snapshot}
-            profile={profile}
-            userEmail={userEmail}
-            divider={index < rows.length - 1}
-            onOpen={() => router.push(`/play?resume=${encodeURIComponent(item.id)}`)}
-            onQuit={() => handleQuit(item.id)}
-          />
-        ))}
+        {rows.map((item, index) => {
+          const daily = item.id.startsWith("daily-");
+          return (
+            <ActiveSoloRow
+              key={item.id}
+              snapshot={item.snapshot}
+              profile={profile}
+              userEmail={userEmail}
+              daily={daily}
+              divider={index < rows.length - 1}
+              onOpen={() =>
+                router.push(
+                  daily
+                    ? "/play/daily"
+                    : `/play?resume=${encodeURIComponent(item.id)}`,
+                )
+              }
+              onQuit={() => handleQuit(item.id)}
+            />
+          );
+        })}
       </FriendListPanel>
     </section>
   );

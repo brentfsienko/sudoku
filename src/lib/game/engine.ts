@@ -154,6 +154,17 @@ export function cellContributions(
   return result;
 }
 
+/** Correct non-given cells the player has filled (for history / abandon). */
+export function countCorrectPlaced(puzzle: string, cells: BoardCells): number {
+  let n = 0;
+  for (let i = 0; i < 81; i++) {
+    if (isGiven(puzzle, i)) continue;
+    const entry = cells[i];
+    if (entry?.correct && entry.value != null) n++;
+  }
+  return n;
+}
+
 /** Convenience: parse a puzzle string to a numeric grid. */
 export function parseGrid(str: string): number[] {
   return stringToGrid(str);

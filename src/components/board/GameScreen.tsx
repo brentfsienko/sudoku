@@ -40,6 +40,8 @@ type Props = {
   allPlayers?: Player[];
   peers?: PeerCursor[];
   onExit: () => void;
+  /** End Game from pause — quit without saving progress as active. */
+  onAbandon?: () => void;
   onRematch?: () => void;
   /** Called once when the game reaches a finished state. */
   streak?: number;
@@ -73,6 +75,7 @@ export function GameScreen({
   allPlayers,
   peers = [],
   onExit,
+  onAbandon,
   onRematch,
   onFinish,
   streak = 0,
@@ -294,7 +297,7 @@ export function GameScreen({
               </button>
               <button
                 type="button"
-                onClick={onExit}
+                onClick={onAbandon ?? onExit}
                 className="font-display w-full rounded-full border-2 border-[var(--border)] bg-white py-3 text-base font-extrabold text-[var(--foreground)] active:scale-[0.98]"
               >
                 End Game

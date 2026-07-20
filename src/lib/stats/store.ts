@@ -13,7 +13,12 @@ import {
 } from "@/lib/game/finishedSolo";
 import { getSupabase } from "@/lib/supabase/client";
 import { loadLocal, saveLocal } from "./local";
-import { fetchRemote, upsertRemote } from "./remote";
+import {
+  addBonesRemote,
+  applyWallet,
+  fetchRemote,
+  upsertRemote,
+} from "./remote";
 import {
   applyMultiResult,
   applySoloResult,
@@ -23,6 +28,11 @@ import {
   type SoloResult,
   type UserData,
 } from "./types";
+import { countCorrectPlaced } from "@/lib/game/engine";
+import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
+import { saveDailyResultLocal } from "@/lib/daily/local";
+import { submitDailyResult } from "@/lib/daily/api";
+import { liveScore } from "@/lib/game/scoring";
 
 function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   return Promise.race([
@@ -54,14 +64,12 @@ function withDeviceData(data: UserData): UserData {
   };
 }
 
-// Keep the old name as a thin alias so call-sites don't change.
 const withDeviceActiveSolos = withDeviceData;
 
 function applyActiveSolosToDeviceCache(data: UserData): void {
   replaceActiveSolosLocal(data.activeSolos ?? []);
 }
 
-/** Apply cloud-synced finished IDs to this device's localStorage set. */
 function applyFinishedIdsToDevice(data: UserData): void {
   if (data.finishedSoloIds?.length) {
     applyFinishedIds(data.finishedSoloIds);
@@ -69,8 +77,8 @@ function applyFinishedIdsToDevice(data: UserData): void {
 }
 
 /**
- * Loads and merges stats (local + remote when signed in). Read-only for remote:
- * never upserts here — a slow read-time upsert could overwrite a newer save.
+ * Loads stats. When signed in, gameplay fields merge local+remote, but bones
+ * and owned exclusives always come from the central user_data wallet.
  */
 export async function loadUserData(): Promise<UserData> {
   const uid = await currentUserId();
@@ -86,8 +94,6 @@ export async function loadUserData(): Promise<UserData> {
   if (remote) {
     data = mergeUserData(data, remote);
   }
-  // Propagate cloud-synced finished/quit IDs to this device's localStorage so
-  // games completed or quit on another device are immediately hidden here.
   applyFinishedIdsToDevice(data);
   applyActiveSolosToDeviceCache(data);
   saveLocal(data);
@@ -124,21 +130,37 @@ async function loadForWrite(): Promise<UserData> {
   return data;
 }
 
+/** Apply a game result, award bones on the server wallet when signed in. */
+async function commitGameWithBones(
+  dataBefore: UserData,
+  dataAfter: UserData,
+): Promise<void> {
+  const delta = Math.max(0, (dataAfter.bones ?? 0) - (dataBefore.bones ?? 0));
+  let next = dataAfter;
+  if (delta > 0) {
+    const wallet = await addBonesRemote(delta);
+    if (wallet) {
+      next = applyWallet(dataAfter, wallet);
+    }
+  }
+  await saveUserData(next);
+}
+
 export async function recordSoloGame(
   result: SoloResult,
   opts?: { activeId?: string },
 ): Promise<void> {
-  // Cancel any pending cloud-sync of active solos so it can't race with this
-  // finish write and restore the game as active after we remove it.
   if (activeSoloPersistTimer) {
     clearTimeout(activeSoloPersistTimer);
     activeSoloPersistTimer = null;
   }
 
-  // claimSoloFinish is called by callers, but call it here too as a guard so
-  // the ID is in getFinishedIds() before withDeviceData runs below.
   if (opts?.activeId) {
-    claimSoloFinish(opts.activeId);
+    // Block duplicate stats/bones if this game was already recorded.
+    if (!claimSoloFinish(opts.activeId)) {
+      removeActiveSolo(opts.activeId);
+      return;
+    }
     removeActiveSolo(opts.activeId);
   }
 
@@ -153,20 +175,58 @@ export async function recordSoloGame(
   }
 
   const bonesFound = Math.max(0, result.bonesFound);
-  await saveUserData(applySoloResult(data, { ...result, bonesFound }));
+  const before = data;
+  const after = applySoloResult(data, { ...result, bonesFound });
+  await commitGameWithBones(before, after);
 }
 
 /**
- * Permanently deletes an active solo from both local and remote storage.
- * Cancels any pending debounced persist so the remote can't race to restore it.
+ * Quit / End Game: remove from active list and append an unsolved recent-game row.
  */
+export async function abandonSoloGame(
+  activeId: string,
+  snapshot: GameSnapshot,
+  opts?: { bonesFound?: number },
+): Promise<void> {
+  const daily = activeId.startsWith("daily-");
+  const dateStr = daily ? activeId.slice("daily-".length) : null;
+  const now = Date.now();
+  const elapsed = elapsedSeconds(snapshot, now);
+  const squaresFilled = countCorrectPlaced(snapshot.puzzle, snapshot.cells);
+  const score = liveScore({
+    difficulty: snapshot.difficulty,
+    correctPlaced: squaresFilled,
+    mistakes: snapshot.mistakes,
+    hintsUsed: snapshot.hintsUsed,
+  });
+
+  await recordSoloGame(
+    {
+      won: false,
+      score,
+      difficulty: snapshot.difficulty,
+      elapsedSeconds: elapsed,
+      mistakes: snapshot.mistakes,
+      hintsUsed: snapshot.hintsUsed,
+      squaresFilled,
+      bonesFound: Math.max(0, opts?.bonesFound ?? 0),
+      daily: daily || undefined,
+    },
+    { activeId },
+  );
+
+  if (daily && dateStr) {
+    saveDailyResultLocal(dateStr, 0, false);
+    await submitDailyResult(dateStr, elapsed, snapshot.mistakes, false);
+  }
+}
+
+/** Remove an active solo without writing history (prefer abandonSoloGame). */
 export async function deleteActiveSolo(id: string): Promise<void> {
   if (activeSoloPersistTimer) {
     clearTimeout(activeSoloPersistTimer);
     activeSoloPersistTimer = null;
   }
-  // Ensure the ID is in finishedSolo before withDeviceData runs, so it gets
-  // included in finishedSoloIds and synced to other devices.
   claimSoloFinish(id);
   removeActiveSolo(id);
   const uid = await currentUserId();
@@ -188,7 +248,8 @@ export async function deleteActiveSolo(id: string): Promise<void> {
 export async function recordMultiGame(result: MultiResult): Promise<void> {
   const data = await loadForWrite();
   const bonesFound = Math.max(0, result.bonesFound);
-  await saveUserData(applyMultiResult(data, { ...result, bonesFound }));
+  const after = applyMultiResult(data, { ...result, bonesFound });
+  await commitGameWithBones(data, after);
 }
 
 let activeSoloPersistTimer: ReturnType<typeof setTimeout> | null = null;
