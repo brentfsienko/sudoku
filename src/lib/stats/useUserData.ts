@@ -241,22 +241,19 @@ export function useUserData(): UseUserData {
         return { ok: false, error: "Need more bones." };
       }
       const owned = current.ownedExclusiveDogs ?? [];
-      const nextOwned = ownsExclusiveDog(dogId, current)
-        ? owned
-        : [...owned, dogId];
+      const alreadyOwned = ownsExclusiveDog(dogId, current);
+      const nextOwned = alreadyOwned ? owned : [...owned, dogId];
+      const nextBones = alreadyOwned ? current.bones : current.bones - cost;
       let merged: UserData = {
         ...current,
-        bones: ownsExclusiveDog(dogId, current)
-          ? current.bones
-          : current.bones - cost,
+        bones: nextBones,
+        bonesUpdatedAt: alreadyOwned ? current.bonesUpdatedAt : Date.now(),
         ownedExclusiveDogs: nextOwned,
         profile: coerceProfile(
           { ...current.profile, dogId },
           {
             ...current,
-            bones: ownsExclusiveDog(dogId, current)
-              ? current.bones
-              : current.bones - cost,
+            bones: nextBones,
             ownedExclusiveDogs: nextOwned,
           },
           userRef.current?.email,

@@ -16,9 +16,11 @@
   --accent: #7ec4cf; /* sky collar */
   --paw: #c98b5b;
 
-  /* Player colors */
-  --player-1: #1d6fd8; /* blue */
-  --player-2: #e85d04; /* orange — distinct from blue and mistake red */
+  /* Player colors — sky, jade, lavender, peach (no red) */
+  --player-1: #4db8e0; /* sky blue */
+  --player-2: #2ead7a; /* jade green */
+  --player-3: #9b8ad4; /* lavender */
+  --player-4: #f4a261; /* peachy orange */
 
   /* Board */
   --cell-bg: #ffffff;
@@ -54,6 +56,8 @@
   --color-paw: var(--paw);
   --color-player-1: var(--player-1);
   --color-player-2: var(--player-2);
+  --color-player-3: var(--player-3);
+  --color-player-4: var(--player-4);
 
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
