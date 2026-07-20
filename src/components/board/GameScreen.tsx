@@ -180,7 +180,10 @@ export function GameScreen({
     function onKey(e: KeyboardEvent) {
       if (snapshot.status !== "playing") return;
       if (e.key >= "1" && e.key <= "9") controller.inputDigit(Number(e.key));
-      else if (e.key === "Backspace" || e.key === "Delete") controller.erase();
+      else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        controller.undo();
+      } else if (e.key === "Backspace" || e.key === "Delete") controller.erase();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -306,8 +309,9 @@ export function GameScreen({
         <ActionBar
           notesMode={controller.notesMode}
           hintsRemaining={controller.hintsRemaining}
+          canUndo={controller.canUndo}
           disabled={done || paused}
-          onErase={controller.erase}
+          onUndo={controller.undo}
           onToggleNotes={controller.toggleNotes}
           onHint={controller.hint}
         />
