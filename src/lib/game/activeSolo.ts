@@ -1,5 +1,6 @@
 "use client";
 
+import { isStaleDailyActiveId } from "@/lib/daily/puzzle";
 import { isSoloFinished } from "./finishedSolo";
 import { pauseSnapshot, type GameSnapshot } from "./store";
 
@@ -119,6 +120,8 @@ export function upsertActiveSolo(
   opts?: { pauseIfPlaying?: boolean },
 ): void {
   if (typeof window === "undefined") return;
+  // Don't revive a daily after the next one has been released.
+  if (isStaleDailyActiveId(id)) return;
   if (!isActiveSolo(snapshot)) return;
   const toStore = opts?.pauseIfPlaying ? pauseSnapshot(snapshot) : snapshot;
   if (!isActiveSolo(toStore)) return;

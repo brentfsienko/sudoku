@@ -269,16 +269,18 @@ export function GameScreen({
       </div>
 
       {/* Board */}
-      <div className="relative flex flex-1 items-center justify-center px-3 py-3">
-        <Board
-          snapshot={snapshot}
-          selectedCell={controller.selectedCell}
-          peers={peers}
-          boneCells={bonePlay.boneCells}
-          collectedBones={bonePlay.collectedBones}
-          popCell={bonePlay.popCell}
-          onSelect={controller.select}
-        />
+      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-3 py-3 [container-type:size]">
+        <div className="aspect-square h-[min(100%,100cqmin)] w-[min(100%,100cqmin)]">
+          <Board
+            snapshot={snapshot}
+            selectedCell={controller.selectedCell}
+            peers={peers}
+            boneCells={bonePlay.boneCells}
+            collectedBones={bonePlay.collectedBones}
+            popCell={bonePlay.popCell}
+            onSelect={controller.select}
+          />
+        </div>
         {paused && (
           <div className="absolute inset-3 flex flex-col items-center justify-center gap-5 rounded-2xl bg-[var(--background)]/95">
             <span className="text-[var(--primary)]">
@@ -308,7 +310,7 @@ export function GameScreen({
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col gap-3 px-4 pb-4">
+      <div className="flex shrink-0 flex-col gap-3 px-4 pb-4">
         <ActionBar
           notesMode={controller.notesMode}
           hintsRemaining={controller.hintsRemaining}

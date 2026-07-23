@@ -70,6 +70,25 @@ export function getDailyActiveId(dateStr?: string): string {
   return `daily-${dateStr ?? getPSTDate()}`;
 }
 
+/** Parse "YYYY-MM-DD" from a `daily-YYYY-MM-DD` active id, or null. */
+export function dailyDateFromActiveId(activeId: string): string | null {
+  if (!activeId.startsWith("daily-")) return null;
+  const dateStr = activeId.slice("daily-".length);
+  return /^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? dateStr : null;
+}
+
+/**
+ * True when this active id is a daily from a previous PST calendar day
+ * (i.e. the next daily has already been released).
+ */
+export function isStaleDailyActiveId(
+  activeId: string,
+  today: string = getPSTDate(),
+): boolean {
+  const dateStr = dailyDateFromActiveId(activeId);
+  return dateStr != null && dateStr < today;
+}
+
 /** Returns true if today's daily puzzle has already been completed. */
 export function isTodayComplete(): boolean {
   return isSoloFinished(getDailyActiveId());

@@ -10,6 +10,7 @@ import {
   applyFinishedIds,
   claimSoloFinish,
   getFinishedIds,
+  isSoloFinished,
 } from "@/lib/game/finishedSolo";
 import { getSupabase } from "@/lib/supabase/client";
 import { loadLocal, saveLocal } from "./local";
@@ -32,6 +33,7 @@ import { countCorrectPlaced } from "@/lib/game/engine";
 import { elapsedSeconds, type GameSnapshot } from "@/lib/game/store";
 import { saveDailyResultLocal } from "@/lib/daily/local";
 import { submitDailyResult } from "@/lib/daily/api";
+import { isStaleDailyActiveId } from "@/lib/daily/puzzle";
 import { liveScore } from "@/lib/game/scoring";
 
 function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
@@ -87,7 +89,8 @@ export async function loadUserData(): Promise<UserData> {
   if (!uid) {
     applyActiveSolosToDeviceCache(data);
     saveLocal(data);
-    return data;
+    await expireStaleDailyActives();
+    return withDeviceActiveSolos(loadLocal());
   }
 
   const remote = await withTimeout(fetchRemote(uid), 6000, null);
@@ -97,7 +100,8 @@ export async function loadUserData(): Promise<UserData> {
   applyFinishedIdsToDevice(data);
   applyActiveSolosToDeviceCache(data);
   saveLocal(data);
-  return data;
+  await expireStaleDailyActives();
+  return withDeviceActiveSolos(loadLocal());
 }
 
 export const STATS_UPDATED_EVENT = "sudogku:stats-updated";
@@ -190,6 +194,9 @@ export async function abandonSoloGame(
 ): Promise<void> {
   const daily = activeId.startsWith("daily-");
   const dateStr = daily ? activeId.slice("daily-".length) : null;
+  // If this game was already recorded (solved/quit elsewhere), only strip the
+  // leftover active — don't overwrite a solved daily with "not solved".
+  const shouldMarkDailyFail = Boolean(daily && dateStr && !isSoloFinished(activeId));
   const now = Date.now();
   const elapsed = elapsedSeconds(snapshot, now);
   const squaresFilled = countCorrectPlaced(snapshot.puzzle, snapshot.cells);
@@ -215,9 +222,21 @@ export async function abandonSoloGame(
     { activeId },
   );
 
-  if (daily && dateStr) {
+  if (shouldMarkDailyFail && dateStr) {
     saveDailyResultLocal(dateStr, 0, false);
     await submitDailyResult(dateStr, elapsed, snapshot.mistakes, false);
+  }
+}
+
+/**
+ * When the next daily is released, any in-progress daily from a prior PST day
+ * is removed from Active games and recorded as not solved.
+ */
+export async function expireStaleDailyActives(): Promise<void> {
+  if (typeof window === "undefined") return;
+  const stale = loadActiveSolos().filter((item) => isStaleDailyActiveId(item.id));
+  for (const item of stale) {
+    await abandonSoloGame(item.id, item.snapshot);
   }
 }
 

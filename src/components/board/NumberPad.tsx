@@ -9,7 +9,7 @@ type Props = {
 
 export function NumberPad({ counts, disabled, onInput }: Props) {
   return (
-    <div className="grid grid-cols-9 gap-1.5">
+    <div className="grid grid-cols-9 gap-1.5" data-number-pad>
       {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => {
         const done = counts[n] >= 9;
         return (
