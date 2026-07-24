@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { dayDifficulty, getPSTDate } from "@/lib/daily/puzzle";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 
@@ -7,6 +6,9 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+/** Prefer secret/service role so inserts don't depend on PostgREST auth.uid(). */
+const serviceKey =
+  process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 type Body = {
   dateStr?: string;
@@ -44,9 +46,102 @@ function normalizeBoard(raw: string): string | null {
   return out;
 }
 
+async function verifyAccessToken(
+  accessToken: string,
+): Promise<{ id: string } | null> {
+  if (!url || !anonKey) return null;
+  const res = await fetch(`${url}/auth/v1/user`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      apikey: anonKey,
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  const json = (await res.json()) as { id?: string };
+  return json.id ? { id: json.id } : null;
+}
+
+/**
+ * Upsert daily result with service role (bypasses auth.uid() / JWT signing issues).
+ * Mirrors submit_daily_result keep-better-time logic. Uses raw REST — no supabase-js
+ * on the server (avoids auth.uid() null + realtime init issues).
+ */
+async function upsertDailyResult(args: {
+  userId: string;
+  dateStr: string;
+  elapsedSeconds: number;
+  mistakes: number;
+  solved: boolean;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!url || !serviceKey) {
+    return { ok: false, error: "Server missing SUPABASE_SECRET_KEY" };
+  }
+
+  const mistakes = Math.min(Math.max(args.mistakes, 0), 10);
+  let elapsed = Math.min(Math.max(args.elapsedSeconds, 0), 86400);
+  if (!args.solved) elapsed = 0;
+
+  const headers = {
+    apikey: serviceKey,
+    Authorization: `Bearer ${serviceKey}`,
+    "Content-Type": "application/json",
+  };
+
+  const existingRes = await fetch(
+    `${url}/rest/v1/daily_results?user_id=eq.${encodeURIComponent(args.userId)}&puzzle_date=eq.${encodeURIComponent(args.dateStr)}&select=elapsed_seconds,solved`,
+    { headers, cache: "no-store" },
+  );
+  if (!existingRes.ok) {
+    const text = await existingRes.text();
+    return { ok: false, error: text || `Read failed (${existingRes.status})` };
+  }
+
+  const existingRows = (await existingRes.json()) as Array<{
+    elapsed_seconds: number;
+    solved: boolean;
+  }>;
+  const existing = existingRows[0];
+
+  if (existing) {
+    if (existing.solved && !args.solved) return { ok: true };
+    if (
+      existing.solved &&
+      args.solved &&
+      Number(existing.elapsed_seconds) <= elapsed
+    ) {
+      return { ok: true };
+    }
+  }
+
+  const upsertRes = await fetch(`${url}/rest/v1/daily_results`, {
+    method: "POST",
+    headers: {
+      ...headers,
+      Prefer: "resolution=merge-duplicates,return=minimal",
+    },
+    body: JSON.stringify({
+      user_id: args.userId,
+      puzzle_date: args.dateStr,
+      elapsed_seconds: elapsed,
+      mistakes,
+      solved: args.solved,
+      completed_at: new Date().toISOString(),
+    }),
+    cache: "no-store",
+  });
+
+  if (!upsertRes.ok) {
+    const text = await upsertRes.text();
+    return { ok: false, error: text || `Upsert failed (${upsertRes.status})` };
+  }
+
+  return { ok: true };
+}
+
 /**
  * Verifies a daily completion against the deterministic puzzle solution,
- * then records via submit_daily_result RPC (no direct table writes).
+ * then records the result with the service-role key (Auth verifies the user JWT).
  */
 export async function POST(request: Request) {
   if (!url || !anonKey) {
@@ -90,35 +185,41 @@ export async function POST(request: Request) {
     }
   }
 
-  // Bind the user JWT for PostgREST/RPC. Using only `global.headers` can make
-  // auth.getUser() succeed while auth.uid() is null inside RPCs (→ 400
-  // "not authenticated"), which is what dropped verified daily solves.
-  const sb = createClient(url, anonKey, {
-    accessToken: async () => token,
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  const { data: userData, error: userError } = await sb.auth.getUser(token);
-  if (userError || !userData.user) {
+  const user = await verifyAccessToken(token);
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await sb.rpc("submit_daily_result", {
-    p_date: dateStr,
-    p_elapsed: elapsedSeconds,
-    p_mistakes: mistakes,
-    p_solved: solved,
+  if (!serviceKey) {
+    console.error(
+      "[daily/submit] SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY) is not set",
+    );
+    return NextResponse.json(
+      {
+        error:
+          "Server misconfigured: add SUPABASE_SECRET_KEY to write daily results",
+      },
+      { status: 501 },
+    );
+  }
+
+  const written = await upsertDailyResult({
+    userId: user.id,
+    dateStr,
+    elapsedSeconds,
+    mistakes,
+    solved,
   });
 
-  if (error) {
-    console.error("[daily/submit] rpc error:", error.message, {
+  if (!written.ok) {
+    console.error("[daily/submit] upsert error:", written.error, {
       dateStr,
       elapsedSeconds,
       mistakes,
       solved,
-      userId: userData.user.id,
+      userId: user.id,
     });
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: written.error }, { status: 400 });
   }
 
   return NextResponse.json({ ok: true });

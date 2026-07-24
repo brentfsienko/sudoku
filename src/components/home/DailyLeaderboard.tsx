@@ -119,8 +119,8 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
       if (viewingDate === today) {
         const synced = await ensureDailyResultSynced(viewingDate);
         const local = loadDailyResultLocal(viewingDate);
-        if (!cancelled && local && !synced) {
-          setSyncHint("Couldn't sync your score. Tap retry.");
+        if (!cancelled && local && !synced.ok) {
+          setSyncHint(synced.error ?? "Couldn't sync your score. Tap retry.");
         }
       }
       if (cancelled) return;
