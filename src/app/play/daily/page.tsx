@@ -30,6 +30,7 @@ import { LoadingPaws } from "@/app/play/page";
 import { fetchFriends } from "@/lib/friends/api";
 import { getSupabase } from "@/lib/supabase/client";
 import type { Friend } from "@/lib/friends/types";
+import { useTrackRedditGameStart } from "@/lib/analytics/useTrackRedditGameStart";
 
 function buildInitialSnapshot(activeId: string): GameSnapshot {
   const saved = loadActiveSolo(activeId);
@@ -66,6 +67,7 @@ function DailyGame({
   onExit: () => void;
   onDone: () => void;
 }) {
+  useTrackRedditGameStart("daily");
   const [snapshot] = useState(() => buildInitialSnapshot(activeId));
   const [me] = useState(() => {
     const p = getProfile();

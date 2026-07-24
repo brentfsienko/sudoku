@@ -4,6 +4,7 @@ import { Baloo_2, Lora, Nunito } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
+import { RedditPixel } from "@/components/analytics/RedditPixel";
 import {
   ROOT_METADATA,
   organizationJsonLd,
@@ -67,6 +68,7 @@ export default function RootLayout({
           }}
         />
         <ViewportHeightSync />
+        <RedditPixel />
         {children}
         <Analytics />
       </body>

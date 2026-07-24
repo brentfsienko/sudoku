@@ -30,6 +30,7 @@ import {
   type GameMode,
 } from "@/lib/game/types";
 import type { LivePlayer } from "@/lib/liveblocks/useLiveGame";
+import { useTrackRedditGameStart } from "@/lib/analytics/useTrackRedditGameStart";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -98,6 +99,7 @@ function RoomInner({
   seedMode: GameMode;
   profile: Profile;
 }) {
+  useTrackRedditGameStart("multiplayer");
   const router = useRouter();
   const connection = useStatus();
   const [wallet, setWallet] = useState({ streak: 0, bones: 0 });
