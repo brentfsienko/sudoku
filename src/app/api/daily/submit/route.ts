@@ -88,9 +88,6 @@ export async function POST(request: Request) {
     if (board !== dailySolution(dateStr)) {
       return NextResponse.json({ error: "Board incorrect" }, { status: 400 });
     }
-    if (elapsedSeconds < 15) {
-      return NextResponse.json({ error: "Elapsed too low" }, { status: 400 });
-    }
   }
 
   const sb = createClient(url, anonKey, {

@@ -253,12 +253,7 @@ begin
   mistakes := least(greatest(coalesce(p_mistakes, 0), 0), 10);
   elapsed := least(greatest(coalesce(p_elapsed, 0), 0), 86400);
 
-  if p_solved then
-    -- Reject impossibly fast solves (server API also verifies the board).
-    if elapsed < 15 then
-      raise exception 'elapsed too low';
-    end if;
-  else
+  if not p_solved then
     elapsed := 0;
   end if;
 

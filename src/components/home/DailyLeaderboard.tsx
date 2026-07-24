@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchLeaderboard, type DailyLeaderboardEntry } from "@/lib/daily/api";
+import { fetchLeaderboard, ensureDailyResultSynced, type DailyLeaderboardEntry } from "@/lib/daily/api";
 import { getPSTDate } from "@/lib/daily/puzzle";
 import { formatDurationExact } from "@/lib/stats/progress";
 import { fetchMyPublicProfile } from "@/lib/friends/api";
@@ -99,6 +99,7 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
   const [entries, setEntries] = useState<DailyLeaderboardEntry[]>([]);
   const [profiles, setProfiles] = useState<Map<string, PublicProfile>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [reloadToken, setReloadToken] = useState(0);
 
   const friendIds = friends.map((f) => f.userId);
 
@@ -109,12 +110,20 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
     }
     setLoading(true);
 
+    let cancelled = false;
     void (async () => {
+      // Recover local completions that never made it to daily_results.
+      if (viewingDate === today) {
+        await ensureDailyResultSynced(viewingDate);
+      }
+      if (cancelled) return;
+
       const [results, myProfile, ...friendProfiles] = await Promise.all([
         fetchLeaderboard(viewingDate, friendIds, myId),
         fetchMyPublicProfile(myId),
         ...friends.map((f) => fetchMyPublicProfile(f.userId)),
       ]);
+      if (cancelled) return;
 
       const profileMap = new Map<string, PublicProfile>();
       if (myProfile) profileMap.set(myId, myProfile);
@@ -127,7 +136,25 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
       setProfiles(profileMap);
       setLoading(false);
     })();
-  }, [viewingDate, myId, friendIds.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return () => {
+      cancelled = true;
+    };
+  }, [viewingDate, myId, friendIds.join(","), reloadToken, today]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible") {
+        setReloadToken((n) => n + 1);
+      }
+    };
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
 
   const canGoForward = viewingDate < today;
 
