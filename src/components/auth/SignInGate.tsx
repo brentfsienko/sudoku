@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { PawIcon } from "@/components/icons";
 import { markAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { passwordsMatch } from "@/lib/auth/password";
+import { trackRedditSignUp } from "@/lib/analytics/reddit";
 import type { UseUserData } from "@/lib/stats/useUserData";
 
 type Mode = "signin" | "signup" | "forgot";
@@ -62,6 +63,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
         setError(res.error ?? "Could not create account.");
         return;
       }
+      trackRedditSignUp();
       if (res.needsConfirmation) {
         setInfo("Account created. Check your email to confirm, then sign in.");
         setMode("signin");

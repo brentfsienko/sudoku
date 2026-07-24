@@ -22,6 +22,7 @@ import {
   STATS_UPDATED_EVENT,
 } from "@/lib/stats/store";
 import { loadLocal } from "@/lib/stats/local";
+import { useTrackRedditGameStart } from "@/lib/analytics/useTrackRedditGameStart";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -70,6 +71,7 @@ function SoloGame({
   onRematch: () => void;
   onWalletSync: () => void;
 }) {
+  useTrackRedditGameStart("solo");
   const [snapshot] = useState(() => initialState(activeId, difficulty));
   const [me] = useState(() => {
     const p = getProfile();
