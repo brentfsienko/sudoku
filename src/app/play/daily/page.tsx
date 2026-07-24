@@ -143,8 +143,15 @@ function DailyGame({
 
           // Save result locally and submit to Supabase for both outcomes.
           // For failures: elapsedSeconds is ignored in ranking (sorted to bottom).
+          // Server verifies the board against the daily solution when solved.
           saveDailyResultLocal(dateStr, solved ? elapsedSeconds : 0, solved);
-          await submitDailyResult(dateStr, elapsedSeconds, mistakes, solved);
+          await submitDailyResult(
+            dateStr,
+            elapsedSeconds,
+            mistakes,
+            solved,
+            solved ? snapshot.solution : undefined,
+          );
 
           finishedRef.current = true;
         })()

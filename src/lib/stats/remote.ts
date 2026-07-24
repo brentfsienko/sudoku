@@ -67,27 +67,9 @@ function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
   ]);
 }
 
-/** Legacy full-blob upsert (used before wallet RPCs exist, or as fallback). */
-async function upsertRemoteLegacy(userId: string, data: UserData): Promise<void> {
-  const sb = getSupabase();
-  if (!sb) return;
-  const result = await withTimeout(
-    sb
-      .from("user_data")
-      .upsert(
-        { user_id: userId, data, updated_at: new Date().toISOString() },
-        { onConflict: "user_id" },
-      ),
-    12_000,
-  );
-  if (result.error) {
-    console.warn("[stats] remote upsert failed:", result.error.message);
-  }
-}
-
 /**
- * Upsert gameplay stats. Server preserves bones / ownedExclusiveDogs so a
- * stale device cannot overwrite wallet purchases or awards.
+ * Upsert gameplay stats. Server preserves bones / ownedExclusiveDogs.
+ * No legacy table upsert fallback — direct writes are revoked by RLS.
  */
 export async function upsertRemote(userId: string, data: UserData): Promise<void> {
   const sb = getSupabase();
@@ -98,16 +80,10 @@ export async function upsertRemote(userId: string, data: UserData): Promise<void
       12_000,
     );
     if (error) {
-      console.warn("[stats] upsert_user_stats failed, falling back:", error.message);
-      await upsertRemoteLegacy(userId, data);
+      console.warn("[stats] upsert_user_stats failed:", error.message);
     }
   } catch (err) {
     console.warn("[stats] remote upsert failed:", err);
-    try {
-      await upsertRemoteLegacy(userId, data);
-    } catch {
-      // ignore
-    }
   }
 }
 
@@ -121,19 +97,33 @@ function parseWalletPayload(raw: unknown): WalletSnapshot | null {
   return { bones, ownedExclusiveDogs: owned };
 }
 
-/** Atomically award bones on the server wallet. */
+/**
+ * Atomically award bones for a finished game id (server-capped + deduped).
+ */
+export async function awardGameBonesRemote(
+  gameId: string,
+  amount: number,
+): Promise<WalletSnapshot | null> {
+  if (!gameId || amount < 0) return null;
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb.rpc("award_game_bones", {
+    p_game_id: gameId,
+    p_amount: amount,
+  });
+  if (error) {
+    console.warn("[stats] award_game_bones failed:", error.message);
+    return null;
+  }
+  return parseWalletPayload(data);
+}
+
+/** @deprecated Use awardGameBonesRemote — positive add_bones is rejected server-side. */
 export async function addBonesRemote(
   amount: number,
 ): Promise<WalletSnapshot | null> {
   if (amount <= 0) return null;
-  const sb = getSupabase();
-  if (!sb) return null;
-  const { data, error } = await sb.rpc("add_bones", { p_amount: amount });
-  if (error) {
-    console.warn("[stats] add_bones failed:", error.message);
-    return null;
-  }
-  return parseWalletPayload(data);
+  return null;
 }
 
 export type PurchaseRemoteResult = {

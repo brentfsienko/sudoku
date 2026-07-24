@@ -7,9 +7,39 @@ import type {
   GameStatus,
   PlayerRole,
 } from "@/lib/game/types";
+import { getSupabase } from "@/lib/supabase/client";
 
 const client = createClient({
-  authEndpoint: "/api/liveblocks-auth",
+  authEndpoint: async (room) => {
+    const sb = getSupabase();
+    const {
+      data: { session },
+    } = (await sb?.auth.getSession()) ?? { data: { session: null } };
+
+    if (!session?.access_token) {
+      throw new Error("Sign in to play multiplayer.");
+    }
+
+    const res = await fetch("/api/liveblocks-auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ room }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(
+        typeof err === "object" && err && "error" in err
+          ? String((err as { error: string }).error)
+          : "Liveblocks auth failed",
+      );
+    }
+
+    return (await res.json()) as { token: string };
+  },
   throttle: 16,
 });
 
@@ -25,6 +55,7 @@ export type Presence = {
 /** Shared, conflict-free room metadata. */
 export type GameMeta = {
   puzzle: string;
+  /** Solution stays in-room for move validation; access is scoped per-room + auth. */
   solution: string;
   difficulty: Difficulty;
   mode: GameMode;
@@ -34,6 +65,8 @@ export type GameMeta = {
   mistakes: number;
   hintsUsed: number;
   hostName: string;
+  /** Supabase user id of the first player to claim host (authoritative). */
+  hostId: string;
 };
 
 export type Storage = {

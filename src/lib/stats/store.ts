@@ -15,8 +15,8 @@ import {
 import { getSupabase } from "@/lib/supabase/client";
 import { loadLocal, saveLocal } from "./local";
 import {
-  addBonesRemote,
   applyWallet,
+  awardGameBonesRemote,
   fetchRemote,
   upsertRemote,
 } from "./remote";
@@ -138,13 +138,17 @@ async function loadForWrite(): Promise<UserData> {
 async function commitGameWithBones(
   dataBefore: UserData,
   dataAfter: UserData,
+  gameId: string,
 ): Promise<void> {
   const delta = Math.max(0, (dataAfter.bones ?? 0) - (dataBefore.bones ?? 0));
   let next = dataAfter;
-  if (delta > 0) {
-    const wallet = await addBonesRemote(delta);
+  if (delta > 0 && gameId) {
+    const wallet = await awardGameBonesRemote(gameId, delta);
     if (wallet) {
       next = applyWallet(dataAfter, wallet);
+    } else {
+      // Signed-out or RPC unavailable: keep local delta only (not synced as mint).
+      next = dataAfter;
     }
   }
   await saveUserData(next);
@@ -159,13 +163,19 @@ export async function recordSoloGame(
     activeSoloPersistTimer = null;
   }
 
+  const gameId =
+    opts?.activeId ??
+    `solo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
   if (opts?.activeId) {
-    // Block duplicate stats/bones if this game was already recorded.
+    // Block duplicate stats/bones if this game was already recorded locally.
     if (!claimSoloFinish(opts.activeId)) {
       removeActiveSolo(opts.activeId);
       return;
     }
     removeActiveSolo(opts.activeId);
+  } else {
+    claimSoloFinish(gameId);
   }
 
   let data = await loadForWrite();
@@ -181,7 +191,7 @@ export async function recordSoloGame(
   const bonesFound = Math.max(0, result.bonesFound);
   const before = data;
   const after = applySoloResult(data, { ...result, bonesFound });
-  await commitGameWithBones(before, after);
+  await commitGameWithBones(before, after, gameId);
 }
 
 /**
@@ -264,11 +274,16 @@ export async function deleteActiveSolo(id: string): Promise<void> {
   }
 }
 
-export async function recordMultiGame(result: MultiResult): Promise<void> {
+export async function recordMultiGame(
+  result: MultiResult,
+  opts?: { roomCode?: string },
+): Promise<void> {
+  const gameId = `multi-${opts?.roomCode ?? "room"}-${Date.now()}`;
+  claimSoloFinish(gameId);
   const data = await loadForWrite();
   const bonesFound = Math.max(0, result.bonesFound);
   const after = applyMultiResult(data, { ...result, bonesFound });
-  await commitGameWithBones(data, after);
+  await commitGameWithBones(data, after, gameId);
 }
 
 let activeSoloPersistTimer: ReturnType<typeof setTimeout> | null = null;

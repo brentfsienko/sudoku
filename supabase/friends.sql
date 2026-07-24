@@ -94,6 +94,26 @@ create policy "friend_requests delete involved"
   to authenticated
   using (auth.uid() = from_user_id or auth.uid() = to_user_id);
 
+create or replace function public.are_friends(a uuid, b uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.friend_requests fr
+    where fr.status = 'accepted'
+      and (
+        (fr.from_user_id = a and fr.to_user_id = b)
+        or (fr.from_user_id = b and fr.to_user_id = a)
+      )
+  );
+$$;
+
+revoke all on function public.are_friends(uuid, uuid) from public;
+grant execute on function public.are_friends(uuid, uuid) to authenticated;
+
 -- Game invites
 drop policy if exists "game_invites read involved" on public.game_invites;
 create policy "game_invites read involved"
@@ -105,7 +125,11 @@ drop policy if exists "game_invites insert host" on public.game_invites;
 create policy "game_invites insert host"
   on public.game_invites for insert
   to authenticated
-  with check (auth.uid() = host_id and host_id <> guest_id);
+  with check (
+    auth.uid() = host_id
+    and host_id <> guest_id
+    and public.are_friends(host_id, guest_id)
+  );
 
 drop policy if exists "game_invites update guest" on public.game_invites;
 create policy "game_invites update guest"
@@ -113,3 +137,25 @@ create policy "game_invites update guest"
   to authenticated
   using (auth.uid() = guest_id)
   with check (auth.uid() = guest_id);
+
+-- Guests/receivers may only flip status, not rewrite other columns.
+revoke update on table public.friend_requests from authenticated;
+grant update (status) on table public.friend_requests to authenticated;
+revoke update on table public.game_invites from authenticated;
+grant update (status) on table public.game_invites to authenticated;
+
+-- Friends can read each other's daily results (table created in schema.sql).
+drop policy if exists "read friends daily results" on public.daily_results;
+create policy "read friends daily results"
+  on public.daily_results for select
+  to authenticated
+  using (
+    exists (
+      select 1 from public.friend_requests fr
+      where fr.status = 'accepted'
+        and (
+          (fr.from_user_id = auth.uid() and fr.to_user_id = daily_results.user_id)
+          or (fr.to_user_id = auth.uid() and fr.from_user_id = daily_results.user_id)
+        )
+    )
+  );
