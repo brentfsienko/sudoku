@@ -90,12 +90,15 @@ export async function POST(request: Request) {
     }
   }
 
+  // Bind the user JWT for PostgREST/RPC. Using only `global.headers` can make
+  // auth.getUser() succeed while auth.uid() is null inside RPCs (→ 400
+  // "not authenticated"), which is what dropped verified daily solves.
   const sb = createClient(url, anonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
+    accessToken: async () => token,
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data: userData, error: userError } = await sb.auth.getUser();
+  const { data: userData, error: userError } = await sb.auth.getUser(token);
   if (userError || !userData.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -108,6 +111,13 @@ export async function POST(request: Request) {
   });
 
   if (error) {
+    console.error("[daily/submit] rpc error:", error.message, {
+      dateStr,
+      elapsedSeconds,
+      mistakes,
+      solved,
+      userId: userData.user.id,
+    });
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 

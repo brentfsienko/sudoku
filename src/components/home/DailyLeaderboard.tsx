@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchLeaderboard, ensureDailyResultSynced, type DailyLeaderboardEntry } from "@/lib/daily/api";
 import { getPSTDate } from "@/lib/daily/puzzle";
+import { loadDailyResultLocal } from "@/lib/daily/local";
 import { formatDurationExact } from "@/lib/stats/progress";
 import { fetchMyPublicProfile } from "@/lib/friends/api";
 import { DogAvatar } from "@/components/DogAvatar";
@@ -100,6 +101,7 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
   const [profiles, setProfiles] = useState<Map<string, PublicProfile>>(new Map());
   const [loading, setLoading] = useState(true);
   const [reloadToken, setReloadToken] = useState(0);
+  const [syncHint, setSyncHint] = useState<string | null>(null);
 
   const friendIds = friends.map((f) => f.userId);
 
@@ -109,12 +111,17 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
       return;
     }
     setLoading(true);
+    setSyncHint(null);
 
     let cancelled = false;
     void (async () => {
       // Recover local completions that never made it to daily_results.
       if (viewingDate === today) {
-        await ensureDailyResultSynced(viewingDate);
+        const synced = await ensureDailyResultSynced(viewingDate);
+        const local = loadDailyResultLocal(viewingDate);
+        if (!cancelled && local && !synced) {
+          setSyncHint("Couldn't sync your score. Tap retry.");
+        }
       }
       if (cancelled) return;
 
@@ -134,6 +141,7 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
 
       setEntries(results);
       setProfiles(profileMap);
+      if (results.some((e) => e.userId === myId)) setSyncHint(null);
       setLoading(false);
     })();
 
@@ -160,6 +168,11 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
 
   const solvedEntries = entries.filter((e) => e.solved);
   const failedEntries = entries.filter((e) => !e.solved);
+  const missingMine =
+    !loading &&
+    viewingDate === today &&
+    !entries.some((e) => e.userId === myId) &&
+    loadDailyResultLocal(viewingDate) != null;
 
   return (
     <div className="flex flex-col gap-3">
@@ -195,6 +208,21 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
           </svg>
         </button>
       </div>
+
+      {(syncHint || missingMine) && (
+        <button
+          type="button"
+          onClick={() => setReloadToken((n) => n + 1)}
+          className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-left active:bg-[var(--surface-soft)]"
+        >
+          <p className="font-display text-sm font-bold text-[var(--foreground)]">
+            Your score isn’t on the board yet
+          </p>
+          <p className="text-xs text-[var(--muted)]">
+            {syncHint ?? "Tap to sync your daily time."}
+          </p>
+        </button>
+      )}
 
       {/* Leaderboard rows */}
       <div className="rounded-2xl bg-[var(--list-panel)] overflow-hidden">
