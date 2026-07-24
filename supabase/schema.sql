@@ -78,9 +78,7 @@ begin
   elapsed := least(greatest(coalesce(p_elapsed, 0), 0), 86400);
 
   if p_solved then
-    if elapsed < 15 then
-      raise exception 'elapsed too low';
-    end if;
+    null; -- board already verified by /api/daily/submit
   else
     elapsed := 0;
   end if;

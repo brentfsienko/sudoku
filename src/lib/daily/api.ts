@@ -2,6 +2,8 @@
 
 import { getSupabase } from "@/lib/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getDailyPuzzle } from "@/lib/daily/puzzle";
+import { loadDailyResultLocal } from "@/lib/daily/local";
 
 export type DailyLeaderboardEntry = {
   userId: string;
@@ -10,6 +12,8 @@ export type DailyLeaderboardEntry = {
   solved: boolean;
   completedAt: string;
 };
+
+export type DailySubmitResult = { ok: boolean; error?: string };
 
 const SELECT_WITH_SOLVED =
   "user_id, elapsed_seconds, mistakes, solved, completed_at";
@@ -115,29 +119,79 @@ export async function submitDailyResult(
   mistakes: number,
   solved: boolean,
   board?: string,
-): Promise<void> {
+): Promise<DailySubmitResult> {
   const sb = getSupabase();
-  if (!sb) return;
+  if (!sb) return { ok: false, error: "Not configured" };
 
   const {
     data: { session },
   } = await sb.auth.getSession();
-  if (!session) return;
+  if (!session) return { ok: false, error: "Not signed in" };
 
-  await fetch("/api/daily/submit", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify({
-      dateStr,
-      elapsedSeconds,
-      mistakes,
-      solved,
-      board: solved ? board : undefined,
-    }),
-  });
+  const payload = {
+    dateStr,
+    elapsedSeconds,
+    mistakes,
+    solved,
+    board: solved ? board : undefined,
+  };
+
+  const post = async (): Promise<DailySubmitResult> => {
+    try {
+      const res = await fetch("/api/daily/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) return { ok: true };
+      let message = `Submit failed (${res.status})`;
+      try {
+        const body = (await res.json()) as { error?: string };
+        if (body.error) message = body.error;
+      } catch {
+        // ignore parse errors
+      }
+      return { ok: false, error: message };
+    } catch (err) {
+      return {
+        ok: false,
+        error: err instanceof Error ? err.message : "Network error",
+      };
+    }
+  };
+
+  const first = await post();
+  if (first.ok) return first;
+  // One retry for transient network failures only.
+  if (first.error === "Network error") {
+    return post();
+  }
+  return first;
+}
+
+/**
+ * If this device finished today's daily but the cloud row is missing
+ * (e.g. elapsed floor rejected a fast solve), re-submit from local storage.
+ */
+export async function ensureDailyResultSynced(dateStr: string): Promise<boolean> {
+  const remote = await fetchMyDailyResult(dateStr);
+  if (remote) return true;
+
+  const local = loadDailyResultLocal(dateStr);
+  if (!local) return false;
+
+  const board = local.solved ? getDailyPuzzle(dateStr).solution : undefined;
+  const result = await submitDailyResult(
+    dateStr,
+    local.elapsedSeconds,
+    0,
+    local.solved,
+    board,
+  );
+  return result.ok;
 }
 
 /**

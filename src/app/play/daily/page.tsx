@@ -145,13 +145,28 @@ function DailyGame({
           // For failures: elapsedSeconds is ignored in ranking (sorted to bottom).
           // Server verifies the board against the daily solution when solved.
           saveDailyResultLocal(dateStr, solved ? elapsedSeconds : 0, solved);
-          await submitDailyResult(
+          const submitted = await submitDailyResult(
             dateStr,
             elapsedSeconds,
             mistakes,
             solved,
             solved ? snapshot.solution : undefined,
           );
+          if (!submitted.ok) {
+            console.warn("[daily] submit failed:", submitted.error);
+            // Retry once after a short delay (cold start / flaky network).
+            await new Promise((r) => setTimeout(r, 800));
+            const retry = await submitDailyResult(
+              dateStr,
+              elapsedSeconds,
+              mistakes,
+              solved,
+              solved ? snapshot.solution : undefined,
+            );
+            if (!retry.ok) {
+              console.warn("[daily] submit retry failed:", retry.error);
+            }
+          }
 
           finishedRef.current = true;
         })()
