@@ -193,7 +193,8 @@ type Props = {
 
 export function ActiveSoloGames({ profile, userEmail }: Props) {
   const router = useRouter();
-  const [actives, setActives] = useState<ActiveSoloSave[]>([]);
+  // Parent only mounts us after stats are ready, so device cache is already merged.
+  const [actives, setActives] = useState<ActiveSoloSave[]>(() => loadActiveSolos());
 
   useEffect(() => {
     let syncing = false;

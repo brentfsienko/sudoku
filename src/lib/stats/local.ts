@@ -93,15 +93,3 @@ export function saveLocal(data: UserData) {
     // ignore quota/availability
   }
 }
-
-export function resetLocal(): UserData {
-  const fresh = loadLocalProfileOnly();
-  saveLocal(fresh);
-  return fresh;
-}
-
-/** Reset stats but keep the current profile. */
-function loadLocalProfileOnly(): UserData {
-  const current = loadLocal();
-  return emptyUserData(current.profile);
-}

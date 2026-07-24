@@ -77,7 +77,8 @@ function PlayRow({
 
 export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Props) {
   const router = useRouter();
-  const friends = useFriends(userData.user, data.profile);
+  const readyData = userData.data;
+  const friends = useFriends(userData.user, readyData?.profile ?? null);
   const { sheetRef, offset, pulling } = usePullableSheet();
   const { containerRef, pull, progress, state: ptrState, snapping } = usePullToRefresh(
     () => userData.refresh(),
@@ -91,8 +92,11 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   > | null>(null);
   const [greetingReopenToken, setGreetingReopenToken] = useState(0);
 
-  const streak = data.solo.streak;
-  const bones = data.bones ?? 0;
+  const streak = readyData?.solo.streak ?? data.solo.streak;
+  const bones = readyData?.bones ?? data.bones ?? 0;
+  // Wait for stats (+ username reconcile) before painting name-bearing lists
+  // or wallet/streak — avoids emptyUserData / local-first flashes.
+  const statsReady = !userData.loading && !!readyData;
 
   const sheetMotion = {
     transform: `translateY(${offset}px)`,
@@ -257,21 +261,30 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
 
           <div className="relative">
             <div className="pointer-events-none absolute right-1.5 top-0 z-50 -translate-y-1/2 sm:right-3">
-              <StreakBonePill
-                streak={streak}
-                bones={bones}
-                className="pointer-events-auto"
-              />
+              {statsReady ? (
+                <StreakBonePill
+                  streak={streak}
+                  bones={bones}
+                  className="pointer-events-auto"
+                />
+              ) : (
+                <div
+                  className="h-11 w-[9.5rem] animate-pulse rounded-full bg-[var(--foreground)]/25"
+                  aria-hidden
+                />
+              )}
             </div>
 
             <div
               className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-12 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
               style={{ minHeight: PLAY_SHEET_MIN_HEIGHT }}
             >
-              <ActiveSoloGames
-                profile={data.profile}
-                userEmail={userData.user?.email}
-              />
+              {statsReady && readyData ? (
+                <ActiveSoloGames
+                  profile={readyData.profile}
+                  userEmail={userData.user?.email}
+                />
+              ) : null}
 
               <DailySection onViewLeaderboard={onViewDailyLeaderboard} />
 
@@ -297,14 +310,24 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
                 <FactGuessCard />
               </div>
 
-              <GameHistoryList
-                history={data.history}
-                profile={data.profile}
-                opponents={data.multi.opponents}
-                userId={userData.user?.id ?? null}
-                userEmail={userData.user?.email}
-                authConfigured={userData.authConfigured}
-              />
+              {statsReady && readyData ? (
+                <GameHistoryList
+                  history={readyData.history}
+                  profile={readyData.profile}
+                  opponents={readyData.multi.opponents}
+                  userId={userData.user?.id ?? null}
+                  userEmail={userData.user?.email}
+                  authConfigured={userData.authConfigured}
+                />
+              ) : (
+                <section className="mb-5" aria-busy aria-label="Loading recent games">
+                  <div className="mb-2.5 h-4 w-28 animate-pulse rounded bg-[var(--list-panel)]" />
+                  <div className="space-y-2 rounded-2xl bg-[var(--list-panel)] p-3">
+                    <div className="h-14 animate-pulse rounded-xl bg-white/60" />
+                    <div className="h-14 animate-pulse rounded-xl bg-white/60" />
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         </div>

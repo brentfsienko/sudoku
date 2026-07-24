@@ -223,8 +223,6 @@ function MeTab({
 }) {
   const { profile, solo, multi, history } = data;
 
-  const totalGames = solo.played + multi.coopPlayed + multi.compPlayed;
-
   return (
     <div className="flex flex-col gap-5">
       <MeProfileHeader
@@ -257,19 +255,6 @@ function MeTab({
 
       {/* Solo */}
       <SoloSection solo={solo} />
-
-      {totalGames > 0 && (
-        <button
-          type="button"
-          onClick={() => {
-            if (confirm("Reset all your stats? This can't be undone."))
-              void userData.reset();
-          }}
-          className="mx-auto text-xs font-semibold text-[var(--muted)] underline underline-offset-2"
-        >
-          Reset stats
-        </button>
-      )}
     </div>
   );
 }
