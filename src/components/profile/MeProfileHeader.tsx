@@ -16,6 +16,9 @@ import { useFriends } from "@/lib/friends/useFriends";
 import { emptyUserData, type MultiStats, type Profile } from "@/lib/stats/types";
 import type { UseUserData } from "@/lib/stats/useUserData";
 
+const FEEDBACK_EMAIL = "playsudogku@gmail.com";
+const FEEDBACK_MAILTO = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Sudogku feedback")}`;
+
 type Props = {
   profile: Profile;
   multi: MultiStats;
@@ -90,6 +93,13 @@ export function MeProfileHeader({
               >
                 Edit profile
               </button>
+              <a
+                href={FEEDBACK_MAILTO}
+                onClick={() => setSettingsOpen(false)}
+                className="block w-full py-2 text-left font-semibold text-[var(--foreground)]"
+              >
+                Send feedback
+              </a>
               <button
                 type="button"
                 onClick={() => void userData.signOut()}
@@ -99,16 +109,25 @@ export function MeProfileHeader({
               </button>
             </>
           ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setSettingsOpen(false);
-                onSignIn();
-              }}
-              className="block w-full py-2 text-left font-semibold text-[var(--primary)]"
-            >
-              Sign in
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSettingsOpen(false);
+                  onSignIn();
+                }}
+                className="block w-full py-2 text-left font-semibold text-[var(--primary)]"
+              >
+                Sign in
+              </button>
+              <a
+                href={FEEDBACK_MAILTO}
+                onClick={() => setSettingsOpen(false)}
+                className="block w-full py-2 text-left font-semibold text-[var(--foreground)]"
+              >
+                Send feedback
+              </a>
+            </>
           )}
         </div>
       )}

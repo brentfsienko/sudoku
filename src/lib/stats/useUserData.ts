@@ -15,7 +15,7 @@ import { EXCLUSIVE_BONE_COSTS } from "@/lib/bones/config";
 import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import type { ExclusiveDogId } from "@/lib/theme/dogs";
 import { coerceProfile } from "./profile";
-import { emptyUserData, type Profile, type UserData } from "./types";
+import type { Profile, UserData } from "./types";
 import {
   applyWallet,
   purchaseExclusiveDogRemote,
@@ -58,7 +58,6 @@ export type UseUserData = {
   purchaseExclusiveDog: (
     dogId: ExclusiveDogId,
   ) => Promise<{ ok: boolean; error?: string }>;
-  reset: () => Promise<void>;
   signInWithPassword: (
     email: string,
     password: string,
@@ -156,11 +155,21 @@ export function useUserData(): UseUserData {
       void (async () => {
         try {
           if (event === "SIGNED_OUT" || !u) {
-            if (active) setDataBoth(loadLocal());
+            if (active) {
+              setDataBoth(loadLocal());
+              setLoading(false);
+            }
             return;
           }
           if (event === "PASSWORD_RECOVERY" || event === "USER_UPDATED") {
             return;
+          }
+          // On sign-in, clear provisional data so home never paints guest
+          // localStorage (random username / wrong history) as this account.
+          if (event === "SIGNED_IN" && active) {
+            setLoading(true);
+            dataRef.current = null;
+            setData(null);
           }
           let d = withOwnerProfile(await loadUserData(), u.email ?? null);
           d = withOwnerProfile(
@@ -314,13 +323,6 @@ export function useUserData(): UseUserData {
     [setDataBoth],
   );
 
-  const reset = useCallback(async () => {
-    const current = dataRef.current ?? (await loadUserData());
-    const fresh = emptyUserData(current.profile);
-    setDataBoth(fresh);
-    await saveUserData(fresh);
-  }, [setDataBoth]);
-
   const signInWithPassword = useCallback(async (email: string, password: string) => {
     const sb = getSupabase();
     if (!sb) return { ok: false, error: "Sign-in is not configured." };
@@ -381,7 +383,6 @@ export function useUserData(): UseUserData {
     refresh,
     updateProfile,
     purchaseExclusiveDog,
-    reset,
     signInWithPassword,
     signUp,
     resetPassword,
