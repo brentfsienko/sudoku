@@ -6,6 +6,7 @@ import {
   useMutation,
   useMyPresence,
   useOthers,
+  useSelf,
   useStorage,
 } from "./config";
 import type { GameSnapshot, GameController } from "@/lib/game/store";
@@ -52,18 +53,21 @@ export type LiveGame = {
   peers: PeerCursor[];
   playerCount: number;
   isFull: boolean;
+  isHost: boolean;
   canStart: boolean;
   startGame: () => void;
   rematch: () => void;
 };
 
 export function useLiveGame(opts: {
-  isHost: boolean;
+  /** Hint from ?host=1 — only used to claim host when none is set yet. */
+  wantHost: boolean;
   seedDifficulty: Difficulty;
   seedMode: GameMode;
   hostName: string;
 }): LiveGame {
-  const { isHost } = opts;
+  const { wantHost } = opts;
+  const self = useSelf();
   const meta = useStorage((root) => root.meta);
   const cellsMap = useStorage((root) => root.cells) as unknown as
     | ReadonlyMap<string, CellEntry>
@@ -72,21 +76,38 @@ export function useLiveGame(opts: {
   const [myPresence, updateMyPresence] = useMyPresence();
   const others = useOthers();
 
+  const isHost = Boolean(self?.id && meta?.hostId && meta.hostId === self.id);
+
   const [notesMode, setNotesMode] = useState(false);
   const [undoStack, setUndoStack] = useState<UndoFrame[]>([]);
 
-  const ensurePuzzle = useMutation(
-    ({ storage }, hostName: string) => {
+  const claimHost = useMutation(
+    ({ storage }, userId: string, hostName: string) => {
       const m = storage.get("meta");
+      if (m.get("hostId")) return;
+      m.update({ hostId: userId, hostName });
+    },
+    [],
+  );
+
+  const ensurePuzzle = useMutation(
+    ({ storage }, hostName: string, hostUserId: string) => {
+      const m = storage.get("meta");
+      if (!m.get("hostId") && hostUserId) {
+        m.update({ hostId: hostUserId, hostName });
+      }
       if (m.get("puzzle")) return;
+      // Only the claimed host may generate the puzzle.
+      if (m.get("hostId") && m.get("hostId") !== hostUserId) return;
       const p = generatePuzzle(m.get("difficulty"));
       m.update({ puzzle: p.puzzle, solution: p.solution, hostName });
     },
     [],
   );
 
-  const startGame = useMutation(({ storage }) => {
+  const startGameMutation = useMutation(({ storage }, hostUserId: string) => {
     const m = storage.get("meta");
+    if (m.get("hostId") !== hostUserId) return;
     if (m.get("status") !== "lobby") return;
     if (!m.get("puzzle")) return;
     m.update({ status: "playing", startedAt: Date.now() });
@@ -192,8 +213,9 @@ export function useLiveGame(opts: {
     else cells.delete(key);
   }, []);
 
-  const rematchMutation = useMutation(({ storage }) => {
+  const rematchMutation = useMutation(({ storage }, hostUserId: string) => {
     const m = storage.get("meta");
+    if (m.get("hostId") !== hostUserId) return;
     const p = generatePuzzle(m.get("difficulty"));
     const cells = storage.get("cells");
     for (const k of [...cells.keys()]) cells.delete(k);
@@ -208,10 +230,19 @@ export function useLiveGame(opts: {
     });
   }, []);
 
-  // Host responsibilities: generate puzzle on mount.
+  // Claim host (first-writer) then generate puzzle.
   useEffect(() => {
-    if (isHost && meta && !meta.puzzle) ensurePuzzle(opts.hostName);
-  }, [isHost, meta, ensurePuzzle, opts.hostName]);
+    if (!self?.id || !meta) return;
+    if (!meta.hostId && wantHost) {
+      claimHost(self.id, opts.hostName);
+    }
+  }, [self?.id, meta, wantHost, claimHost, opts.hostName]);
+
+  useEffect(() => {
+    if (!self?.id || !meta) return;
+    const amHost = meta.hostId === self.id || (!meta.hostId && wantHost);
+    if (amHost && !meta.puzzle) ensurePuzzle(opts.hostName, self.id);
+  }, [self?.id, meta, wantHost, ensurePuzzle, opts.hostName]);
 
   // Dynamic role claiming: host is always player-1; non-hosts grab the first
   // unclaimed slot among player-2/3/4.  We use a ref to avoid infinite loops.
@@ -350,9 +381,14 @@ export function useLiveGame(opts: {
     peers,
     playerCount,
     isFull: playerCount >= MAX_PLAYERS,
+    isHost,
     canStart: isHost && others.length >= 1 && meta?.status === "lobby",
-    startGame: () => startGame(),
-    rematch: () => rematchMutation(),
+    startGame: () => {
+      if (self?.id) startGameMutation(self.id);
+    },
+    rematch: () => {
+      if (self?.id) rematchMutation(self.id);
+    },
   };
 }
 
@@ -374,6 +410,7 @@ export function buildInitialStorage(args: {
       mistakes: 0,
       hintsUsed: 0,
       hostName: "",
+      hostId: "",
     }),
   };
 }

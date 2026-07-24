@@ -106,15 +106,15 @@ export async function fetchMyDailyResult(
 }
 
 /**
- * Upserts the current user's result for a given daily puzzle date.
- * For solved attempts: only keeps the best (fastest) time.
- * For failed attempts: always records (so friends can see who tried).
+ * Submits a daily result via the server verify endpoint.
+ * When solved, `board` must be the full 81-char solution grid.
  */
 export async function submitDailyResult(
   dateStr: string,
   elapsedSeconds: number,
   mistakes: number,
   solved: boolean,
+  board?: string,
 ): Promise<void> {
   const sb = getSupabase();
   if (!sb) return;
@@ -124,55 +124,19 @@ export async function submitDailyResult(
   } = await sb.auth.getSession();
   if (!session) return;
 
-  const userId = session.user.id;
-
-  // Check if there's already a result for this date.
-  let { data: existing, error: existingError } = await sb
-    .from("daily_results")
-    .select("elapsed_seconds, solved")
-    .eq("user_id", userId)
-    .eq("puzzle_date", dateStr)
-    .maybeSingle();
-
-  let hasSolvedColumn = true;
-  if (existingError && isMissingSolvedColumn(existingError)) {
-    hasSolvedColumn = false;
-    ({ data: existing } = await sb
-      .from("daily_results")
-      .select("elapsed_seconds")
-      .eq("user_id", userId)
-      .eq("puzzle_date", dateStr)
-      .maybeSingle());
-  }
-
-  if (existing) {
-    const alreadySolved = (existing as { solved?: boolean }).solved ?? true;
-    // If they already have a solved entry, don't overwrite with a failed one.
-    if (alreadySolved && !solved) return;
-    // If they already have a faster solved time, don't overwrite.
-    if (
-      alreadySolved &&
-      solved &&
-      (existing as { elapsed_seconds: number }).elapsed_seconds <= elapsedSeconds
-    ) {
-      return;
-    }
-  }
-
-  // Without the solved column, skip persisting failures (would look like a 0s win).
-  if (!hasSolvedColumn && !solved) return;
-
-  const payload: Record<string, unknown> = {
-    user_id: userId,
-    puzzle_date: dateStr,
-    elapsed_seconds: solved ? elapsedSeconds : 0,
-    mistakes,
-    completed_at: new Date().toISOString(),
-  };
-  if (hasSolvedColumn) payload.solved = solved;
-
-  await sb.from("daily_results").upsert(payload, {
-    onConflict: "user_id,puzzle_date",
+  await fetch("/api/daily/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      dateStr,
+      elapsedSeconds,
+      mistakes,
+      solved,
+      board: solved ? board : undefined,
+    }),
   });
 }
 
@@ -198,7 +162,6 @@ export async function fetchLeaderboard(
     mapRow(row as Record<string, unknown>),
   );
 
-  // Solved entries first (sorted by time), failed entries at the bottom.
   const solved = entries
     .filter((e) => e.solved)
     .sort((a, b) => a.elapsedSeconds - b.elapsedSeconds);

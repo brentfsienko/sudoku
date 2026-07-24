@@ -52,7 +52,7 @@ function RoomRoute() {
   const params = useParams();
   const search = useSearchParams();
   const code = String(params.room ?? "").toUpperCase();
-  const isHost = search.get("host") === "1";
+  const wantHost = search.get("host") === "1";
   const seedDifficulty = parseDifficulty(search.get("d"));
   const seedMode = parseMode(search.get("m"));
   const [profile] = useState<Profile>(() => getProfile());
@@ -75,7 +75,7 @@ function RoomRoute() {
       >
         <RoomInner
           code={code}
-          isHost={isHost}
+          wantHost={wantHost}
           seedDifficulty={seedDifficulty}
           seedMode={seedMode}
           profile={profile}
@@ -87,13 +87,13 @@ function RoomRoute() {
 
 function RoomInner({
   code,
-  isHost,
+  wantHost,
   seedDifficulty,
   seedMode,
   profile,
 }: {
   code: string;
-  isHost: boolean;
+  wantHost: boolean;
   seedDifficulty: Difficulty;
   seedMode: GameMode;
   profile: Profile;
@@ -120,7 +120,7 @@ function RoomInner({
   }, []);
 
   const game = useLiveGame({
-    isHost,
+    wantHost,
     seedDifficulty,
     seedMode,
     hostName: profile.username,
@@ -136,7 +136,7 @@ function RoomInner({
     return (
       <Lobby
         code={code}
-        isHost={isHost}
+        isHost={game.isHost}
         mode={game.controller?.snapshot.mode ?? seedMode}
         difficulty={game.controller?.snapshot.difficulty ?? seedDifficulty}
         allPlayers={game.allPlayers}
@@ -170,19 +170,22 @@ function RoomInner({
         if (!snap) return;
         const contrib = cellContributions(snap.puzzle, snap.solution, snap.cells);
         const oppRole = game.opponent?.role;
-        void recordMultiGame({
-          mode: snap.mode === "competitive" ? "competitive" : "coop",
-          solved,
-          mySquares: contrib[game.me.role] ?? 0,
-          opponentSquares: oppRole ? contrib[oppRole] ?? 0 : 0,
-          opponentName: game.opponent?.name ?? "",
-          opponentDogId: game.opponent?.dogId ?? "",
-          difficulty: snap.difficulty,
-          elapsedSeconds,
-          mistakes,
-          score,
-          bonesFound,
-        }).then(syncWallet);
+        void recordMultiGame(
+          {
+            mode: snap.mode === "competitive" ? "competitive" : "coop",
+            solved,
+            mySquares: contrib[game.me.role] ?? 0,
+            opponentSquares: oppRole ? contrib[oppRole] ?? 0 : 0,
+            opponentName: game.opponent?.name ?? "",
+            opponentDogId: game.opponent?.dogId ?? "",
+            difficulty: snap.difficulty,
+            elapsedSeconds,
+            mistakes,
+            score,
+            bonesFound,
+          },
+          { roomCode: code },
+        ).then(syncWallet);
       }}
     />
   );

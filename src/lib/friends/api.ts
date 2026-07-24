@@ -360,6 +360,20 @@ export async function createGameInvite(
   if (!sb) return { ok: false, error: "Not configured" };
   if (mode === "single") return { ok: false, error: "Invalid mode" };
 
+  const { data: friendsOk, error: friendErr } = await sb.rpc("are_friends", {
+    a: hostId,
+    b: guestId,
+  });
+  if (friendErr) {
+    // Fallback client check if RPC not deployed yet
+    const friends = await fetchFriends(hostId);
+    if (!friends.some((f) => f.userId === guestId)) {
+      return { ok: false, error: "You can only invite friends." };
+    }
+  } else if (!friendsOk) {
+    return { ok: false, error: "You can only invite friends." };
+  }
+
   const { error } = await sb.from("game_invites").insert({
     room_code: roomCode,
     host_id: hostId,

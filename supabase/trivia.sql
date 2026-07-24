@@ -28,6 +28,13 @@ security definer
 set search_path = public
 as $$
 begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  if p_fact_id is null or length(p_fact_id) < 1 or length(p_fact_id) > 80 then
+    raise exception 'invalid fact id';
+  end if;
+
   insert into public.trivia_fact_stats (fact_id, correct, wrong)
   values (
     p_fact_id,
@@ -41,4 +48,6 @@ begin
 end;
 $$;
 
-grant execute on function public.record_trivia_guess(text, boolean) to anon, authenticated;
+revoke all on function public.record_trivia_guess(text, boolean) from public;
+revoke all on function public.record_trivia_guess(text, boolean) from anon;
+grant execute on function public.record_trivia_guess(text, boolean) to authenticated;
