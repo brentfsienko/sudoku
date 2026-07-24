@@ -176,22 +176,23 @@ export async function submitDailyResult(
  * If this device finished today's daily but the cloud row is missing
  * (e.g. elapsed floor rejected a fast solve), re-submit from local storage.
  */
-export async function ensureDailyResultSynced(dateStr: string): Promise<boolean> {
+export async function ensureDailyResultSynced(
+  dateStr: string,
+): Promise<{ ok: boolean; error?: string }> {
   const remote = await fetchMyDailyResult(dateStr);
-  if (remote) return true;
+  if (remote) return { ok: true };
 
   const local = loadDailyResultLocal(dateStr);
-  if (!local) return false;
+  if (!local) return { ok: false, error: "No local result to sync" };
 
   const board = local.solved ? getDailyPuzzle(dateStr).solution : undefined;
-  const result = await submitDailyResult(
+  return submitDailyResult(
     dateStr,
     local.elapsedSeconds,
     0,
     local.solved,
     board,
   );
-  return result.ok;
 }
 
 /**
