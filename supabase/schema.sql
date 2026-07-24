@@ -77,9 +77,7 @@ begin
   mistakes := least(greatest(coalesce(p_mistakes, 0), 0), 10);
   elapsed := least(greatest(coalesce(p_elapsed, 0), 0), 86400);
 
-  if p_solved then
-    null; -- board already verified by /api/daily/submit
-  else
+  if not p_solved then
     elapsed := 0;
   end if;
 
