@@ -27,6 +27,7 @@ import {
 import { useFriends } from "@/lib/friends/useFriends";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { PublicProfile } from "@/lib/friends/types";
+import { useOnline } from "@/lib/hooks/useOnline";
 
 type SubTab = "friends" | "daily";
 
@@ -40,6 +41,7 @@ type Props = {
 
 export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new Set() }: Props) {
   const router = useRouter();
+  const online = useOnline();
   const searchRef = useRef<HTMLInputElement>(null);
   const profile = userData.data?.profile ?? null;
   const friends = useFriends(userData.user, profile);
@@ -191,8 +193,9 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
         action={
           <button
             type="button"
-            onClick={() => setAddFriendOpen(true)}
-            className="rounded-full p-2 text-[var(--foreground)] active:bg-[var(--surface-soft)]"
+            onClick={() => online && setAddFriendOpen(true)}
+            disabled={!online}
+            className="rounded-full p-2 text-[var(--foreground)] active:bg-[var(--surface-soft)] disabled:opacity-40"
             aria-label="Add friend"
           >
             <UserPlusIcon width={24} height={24} />
@@ -200,6 +203,11 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
         }
       />
       {subTabPill}
+      {!online ? (
+        <p className="rounded-2xl bg-[var(--list-panel)] px-3 py-2 text-center text-xs font-semibold text-[var(--muted)]">
+          Friends search and invites need a connection. You can still play solo or daily offline.
+        </p>
+      ) : null}
 
       <div className="relative">
         <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]">
@@ -209,10 +217,11 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
           ref={searchRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && void runSearch()}
-          onBlur={() => query.trim().length >= 2 && void runSearch()}
-          placeholder="Search by @username"
-          className="w-full rounded-2xl border border-[var(--border)] bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--primary)]"
+          onKeyDown={(e) => e.key === "Enter" && online && void runSearch()}
+          onBlur={() => online && query.trim().length >= 2 && void runSearch()}
+          placeholder={online ? "Search by @username" : "Search needs a connection"}
+          disabled={!online}
+          className="w-full rounded-2xl border border-[var(--border)] bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--primary)] disabled:opacity-55"
         />
       </div>
 
@@ -302,8 +311,11 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
               primary={f.username}
               secondary={isOnline ? "Online now" : "Ready to play"}
               action={
-                <FriendPillButton onClick={() => setInviteFriend(f)}>
-                  Start
+                <FriendPillButton
+                  disabled={!online}
+                  onClick={() => online && setInviteFriend(f)}
+                >
+                  {online ? "Start" : "Offline"}
                 </FriendPillButton>
               }
             />

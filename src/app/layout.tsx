@@ -10,6 +10,9 @@ import {
   organizationJsonLd,
   webApplicationJsonLd,
 } from "@/lib/seo";
+import { SerwistProvider } from "@/components/pwa/SerwistProvider";
+import { OfflineBanner } from "@/components/pwa/OfflineBanner";
+import { OfflineDailySync } from "@/components/pwa/OfflineDailySync";
 import "./globals.css";
 
 const baloo = Baloo_2({
@@ -69,7 +72,11 @@ export default function RootLayout({
         />
         <ViewportHeightSync />
         <RedditPixel />
-        {children}
+        <SerwistProvider>
+          <OfflineBanner />
+          <OfflineDailySync />
+          {children}
+        </SerwistProvider>
         <Analytics />
       </body>
     </html>

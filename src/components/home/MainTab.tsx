@@ -23,6 +23,7 @@ import { createGameInvite } from "@/lib/friends/api";
 import type { PublicProfile } from "@/lib/friends/types";
 import { useFriends } from "@/lib/friends/useFriends";
 import { newRoomCode } from "@/lib/game/room";
+import { useOnline } from "@/lib/hooks/useOnline";
 import { usePullableSheet } from "@/lib/hooks/usePullableSheet";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { UserData } from "@/lib/stats/types";
@@ -47,17 +48,20 @@ function PlayRow({
   title,
   subtitle,
   onClick,
+  disabled = false,
 }: {
   icon: ReactNode;
   title: string;
   subtitle: string;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-2xl bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99]"
+      disabled={disabled}
+      className="flex w-full items-center gap-3 rounded-2xl bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-55"
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
         {icon}
@@ -69,7 +73,7 @@ function PlayRow({
         <p className="text-xs text-[var(--muted)]">{subtitle}</p>
       </div>
       <span className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-bold text-[var(--foreground)]">
-        Start
+        {disabled ? "Offline" : "Start"}
       </span>
     </button>
   );
@@ -77,6 +81,7 @@ function PlayRow({
 
 export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Props) {
   const router = useRouter();
+  const online = useOnline();
   const readyData = userData.data;
   const friends = useFriends(userData.user, readyData?.profile ?? null);
   const { sheetRef, offset, pulling } = usePullableSheet();
@@ -110,6 +115,7 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
   }
 
   function openMultiSetup() {
+    if (!online) return;
     if (!userData.authConfigured || !userData.user) {
       onSignIn();
       return;
@@ -300,8 +306,13 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
                   <PlayRow
                     icon={<UsersIcon width={24} height={24} />}
                     title="Multiplayer"
-                    subtitle="Friends, search, and invites"
+                    subtitle={
+                      online
+                        ? "Friends, search, and invites"
+                        : "Needs a connection"
+                    }
                     onClick={openMultiSetup}
+                    disabled={!online}
                   />
                 </div>
               </section>
