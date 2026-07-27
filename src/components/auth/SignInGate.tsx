@@ -5,6 +5,7 @@ import { PawIcon } from "@/components/icons";
 import { markAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { passwordsMatch } from "@/lib/auth/password";
 import { trackRedditSignUp } from "@/lib/analytics/reddit";
+import { useOnline } from "@/lib/hooks/useOnline";
 import type { UseUserData } from "@/lib/stats/useUserData";
 
 type Mode = "signin" | "signup" | "forgot";
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function SignInGate({ open, userData, onClose }: Props) {
+  const online = useOnline();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,9 +33,20 @@ export function SignInGate({ open, userData, onClose }: Props) {
     }
   }, [userData.user, onClose]);
 
-  if (!open || !userData.authConfigured || userData.user) return null;
+  useEffect(() => {
+    if (open && !online) {
+      onClose();
+    }
+  }, [open, online, onClose]);
+
+  if (!open || !userData.authConfigured || userData.user || !online) return null;
 
   async function submit() {
+    if (!navigator.onLine) {
+      setStatus("error");
+      setError("You're offline — sign in needs a connection.");
+      return;
+    }
     setStatus("loading");
     setError(null);
     setInfo(null);

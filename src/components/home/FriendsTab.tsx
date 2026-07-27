@@ -69,14 +69,20 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
         <TabScreenHeader title="Friends" />
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-2 text-center">
           <p className="font-serif-title text-lg text-[var(--foreground)]">
-            Sign in to play with friends
+            {online ? "Sign in to play with friends" : "Friends need a connection"}
           </p>
+          {!online ? (
+            <p className="max-w-xs text-sm text-[var(--muted)]">
+              You can still play solo or daily offline. Sign in when you&apos;re back online.
+            </p>
+          ) : null}
           <button
             type="button"
             onClick={onSignIn}
-            className="ui-button rounded-full bg-[var(--foreground)] px-6 py-3 text-sm font-bold text-white"
+            disabled={!online}
+            className="ui-button rounded-full bg-[var(--foreground)] px-6 py-3 text-sm font-bold text-white disabled:opacity-45"
           >
-            Sign in
+            {online ? "Sign in" : "Offline"}
           </button>
         </div>
       </div>

@@ -24,6 +24,7 @@ import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
 import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { useOnlineFriends } from "@/lib/friends/useOnlineFriends";
+import { useOnline } from "@/lib/hooks/useOnline";
 import {
   getCoachmarkStep,
   advanceCoachmarkToAvatar,
@@ -95,10 +96,20 @@ export default function Home() {
   const data = userData.data;
   // Always-on presence: tracks from app mount regardless of active tab
   const onlineIds = useOnlineFriends(userData.user?.id ?? null);
+  const online = useOnline();
   const statsForMe = data ?? emptyUserData();
   const [signInGateOpen, setSignInGateOpen] = useState(false);
 
+  function requestSignIn() {
+    if (!online) return;
+    setSignInGateOpen(true);
+  }
+
   useEffect(() => {
+    if (!online) {
+      setSignInGateOpen(false);
+      return;
+    }
     if (
       !userData.loading &&
       userData.authConfigured &&
@@ -107,7 +118,7 @@ export default function Home() {
     ) {
       setSignInGateOpen(true);
     }
-  }, [userData.loading, userData.authConfigured, userData.user]);
+  }, [userData.loading, userData.authConfigured, userData.user, online]);
 
   return (
     <>
@@ -127,7 +138,7 @@ export default function Home() {
             <MainTab
               data={statsForMe}
               userData={userData}
-              onSignIn={() => setSignInGateOpen(true)}
+              onSignIn={requestSignIn}
               onViewDailyLeaderboard={() => {
                 setFriendsInitSubTab("daily");
                 setTab("friends");
@@ -142,7 +153,7 @@ export default function Home() {
             >
               <FriendsTab
                 userData={userData}
-                onSignIn={() => setSignInGateOpen(true)}
+                onSignIn={requestSignIn}
                 initialSubTab={friendsInitSubTab}
                 onlineIds={onlineIds}
               />
@@ -170,7 +181,7 @@ export default function Home() {
                   bones: statsForMe.bones ?? 0,
                 }}
                 userData={userData}
-                onSignIn={() => setSignInGateOpen(true)}
+                onSignIn={requestSignIn}
                 coachmarkStep={coachmarkStep}
                 onCoachmarkDismiss={() => setCoachmarkStep(null)}
               />

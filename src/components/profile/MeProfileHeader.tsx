@@ -15,6 +15,7 @@ import { GAME_MODE_LABELS } from "@/lib/game/types";
 import { useFriends } from "@/lib/friends/useFriends";
 import { emptyUserData, type MultiStats, type Profile } from "@/lib/stats/types";
 import type { UseUserData } from "@/lib/stats/useUserData";
+import { useOnline } from "@/lib/hooks/useOnline";
 
 const FEEDBACK_EMAIL = "playsudogku@gmail.com";
 const FEEDBACK_MAILTO = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("Sudogku feedback")}`;
@@ -40,6 +41,7 @@ export function MeProfileHeader({
   coachmarkStep,
   onCoachmarkDismiss,
 }: Props) {
+  const online = useOnline();
   const [editing, setEditing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [friendCodeOpen, setFriendCodeOpen] = useState(false);
@@ -112,13 +114,15 @@ export function MeProfileHeader({
             <>
               <button
                 type="button"
+                disabled={!online}
                 onClick={() => {
+                  if (!online) return;
                   setSettingsOpen(false);
                   onSignIn();
                 }}
-                className="block w-full py-2 text-left font-semibold text-[var(--primary)]"
+                className="block w-full py-2 text-left font-semibold text-[var(--primary)] disabled:opacity-45"
               >
-                Sign in
+                {online ? "Sign in" : "Sign in (needs connection)"}
               </button>
               <a
                 href={FEEDBACK_MAILTO}

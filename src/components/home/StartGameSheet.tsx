@@ -12,6 +12,7 @@ import type { PublicProfile } from "@/lib/friends/types";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { DogId } from "@/lib/theme/dogs";
 import { newRoomCode } from "@/lib/game/room";
+import { useOnline } from "@/lib/hooks/useOnline";
 
 type Props = {
   open: boolean;
@@ -71,6 +72,7 @@ export function StartGameSheet({
   onSignIn,
 }: Props) {
   const router = useRouter();
+  const online = useOnline();
   const [selected, setSelected] = useState<PublicProfile[]>([]);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicProfile[]>([]);
@@ -149,17 +151,19 @@ export function StartGameSheet({
     return (
       <BottomSheet open={open} onClose={handleClose} title="Invite friends">
         <p className="mb-4 text-center font-serif-title text-lg text-[var(--foreground)]">
-          Sign in to play with friends
+          {online ? "Sign in to play with friends" : "Sign in needs a connection"}
         </p>
         <button
           type="button"
+          disabled={!online}
           onClick={() => {
+            if (!online) return;
             handleClose();
             onSignIn();
           }}
-          className="ui-button w-full rounded-full bg-[var(--foreground)] py-4 text-sm font-bold text-white"
+          className="ui-button w-full rounded-full bg-[var(--foreground)] py-4 text-sm font-bold text-white disabled:opacity-45"
         >
-          Sign in
+          {online ? "Sign in" : "Offline"}
         </button>
         <JoinCodeInput onJoin={handleJoinCode} />
       </BottomSheet>
