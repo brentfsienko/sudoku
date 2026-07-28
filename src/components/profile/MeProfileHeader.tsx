@@ -8,12 +8,10 @@ import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { FriendCodeModal } from "@/components/profile/FriendCodeModal";
 import { ProfileEditModal } from "@/components/profile/ProfileEditModal";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
-import { WinLossBar } from "@/components/stats/WinLossBar";
+import { PuzzledDaysCalendar } from "@/components/stats/PuzzledDaysCalendar";
 import { FlameIcon, PencilIcon, SettingsIcon, ShareIcon } from "@/components/icons";
-import { COOP_ACCENT, VERSUS_ACCENT, compWinLoss, coopWinLoss } from "@/lib/stats/multi";
-import { GAME_MODE_LABELS } from "@/lib/game/types";
 import { useFriends } from "@/lib/friends/useFriends";
-import { emptyUserData, type MultiStats, type Profile } from "@/lib/stats/types";
+import { emptyUserData, type GameLog, type Profile } from "@/lib/stats/types";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import { useOnline } from "@/lib/hooks/useOnline";
 
@@ -22,7 +20,7 @@ const FEEDBACK_MAILTO = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent("
 
 type Props = {
   profile: Profile;
-  multi: MultiStats;
+  history: GameLog[];
   soloStreak: number;
   bones: number;
   userData: UseUserData;
@@ -33,7 +31,7 @@ type Props = {
 
 export function MeProfileHeader({
   profile,
-  multi,
+  history,
   soloStreak,
   bones,
   userData,
@@ -56,8 +54,6 @@ export function MeProfileHeader({
     }
   }
   const friends = useFriends(userData.user, profile);
-  const coop = coopWinLoss(multi);
-  const versus = compWinLoss(multi);
 
   const username = friends.myProfile?.username ?? profile.username;
   const statsData = userData.data ?? emptyUserData(profile);
@@ -144,12 +140,10 @@ export function MeProfileHeader({
             className="relative block rounded-full active:scale-95"
             aria-label="Edit profile"
           >
-            {/* Speech bubble positioned just above the pencil badge, coming out of the avatar */}
             {showAvatarCoachmark && (
               <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap">
                 <div className="relative rounded-2xl bg-[var(--foreground)] px-3.5 py-2 text-xs font-semibold text-white shadow-xl">
                   Tap to customize your pup! 🐾
-                  {/* Downward caret pointing at pencil badge */}
                   <span className="absolute left-1/2 top-full -translate-x-1/2 border-[6px] border-transparent border-t-[var(--foreground)]" />
                 </div>
               </div>
@@ -182,52 +176,31 @@ export function MeProfileHeader({
           Here are your stats,{" "}
           <span className="font-semibold">{username}</span>.
         </p>
-
-        <div className="flex w-full max-w-xs justify-center gap-10">
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-[var(--primary)]">
-              <FlameIcon width={22} height={22} />
-            </span>
-            <p className="font-display text-2xl font-extrabold text-[var(--foreground)]">
-              {soloStreak}
-            </p>
-            <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
-              Day streak
-            </p>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <BoneIcon size={22} />
-            <p className="font-display text-2xl font-extrabold text-[var(--foreground)]">
-              {bones}
-            </p>
-            <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
-              Bones
-            </p>
-          </div>
-        </div>
       </div>
 
-      <div className="flex flex-col gap-5">
-        <WinLossBar
-          {...coop}
-          title={GAME_MODE_LABELS.coop}
-          subtitle={
-            coop.played > 0 ? `${coop.wins} solved · ${coop.played} played` : "No games yet"
-          }
-          color={COOP_ACCENT}
-        />
-        <WinLossBar
-          wins={versus.wins}
-          losses={versus.losses}
-          winPct={versus.winPct}
-          title={GAME_MODE_LABELS.competitive}
-          subtitle={
-            versus.played > 0
-              ? `${versus.record} W-L-T · ${versus.played} played`
-              : "No games yet"
-          }
-          color={VERSUS_ACCENT}
-        />
+      <PuzzledDaysCalendar history={history} />
+
+      <div className="flex w-full max-w-xs justify-center gap-10 self-center">
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[var(--primary)]">
+            <FlameIcon width={22} height={22} />
+          </span>
+          <p className="font-display text-2xl font-extrabold text-[var(--foreground)]">
+            {soloStreak}
+          </p>
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+            Day streak
+          </p>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <BoneIcon size={22} />
+          <p className="font-display text-2xl font-extrabold text-[var(--foreground)]">
+            {bones}
+          </p>
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+            Bones
+          </p>
+        </div>
       </div>
 
       <ProfileEditModal open={editing} onClose={() => setEditing(false)}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { BoneIcon } from "@/components/BoneIcon";
 import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh";
@@ -41,6 +41,8 @@ type Props = {
   userData: UseUserData;
   onSignIn: () => void;
   onViewDailyLeaderboard: () => void;
+  /** Fired once when stats are loaded and the play UI has painted. */
+  onReady?: () => void;
 };
 
 function PlayRow({
@@ -79,7 +81,13 @@ function PlayRow({
   );
 }
 
-export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Props) {
+export function MainTab({
+  data,
+  userData,
+  onSignIn,
+  onViewDailyLeaderboard,
+  onReady,
+}: Props) {
   const router = useRouter();
   const online = useOnline();
   const readyData = userData.data;
@@ -96,12 +104,29 @@ export function MainTab({ data, userData, onSignIn, onViewDailyLeaderboard }: Pr
     { kind: "multiplayer" }
   > | null>(null);
   const [greetingReopenToken, setGreetingReopenToken] = useState(0);
+  const readySent = useRef(false);
 
   const streak = readyData?.solo.streak ?? data.solo.streak;
   const bones = readyData?.bones ?? data.bones ?? 0;
   // Wait for stats (+ username reconcile) before painting name-bearing lists
   // or wallet/streak — avoids emptyUserData / local-first flashes.
   const statsReady = !userData.loading && !!readyData;
+
+  useEffect(() => {
+    if (!statsReady || readySent.current || !onReady) return;
+    let cancelled = false;
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (cancelled || readySent.current) return;
+        readySent.current = true;
+        onReady();
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(id);
+    };
+  }, [statsReady, onReady]);
 
   const sheetMotion = {
     transform: `translateY(${offset}px)`,

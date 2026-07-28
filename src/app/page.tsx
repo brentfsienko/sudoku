@@ -8,9 +8,11 @@ import { MainTab } from "@/components/home/MainTab";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { BottomNav, type HomeTab } from "@/components/home/BottomNav";
 import { FriendsTab } from "@/components/home/FriendsTab";
+import { AppSplash } from "@/components/AppSplash";
 import { MeProfileHeader } from "@/components/profile/MeProfileHeader";
 import { DogAvatar } from "@/components/DogAvatar";
 import { ProgressChart } from "@/components/stats/ProgressChart";
+import { WinLossBar } from "@/components/stats/WinLossBar";
 import {
   ChartIcon,
   ClockIcon,
@@ -65,6 +67,7 @@ export default function Home() {
   // FriendsTab remounts on tab switch, so it reads this as initialSubTab.
   const [friendsInitSubTab, setFriendsInitSubTab] = useState<"friends" | "daily">("friends");
   const [coachmarkStep, setCoachmarkStep] = useState<CoachmarkStep | null>(null);
+  const [playReady, setPlayReady] = useState(false);
 
   useEffect(() => {
     setCoachmarkStep(getCoachmarkStep());
@@ -99,6 +102,23 @@ export default function Home() {
   const online = useOnline();
   const statsForMe = data ?? emptyUserData();
   const [signInGateOpen, setSignInGateOpen] = useState(false);
+  const statsReady = !userData.loading && !!data;
+
+  // If we land on a non-play tab first, dismiss splash once stats are ready
+  // (Play tab reports readiness itself via onReady).
+  useEffect(() => {
+    if (playReady || !statsReady || tab === "main") return;
+    let cancelled = false;
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!cancelled) setPlayReady(true);
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(id);
+    };
+  }, [playReady, statsReady, tab]);
 
   function requestSignIn() {
     if (!online) return;
@@ -127,6 +147,7 @@ export default function Home() {
         userData={userData}
         onClose={() => setSignInGateOpen(false)}
       />
+      <AppSplash ready={playReady} />
     <MobileAppRoot>
       <AppFrame variant={tab === "main" ? "accent" : "background"}>
         <main
@@ -134,16 +155,26 @@ export default function Home() {
             tab === "main" ? "bg-[var(--accent)]" : "bg-[var(--background)]"
           }`}
         >
-          {tab === "main" && (
-            <MainTab
-              data={statsForMe}
-              userData={userData}
-              onSignIn={requestSignIn}
-              onViewDailyLeaderboard={() => {
-                setFriendsInitSubTab("daily");
-                setTab("friends");
-              }}
-            />
+          {(tab === "main" || !playReady) && (
+            <div
+              className={
+                tab === "main"
+                  ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+                  : "pointer-events-none invisible absolute inset-0"
+              }
+              aria-hidden={tab !== "main"}
+            >
+              <MainTab
+                data={statsForMe}
+                userData={userData}
+                onSignIn={requestSignIn}
+                onReady={() => setPlayReady(true)}
+                onViewDailyLeaderboard={() => {
+                  setFriendsInitSubTab("daily");
+                  setTab("friends");
+                }}
+              />
+            </div>
           )}
 
           {tab === "friends" && (
@@ -233,12 +264,23 @@ function MeTab({
   onCoachmarkDismiss?: () => void;
 }) {
   const { profile, solo, multi, history } = data;
+  const [statsTab, setStatsTab] = useState<"solo" | "multi">("solo");
+  const coop = coopWinLoss(multi);
+  const versus = compWinLoss(multi);
+  const lifetime = lifetimeSquares({
+    profile,
+    solo,
+    multi,
+    history,
+    bones: data.bones,
+    ownedExclusiveDogs: userData.data?.ownedExclusiveDogs ?? [],
+  });
 
   return (
     <div className="flex flex-col gap-5">
       <MeProfileHeader
         profile={profile}
-        multi={multi}
+        history={history}
         soloStreak={solo.streak}
         bones={data.bones ?? 0}
         userData={userData}
@@ -247,25 +289,75 @@ function MeTab({
         onCoachmarkDismiss={onCoachmarkDismiss}
       />
 
-      {/* Progress */}
-      <ProgressSection
-        history={history}
-        lifetimeSquares={lifetimeSquares({
-          profile,
-          solo,
-          multi,
-          history,
-          bones: data.bones,
-          ownedExclusiveDogs: userData.data?.ownedExclusiveDogs ?? [],
+      <div className="flex rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-1">
+        {(
+          [
+            { id: "solo", label: "Solo" },
+            { id: "multi", label: "Multiplayer" },
+          ] as const
+        ).map((t) => {
+          const active = statsTab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setStatsTab(t.id)}
+              className={`font-display flex-1 rounded-xl py-2.5 text-sm font-bold transition active:scale-[0.98] ${
+                active
+                  ? "bg-white text-[var(--foreground)] shadow-sm"
+                  : "text-[var(--muted)]"
+              }`}
+            >
+              {t.label}
+            </button>
+          );
         })}
-      />
+      </div>
 
-      {/* Multiplayer details */}
-      <CoopSection multi={multi} />
-      <VersusSection multi={multi} />
-
-      {/* Solo */}
-      <SoloSection solo={solo} />
+      {statsTab === "solo" ? (
+        <>
+          <SoloSection solo={solo} />
+          <ProgressSection
+            history={history}
+            lifetimeSquares={lifetime}
+            scope="solo"
+          />
+        </>
+      ) : (
+        <>
+          <div className="flex flex-col gap-5">
+            <WinLossBar
+              {...coop}
+              title={GAME_MODE_LABELS.coop}
+              subtitle={
+                coop.played > 0
+                  ? `${coop.wins} solved · ${coop.played} played`
+                  : "No games yet"
+              }
+              color={COOP_ACCENT}
+            />
+            <WinLossBar
+              wins={versus.wins}
+              losses={versus.losses}
+              winPct={versus.winPct}
+              title={GAME_MODE_LABELS.competitive}
+              subtitle={
+                versus.played > 0
+                  ? `${versus.record} W-L-T · ${versus.played} played`
+                  : "No games yet"
+              }
+              color={VERSUS_ACCENT}
+            />
+          </div>
+          <CoopSection multi={multi} />
+          <VersusSection multi={multi} />
+          <ProgressSection
+            history={history}
+            lifetimeSquares={lifetime}
+            scope="multi"
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -283,20 +375,43 @@ const HISTORY_FILTERS: { id: HistoryFilter; label: string; color: string }[] = [
   { id: "solo", label: "Solo", color: "#a06bd6" },
 ];
 
+const MULTI_HISTORY_FILTERS = HISTORY_FILTERS.filter(
+  (f) => f.id === "all" || f.id === "coop" || f.id === "competitive",
+);
+
 function ProgressSection({
   history,
   lifetimeSquares: lifetimeTotal,
+  scope,
 }: {
   history: GameLog[];
   lifetimeSquares: number;
+  scope: "solo" | "multi";
 }) {
   const [metric, setMetric] = useState<Metric>("games");
-  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
-  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
-  const filteredHistory = useMemo(
-    () => filterHistory(history, historyFilter),
-    [history, historyFilter],
+  const [historyFilter, setHistoryFilter] = useState<HistoryFilter>(
+    scope === "solo" ? "solo" : "all",
   );
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
+
+  useEffect(() => {
+    setHistoryFilter(scope === "solo" ? "solo" : "all");
+    setSelectedWeek(null);
+  }, [scope]);
+
+  const scopedHistory = useMemo(() => {
+    if (scope === "solo") return filterHistory(history, "solo");
+    return history.filter(
+      (log) => log.mode === "coop" || log.mode === "competitive",
+    );
+  }, [history, scope]);
+
+  const filteredHistory = useMemo(() => {
+    if (scope === "solo") return scopedHistory;
+    if (historyFilter === "all") return scopedHistory;
+    return filterHistory(scopedHistory, historyFilter);
+  }, [scopedHistory, scope, historyFilter]);
+
   const starts = useMemo(() => weekStarts(12), []);
   const series = useMemo(
     () => weeklySeries(filteredHistory, metric, 12),
@@ -320,8 +435,14 @@ function ProgressSection({
   }, [selectedWeek, starts, filteredHistory]);
 
   const chartColor =
-    HISTORY_FILTERS.find((f) => f.id === historyFilter)?.color ?? METRIC_COLORS[metric];
-  const color = historyFilter === "all" ? METRIC_COLORS[metric] : chartColor;
+    MULTI_HISTORY_FILTERS.find((f) => f.id === historyFilter)?.color ??
+    (scope === "solo" ? "#a06bd6" : METRIC_COLORS[metric]);
+  const color =
+    scope === "multi" && historyFilter !== "all"
+      ? chartColor
+      : scope === "solo"
+        ? "#a06bd6"
+        : METRIC_COLORS[metric];
 
   const displayWeek = selectedWeekTotals ?? week;
   const weekLabel = selectedWeek !== null
@@ -360,26 +481,31 @@ function ProgressSection({
         })}
       </div>
 
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {HISTORY_FILTERS.map((f) => {
-          const active = f.id === historyFilter;
-          return (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => { setHistoryFilter(f.id); setSelectedWeek(null); }}
-              className="shrink-0 rounded-full border-2 px-3 py-1 text-xs font-bold transition active:scale-95"
-              style={{
-                borderColor: active ? f.color : "var(--border)",
-                backgroundColor: active ? f.color : "transparent",
-                color: active ? "#fff" : "var(--muted)",
-              }}
-            >
-              {f.label}
-            </button>
-          );
-        })}
-      </div>
+      {scope === "multi" && (
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {MULTI_HISTORY_FILTERS.map((f) => {
+            const active = f.id === historyFilter;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => {
+                  setHistoryFilter(f.id);
+                  setSelectedWeek(null);
+                }}
+                className="shrink-0 rounded-full border-2 px-3 py-1 text-xs font-bold transition active:scale-95"
+                style={{
+                  borderColor: active ? f.color : "var(--border)",
+                  backgroundColor: active ? f.color : "transparent",
+                  color: active ? "#fff" : "var(--muted)",
+                }}
+              >
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Week stats — changes when a week is selected in the chart */}
       <div className="flex items-center justify-between">
