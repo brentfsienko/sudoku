@@ -11,6 +11,8 @@ type Props = {
   profileIcon?: boolean;
   light?: boolean;
   size?: "md" | "lg" | "xl";
+  /** Override dog/icon pixel size (e.g. splash mark). */
+  iconSize?: number;
   /** Title + icon alignment in the header */
   align?: "start" | "center";
   className?: string;
@@ -22,17 +24,19 @@ export function AppBrandTitle({
   profileIcon,
   light,
   size = "lg",
+  iconSize,
   align = "center",
   className,
 }: Props) {
   const avatarSize =
-    size === "xl"
+    iconSize ??
+    (size === "xl"
       ? appIcon || profileIcon
         ? 128
         : 48
       : size === "lg"
         ? 36
-        : 28;
+        : 28);
   const titleClass =
     size === "xl"
       ? "font-serif-title text-[2.75rem] leading-none"
