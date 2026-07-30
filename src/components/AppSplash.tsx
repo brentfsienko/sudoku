@@ -88,7 +88,7 @@ export function AppSplash({ ready }: Props) {
       aria-label="Loading Sudogku"
     >
       <BoneIcon size={72} className="animate-bone-spin-slow" />
-      <AppBrandTitle appIcon size="lg" align="center" />
+      <AppBrandTitle appIcon size="lg" iconSize={54} align="center" />
       <p className="max-w-xs text-center text-sm font-semibold text-[var(--muted)]">
         {tagline}
       </p>
