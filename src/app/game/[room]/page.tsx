@@ -193,6 +193,9 @@ function RoomInner({
   );
 }
 
+/** Liveblocks can report "disconnected" briefly during auth — don't fail on that. */
+const CONNECT_GRACE_MS = 15_000;
+
 function ConnectingScreen({
   connection,
   onExit,
@@ -200,36 +203,44 @@ function ConnectingScreen({
   connection: string;
   onExit: () => void;
 }) {
-  const [slow, setSlow] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   useEffect(() => {
-    const id = setTimeout(() => setSlow(true), 6000);
+    const id = setTimeout(() => setTimedOut(true), CONNECT_GRACE_MS);
     return () => clearTimeout(id);
   }, []);
 
-  const failed = connection === "disconnected";
+  // Only show failure after a grace period. Transient "disconnected" during
+  // handshake used to flash a false error immediately.
+  const failed = timedOut && connection !== "connected";
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
       <DogAvatar dogId="husky" size={96} />
-      {failed || slow ? (
+      {failed ? (
         <>
           <h2 className="font-display text-xl font-extrabold text-[var(--foreground)]">
             Can&apos;t reach the dog park
           </h2>
           <p className="text-sm text-[var(--muted)]">
-            Multiplayer needs a Liveblocks key. Make sure{" "}
-            <code className="rounded bg-[var(--surface-soft)] px-1">
-              LIVEBLOCKS_SECRET_KEY
-            </code>{" "}
-            is set in your environment, then try again.
+            Having trouble joining the room. Check your connection, then try
+            again.
           </p>
-          <button
-            type="button"
-            onClick={onExit}
-            className="font-display mt-2 rounded-full bg-[var(--primary)] px-6 py-3 font-extrabold text-white"
-          >
-            Back home
-          </button>
+          <div className="mt-2 flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="font-display rounded-full bg-[var(--primary)] px-6 py-3 font-extrabold text-white"
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              onClick={onExit}
+              className="font-display rounded-full px-6 py-2 text-sm font-bold text-[var(--muted)]"
+            >
+              Back home
+            </button>
+          </div>
         </>
       ) : (
         <p className="font-display animate-pulse text-lg font-bold text-[var(--muted)]">
