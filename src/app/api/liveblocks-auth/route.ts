@@ -10,7 +10,12 @@ const supabaseAnon =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const ROOM_RE = /^floof-[A-Z]{4,8}$/;
+/** Normalize Liveblocks room id: keep `floof-` prefix, uppercase the code. */
+function normalizeRoomId(raw: string): string | null {
+  const match = String(raw).trim().match(/^floof-([a-zA-Z]{4,8})$/i);
+  if (!match) return null;
+  return `floof-${match[1].toUpperCase()}`;
+}
 
 type Body = {
   room?: string;
@@ -25,10 +30,7 @@ type Body = {
 export async function POST(request: Request) {
   if (!secret) {
     return NextResponse.json(
-      {
-        error:
-          "Missing LIVEBLOCKS_SECRET_KEY. Add it to .env.local (and Vercel env) to enable multiplayer.",
-      },
+      { error: "Multiplayer is temporarily unavailable. Please try again later." },
       { status: 501 },
     );
   }
@@ -61,8 +63,8 @@ export async function POST(request: Request) {
     // no body
   }
 
-  const room = String(body.room ?? "").toUpperCase();
-  if (!ROOM_RE.test(room)) {
+  const room = normalizeRoomId(body.room ?? "");
+  if (!room) {
     return NextResponse.json({ error: "Invalid room" }, { status: 400 });
   }
 

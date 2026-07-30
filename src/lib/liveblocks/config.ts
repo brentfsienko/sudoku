@@ -31,11 +31,11 @@ const client = createClient({
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(
+      const message =
         typeof err === "object" && err && "error" in err
           ? String((err as { error: string }).error)
-          : "Liveblocks auth failed",
-      );
+          : "Couldn't join the room. Please try again.";
+      throw new Error(message);
     }
 
     return (await res.json()) as { token: string };
