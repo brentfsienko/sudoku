@@ -28,6 +28,7 @@ import {
   MAX_PLAYERS,
   type Difficulty,
   type GameMode,
+  type PlayerRole,
 } from "@/lib/game/types";
 import type { LivePlayer } from "@/lib/liveblocks/useLiveGame";
 import { useTrackRedditGameStart } from "@/lib/analytics/useTrackRedditGameStart";
