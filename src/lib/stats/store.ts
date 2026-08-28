@@ -13,6 +13,7 @@ import {
   isSoloFinished,
 } from "@/lib/game/finishedSolo";
 import { getSupabase } from "@/lib/supabase/client";
+import { setStorageScopeUserId } from "@/lib/auth/storageScope";
 import { loadLocal, saveLocal } from "./local";
 import {
   applyWallet,
@@ -25,6 +26,7 @@ import { getInstallPlatform, hasInstallCoachCompleted } from "@/lib/pwa/iosInsta
 import {
   applyMultiResult,
   applySoloResult,
+  emptyUserData,
   mergeActiveSolos,
   mergeUserData,
   type MultiResult,
@@ -102,7 +104,12 @@ async function loadRemoteRetry(uid: string) {
  */
 export async function loadUserData(): Promise<UserData> {
   const uid = await currentUserId();
+  setStorageScopeUserId(uid);
+
   let data = withDeviceActiveSolos(loadLocal());
+  if (uid && data.accountId && data.accountId !== uid) {
+    data = emptyUserData();
+  }
 
   if (!uid) {
     applyActiveSolosToDeviceCache(data);
@@ -113,8 +120,11 @@ export async function loadUserData(): Promise<UserData> {
 
   const remote = await loadRemoteRetry(uid);
   if (remote.ok && remote.data) {
+    // Remote is this account's cloud blob. Local is this account's scoped
+    // cache only — never the guest / other-account unscoped keys.
     data = mergeUserData(data, remote.data);
   }
+  data = { ...data, accountId: uid };
   applyFinishedIdsToDevice(data);
   applyActiveSolosToDeviceCache(data);
   saveLocal(data);
@@ -125,10 +135,11 @@ export async function loadUserData(): Promise<UserData> {
 export const STATS_UPDATED_EVENT = "sudogku:stats-updated";
 
 export async function saveUserData(data: UserData): Promise<void> {
-  let next = withDeviceActiveSolos(data);
+  const uid = await currentUserId();
+  setStorageScopeUserId(uid);
+  let next = withDeviceActiveSolos(uid ? { ...data, accountId: uid } : data);
   applyActiveSolosToDeviceCache(next);
   saveLocal(next);
-  const uid = await currentUserId();
   if (uid) {
     const saved = await upsertRemote(uid, next);
     if (saved) {
@@ -145,6 +156,7 @@ export async function saveUserData(data: UserData): Promise<void> {
 export async function seedRemoteIfMissing(): Promise<void> {
   const uid = await currentUserId();
   if (!uid) return;
+  setStorageScopeUserId(uid);
   const remote = await loadRemoteRetry(uid);
   if (!remote.ok) return;
   if (!remote.data) void upsertRemote(uid, withDeviceActiveSolos(loadLocal()));
@@ -152,11 +164,15 @@ export async function seedRemoteIfMissing(): Promise<void> {
 
 async function loadForWrite(): Promise<UserData> {
   const uid = await currentUserId();
+  setStorageScopeUserId(uid);
   let data = loadLocal();
+  if (uid && data.accountId && data.accountId !== uid) {
+    data = emptyUserData();
+  }
   if (!uid) return data;
   const remote = await loadRemoteRetry(uid);
   if (remote.ok && remote.data) data = mergeUserData(data, remote.data);
-  return data;
+  return uid ? { ...data, accountId: uid } : data;
 }
 
 function sleep(ms: number): Promise<void> {

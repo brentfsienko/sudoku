@@ -1,5 +1,7 @@
 /** Cute lowercase pup greetings for the home-tab speech bubble. */
 
+import { scopedKey } from "@/lib/auth/storageScope";
+
 export type DayHalf = "am" | "pm";
 
 const INTRO_AM = "ruff ruff";
@@ -112,7 +114,7 @@ export function isGreetingDismissedForHalf(
 ): boolean {
   if (typeof window === "undefined") return true;
   try {
-    return localStorage.getItem(DISMISS_KEY) === dismissToken(dateKey, half);
+    return localStorage.getItem(scopedKey(DISMISS_KEY)) === dismissToken(dateKey, half);
   } catch {
     return false;
   }
@@ -121,7 +123,7 @@ export function isGreetingDismissedForHalf(
 export function dismissGreetingForHalf(dateKey: string, half: DayHalf): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(DISMISS_KEY, dismissToken(dateKey, half));
+    localStorage.setItem(scopedKey(DISMISS_KEY), dismissToken(dateKey, half));
   } catch {
     // ignore quota
   }
@@ -131,7 +133,7 @@ export function dismissGreetingForHalf(dateKey: string, half: DayHalf): void {
 export function clearGreetingDismiss(): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.removeItem(DISMISS_KEY);
+    localStorage.removeItem(scopedKey(DISMISS_KEY));
   } catch {
     // ignore
   }

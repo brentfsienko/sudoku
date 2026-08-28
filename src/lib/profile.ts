@@ -4,6 +4,7 @@ import { coerceProfile, randomUsername } from "@/lib/stats/profile";
 import { flagNewUserCoachmark } from "@/lib/onboarding";
 import type { Profile } from "@/lib/stats/types";
 import { randomDogId, type DogId } from "@/lib/theme/dogs";
+import { scopedKey } from "@/lib/auth/storageScope";
 
 export type { Profile };
 
@@ -14,7 +15,7 @@ export function getProfile(): Profile {
     return { username: randomUsername(), dogId: "golden" };
   }
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = window.localStorage.getItem(scopedKey(KEY));
     if (raw) {
       return coerceProfile(JSON.parse(raw) as Partial<Profile> & { name?: string });
     }
@@ -31,7 +32,7 @@ export function getProfile(): Profile {
 export function setProfile(profile: Profile) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(coerceProfile(profile)));
+    window.localStorage.setItem(scopedKey(KEY), JSON.stringify(coerceProfile(profile)));
   } catch {
     // ignore
   }

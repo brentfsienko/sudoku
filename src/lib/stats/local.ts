@@ -7,6 +7,7 @@ import {
   type Profile,
   type UserData,
 } from "./types";
+import { scopedKey, getStorageScopeUserId } from "@/lib/auth/storageScope";
 
 const DATA_KEY = "floof-sudoku-data";
 const LEGACY_STATS_KEY = "floof-sudoku-stats";
@@ -55,7 +56,7 @@ function migrateLegacy(): UserData | null {
 export function loadLocal(): UserData {
   if (typeof window === "undefined") return emptyUserData();
   try {
-    const raw = window.localStorage.getItem(DATA_KEY);
+    const raw = window.localStorage.getItem(scopedKey(DATA_KEY));
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<UserData>;
       const normalized = normalizeUserData(parsed);
@@ -69,10 +70,13 @@ export function loadLocal(): UserData {
       }
       return normalized;
     }
-    const migrated = migrateLegacy();
-    if (migrated) {
-      saveLocal(migrated);
-      return migrated;
+    // Never copy unscoped guest/legacy data into a signed-in account's cache.
+    if (!getStorageScopeUserId()) {
+      const migrated = migrateLegacy();
+      if (migrated) {
+        saveLocal(migrated);
+        return migrated;
+      }
     }
   } catch {
     // ignore
@@ -83,10 +87,10 @@ export function loadLocal(): UserData {
 export function saveLocal(data: UserData) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DATA_KEY, JSON.stringify(data));
+    window.localStorage.setItem(scopedKey(DATA_KEY), JSON.stringify(data));
     // Keep the lightweight profile cache used by game presence in sync.
     window.localStorage.setItem(
-      LEGACY_PROFILE_KEY,
+      scopedKey(LEGACY_PROFILE_KEY),
       JSON.stringify(data.profile),
     );
   } catch {

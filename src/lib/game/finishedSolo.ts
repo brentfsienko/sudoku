@@ -7,13 +7,15 @@
  * restore a "finished" active after a reload.
  */
 
+import { scopedKey } from "@/lib/auth/storageScope";
+
 const STORAGE_KEY = "sudogku-finished-solo-ids";
 const MAX_ENTRIES = 200;
 
 function readSet(): Set<string> {
   if (typeof window === "undefined") return new Set();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(scopedKey(STORAGE_KEY));
     if (!raw) return new Set();
     const parsed = JSON.parse(raw) as string[];
     return new Set(Array.isArray(parsed) ? parsed : []);
@@ -27,7 +29,7 @@ function writeSet(set: Set<string>): void {
   try {
     // Keep the set bounded so it doesn't grow forever
     const arr = [...set].slice(-MAX_ENTRIES);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    localStorage.setItem(scopedKey(STORAGE_KEY), JSON.stringify(arr));
   } catch {
     // ignore quota
   }

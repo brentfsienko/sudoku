@@ -2,6 +2,7 @@
 
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { FactTopic } from "./facts";
+import { scopedKey } from "@/lib/auth/storageScope";
 
 const USER_GUESSES_KEY = "floof-trivia-user";
 const LOCAL_FACT_PREFIX = "floof-trivia-fact-";
@@ -75,7 +76,7 @@ function normalizeStoredGuesses(
 export function loadUserGuesses(): Record<string, UserGuess> {
   if (typeof window === "undefined") return {};
   try {
-    const raw = window.localStorage.getItem(USER_GUESSES_KEY);
+    const raw = window.localStorage.getItem(scopedKey(USER_GUESSES_KEY));
     if (raw) return normalizeStoredGuesses(JSON.parse(raw) as Record<string, unknown>);
   } catch {
     // ignore
@@ -87,7 +88,7 @@ export function saveUserGuess(guess: UserGuess) {
   if (typeof window === "undefined") return;
   const all = loadUserGuesses();
   all[guess.factId] = guess;
-  window.localStorage.setItem(USER_GUESSES_KEY, JSON.stringify(all));
+  window.localStorage.setItem(scopedKey(USER_GUESSES_KEY), JSON.stringify(all));
 }
 
 export async function fetchFactStats(

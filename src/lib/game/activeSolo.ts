@@ -3,6 +3,7 @@
 import { isStaleDailyActiveId } from "@/lib/daily/puzzle";
 import { isSoloFinished } from "./finishedSolo";
 import { pauseSnapshot, type GameSnapshot } from "./store";
+import { scopedKey, getStorageScopeUserId } from "@/lib/auth/storageScope";
 
 const STORAGE_KEY = "floof-active-solos";
 const LEGACY_KEY = "floof-active-solo";
@@ -68,7 +69,7 @@ function migrateLegacy(): ActiveSoloSave[] {
 function writeList(list: ActiveSoloSave[], notify = true): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    window.localStorage.setItem(scopedKey(STORAGE_KEY), JSON.stringify(list));
     if (notify) window.dispatchEvent(new Event(ACTIVE_SOLO_UPDATED_EVENT));
   } catch {
     // ignore quota errors
@@ -93,8 +94,8 @@ export function replaceActiveSolosLocal(list: ActiveSoloSave[]): void {
 export function loadActiveSolos(): ActiveSoloSave[] {
   if (typeof window === "undefined") return [];
   try {
-    let list = parseList(window.localStorage.getItem(STORAGE_KEY));
-    if (list.length === 0) {
+    let list = parseList(window.localStorage.getItem(scopedKey(STORAGE_KEY)));
+    if (list.length === 0 && !getStorageScopeUserId()) {
       list = migrateLegacy();
       if (list.length > 0) writeList(list);
     }
@@ -142,7 +143,7 @@ export function removeActiveSolo(id: string): void {
 export function clearActiveSolo(): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(scopedKey(STORAGE_KEY));
     window.localStorage.removeItem(LEGACY_KEY);
     window.dispatchEvent(new Event(ACTIVE_SOLO_UPDATED_EVENT));
   } catch {

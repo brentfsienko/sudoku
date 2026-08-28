@@ -1,45 +1,47 @@
 "use client";
 
 /**
- * Wipes all user-specific localStorage so that switching accounts
- * (sign-out / sign-in) never shows one account's cached data to another.
+ * Clears *unscoped* (pre-account-split) user caches so a guest session
+ * never shows the previous account. Keys namespaced with `:${userId}` are
+ * left alone so switching accounts on this device keeps each cache intact.
  *
- * Keys intentionally NOT cleared (device-level preferences):
+ * Device-level preferences are not touched:
  *   sudogku-install-coach-v3:*   — install coach seen, per platform
- *   sudogku.greetingIntroAmSeen  — first-time greeting copy consumed
+ *   sudogku.greetingIntroAmSeen
  *   sudogku.greetingIntroPmSeen
- *   sudogku.greetingDismissedHalf
- *   floof-auth-intro-done        — auth intro seen
+ *   floof-auth-intro-done
  */
-export function clearUserStorage(): void {
+
+const UNSCOPED_FIXED = [
+  "floof-sudoku-profile",
+  "floof-sudoku-data",
+  "floof-sudoku-stats",
+  "floof-active-solos",
+  "floof-active-solo",
+  "sudogku-finished-solo-ids",
+  "sudogku-coachmark-step",
+  "floof-trivia-user",
+];
+
+const DAILY_UNSCOPED = /^sudogku-daily-result-\d{4}-\d{2}-\d{2}$/;
+
+export function clearUnscopedUserStorage(): void {
   if (typeof window === "undefined") return;
   try {
-    // Fixed user-data keys
-    const fixedKeys = [
-      "floof-sudoku-profile",
-      "floof-sudoku-data",
-      "floof-sudoku-stats", // legacy
-      "floof-active-solos",
-      "floof-active-solo", // legacy
-      "sudogku-finished-solo-ids",
-      "sudogku-coachmark-step",
-    ];
-    for (const key of fixedKeys) {
+    for (const key of UNSCOPED_FIXED) {
       localStorage.removeItem(key);
     }
 
-    // Dynamic daily-result keys (one per date: sudogku-daily-result-YYYY-MM-DD)
     const toRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith("sudogku-daily-result-")) {
-        toRemove.push(key);
-      }
+      if (key && DAILY_UNSCOPED.test(key)) toRemove.push(key);
     }
-    for (const key of toRemove) {
-      localStorage.removeItem(key);
-    }
+    for (const key of toRemove) localStorage.removeItem(key);
   } catch {
     // Ignore private-mode / quota errors
   }
 }
+
+/** @deprecated use clearUnscopedUserStorage */
+export const clearUserStorage = clearUnscopedUserStorage;
