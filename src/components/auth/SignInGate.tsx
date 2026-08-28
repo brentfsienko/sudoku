@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { PawIcon } from "@/components/icons";
 import { markAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { passwordsMatch } from "@/lib/auth/password";
@@ -54,8 +55,10 @@ export function SignInGate({ open, userData, onClose }: Props) {
     if (mode === "forgot") {
       const res = await userData.resetPassword(email);
       if (res.ok) {
-        setStatus("sent");
-        setInfo("Check your email for a link to set a new password.");
+        toast.success("reset link sent — check your inbox 🐾", {
+          duration: 5000,
+        });
+        onClose();
       } else {
         setStatus("error");
         setError(res.error ?? "Something went wrong.");

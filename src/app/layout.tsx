@@ -13,6 +13,7 @@ import {
 import { SerwistProvider } from "@/components/pwa/SerwistProvider";
 import { OfflineBanner } from "@/components/pwa/OfflineBanner";
 import { OfflineDailySync } from "@/components/pwa/OfflineDailySync";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const baloo = Baloo_2({
@@ -77,6 +78,20 @@ export default function RootLayout({
           <OfflineDailySync />
           {children}
         </SerwistProvider>
+        <Toaster
+          position="bottom-center"
+          toastOptions={{
+            style: {
+              background: "#fdf6ec",
+              border: "1px solid #efe2cf",
+              color: "#4a3b2f",
+              borderRadius: "14px",
+              fontFamily: "var(--font-sans), ui-sans-serif, system-ui, sans-serif",
+              fontSize: "14px",
+              fontWeight: "600",
+            },
+          }}
+        />
         <Analytics />
       </body>
     </html>
