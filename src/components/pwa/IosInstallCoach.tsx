@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import {
+  ChevronDownIcon,
   InstallDesktopIcon,
   MoreVerticalIcon,
   PawIcon,
@@ -17,16 +18,21 @@ import {
   type InstallPlatform,
 } from "@/lib/pwa/iosInstall";
 
-type Step = 0 | 1 | 2;
+type Step = 0 | 1 | 2 | 3;
 
 type Props = {
   /** Wait until splash / sign-in / other coachmarks are out of the way. */
   ready: boolean;
 };
 
+function lastStep(platform: InstallPlatform): Step {
+  return platform === "ios-chrome" ? 3 : 2;
+}
+
 /**
- * One-time 3-step coach for installing Sudogku as an app.
+ * One-time coach for installing Sudogku as an app.
  * Browser chrome lives outside the page — arrows point at it.
+ * Chrome iOS: Share (top-right) → View More → Add to Home Screen.
  */
 export function IosInstallCoach({ ready }: Props) {
   const [step, setStep] = useState<Step | null>(null);
@@ -49,8 +55,8 @@ export function IosInstallCoach({ ready }: Props) {
   }
 
   function next() {
-    if (step === null) return;
-    if (step >= 2) {
+    if (step === null || !platform) return;
+    if (step >= lastStep(platform)) {
       finish();
       return;
     }
@@ -82,7 +88,13 @@ export function IosInstallCoach({ ready }: Props) {
           onSkip={finish}
         />
       )}
-      {step === 2 && (
+      {step === 2 && platform === "ios-chrome" && (
+        <ViewMoreStep onNext={next} onSkip={finish} />
+      )}
+      {step === 2 && platform !== "ios-chrome" && (
+        <AddStep platform={platform} onDone={finish} onSkip={finish} />
+      )}
+      {step === 3 && (
         <AddStep platform={platform} onDone={finish} onSkip={finish} />
       )}
     </div>
@@ -155,7 +167,9 @@ function ChromePointStep({
   onSkip: () => void;
 }) {
   const chromeTopRight =
-    platform === "android-chrome" || platform === "desktop-chrome";
+    platform === "android-chrome" ||
+    platform === "desktop-chrome" ||
+    platform === "ios-chrome";
   const iosTop = platform.startsWith("ios") && ipad;
 
   const copy = pointCopy(platform, ipad);
@@ -258,10 +272,8 @@ function pointCopy(
       };
     case "ios-chrome":
       return {
-        title: ipad
-          ? "tap Share at the top of Chrome"
-          : "tap Share at the bottom of Chrome",
-        sub: "the square with the arrow pointing up",
+        title: "tap Share in the top-right of Chrome",
+        sub: "the square with the arrow, next to the address bar",
       };
     default:
       return {
@@ -281,6 +293,52 @@ function pointIcon(platform: InstallPlatform): ReactNode {
     return <InstallDesktopIcon width={28} height={28} />;
   }
   return <ShareIcon width={28} height={28} />;
+}
+
+function ViewMoreStep({
+  onNext,
+  onSkip,
+}: {
+  onNext: () => void;
+  onSkip: () => void;
+}) {
+  return (
+    <div className="animate-float-in relative z-10 mx-auto my-auto w-full max-w-sm px-4">
+      <div className="rounded-3xl bg-white p-5 shadow-lg">
+        <p className="mb-3 text-center text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+          in the share sheet
+        </p>
+        <div className="mb-4 flex items-center gap-3 rounded-2xl border-2 border-[var(--primary)] bg-[var(--primary-soft)] px-3 py-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#8e8e93] text-white shadow-sm">
+            <ChevronDownIcon width={20} height={20} />
+          </span>
+          <div className="min-w-0 text-left">
+            <p className="text-sm font-bold text-[var(--foreground)]">View More</p>
+            <p className="text-[11px] font-medium text-[var(--muted)]">
+              gray circle with the down arrow — far right of the bottom row
+            </p>
+          </div>
+        </div>
+        <p className="mb-4 text-center text-sm leading-snug text-[var(--foreground)]">
+          tap that, then we'll find Add to Home Screen.
+        </p>
+        <button
+          type="button"
+          onClick={onNext}
+          className="ui-button w-full rounded-full bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95"
+        >
+          next →
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="mt-2 w-full py-2 text-xs font-semibold text-[var(--muted)]"
+        >
+          skip
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function AddStep({
@@ -355,6 +413,14 @@ function addRow(platform: InstallPlatform): {
         sub: "or ⋮ → Cast, save, and share → Install Sudogku",
         footer: "confirm Install. sudogku opens in its own window from then on.",
         icon: <InstallDesktopIcon width={20} height={20} />,
+      };
+    case "ios-chrome":
+      return {
+        caption: "after View More",
+        title: "Add to Home Screen",
+        sub: "scroll down the list — it's usually near the bottom",
+        footer: "then tap Add in the top-right. sudogku will land on your home screen like any other app.",
+        icon: <PlusIcon width={20} height={20} />,
       };
     default:
       return {
