@@ -90,11 +90,18 @@ export async function upsertRemote(userId: string, data: UserData): Promise<void
 function parseWalletPayload(raw: unknown): WalletSnapshot | null {
   if (!raw || typeof raw !== "object") return null;
   const obj = raw as Record<string, unknown>;
-  const bones = typeof obj.bones === "number" ? Math.max(0, obj.bones) : 0;
+  const rawBones = obj.bones;
+  const bonesNum =
+    typeof rawBones === "number"
+      ? rawBones
+      : typeof rawBones === "string" && rawBones.trim() !== ""
+        ? Number(rawBones)
+        : NaN;
+  if (!Number.isFinite(bonesNum)) return null;
   const owned = Array.isArray(obj.ownedExclusiveDogs)
     ? (obj.ownedExclusiveDogs as ExclusiveDogId[])
     : [];
-  return { bones, ownedExclusiveDogs: owned };
+  return { bones: Math.max(0, bonesNum), ownedExclusiveDogs: owned };
 }
 
 /**

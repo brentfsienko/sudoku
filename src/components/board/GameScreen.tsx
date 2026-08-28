@@ -148,6 +148,9 @@ export function GameScreen({
   }, [solved, mode, opponent, contrib, me.role]);
 
   const finishReported = useRef(false);
+  const onFinishRef = useRef(onFinish);
+  onFinishRef.current = onFinish;
+
   useEffect(() => {
     finishReported.current = false;
   }, [snapshot.puzzle, snapshot.startedAt]);
@@ -155,6 +158,10 @@ export function GameScreen({
   useEffect(() => {
     if (!done || finishReported.current) return;
     finishReported.current = true;
+
+    const fromBoard = countCollectedBones(snapshot, bonePlay.boneCells);
+    const bonesFound = Math.max(fromBoard, bonePlay.sessionBones);
+
     trackGameFinish({
       mode: finishAnalyticsMode,
       solved,
@@ -162,41 +169,20 @@ export function GameScreen({
       elapsedSeconds: elapsed,
       mistakes: snapshot.mistakes,
     });
-    if (!onFinish) return;
-    const frame = requestAnimationFrame(() => {
-      const fromBoard = countCollectedBones(snapshot, bonePlay.boneCells);
-      const bonesFound = Math.max(fromBoard, bonePlay.sessionBones);
-      onFinish({
-        solved,
-        score: computedFinal,
-        elapsedSeconds: elapsed,
-        mistakes: snapshot.mistakes,
-        hintsUsed: snapshot.hintsUsed,
-        squaresFilled: contrib[me.role] ?? contrib.total,
-        bonesFound,
-        winBoneBonus,
-      });
+    onFinishRef.current?.({
+      solved,
+      score: computedFinal,
+      elapsedSeconds: elapsed,
+      mistakes: snapshot.mistakes,
+      hintsUsed: snapshot.hintsUsed,
+      squaresFilled: contrib[me.role] ?? contrib.total,
+      bonesFound,
+      winBoneBonus,
     });
-    return () => cancelAnimationFrame(frame);
-  }, [
-    done,
-    onFinish,
-    finishAnalyticsMode,
-    solved,
-    computedFinal,
-    elapsed,
-    snapshot.mistakes,
-    snapshot.hintsUsed,
-    snapshot.difficulty,
-    snapshot.cells,
-    snapshot.puzzle,
-    snapshot.startedAt,
-    bonePlay.boneCells,
-    bonePlay.sessionBones,
-    contrib,
-    me.role,
-    winBoneBonus,
-  ]);
+    // Fire once when the board hits "done". Do not depend on onFinish /
+    // sessionBones — a re-render used to cancel the rAF and skip the award.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, snapshot.puzzle, snapshot.startedAt]);
 
   // Basic keyboard support for desktop testing.
   useEffect(() => {
