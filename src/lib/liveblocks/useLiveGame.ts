@@ -301,6 +301,7 @@ export function useLiveGame(opts: {
       mistakes: meta.mistakes,
       hintsUsed: meta.hintsUsed,
       cells,
+      maxMistakes: MAX_MISTAKES,
     };
   }, [meta, cellsMap]);
 

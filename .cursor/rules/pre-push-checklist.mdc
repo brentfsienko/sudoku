@@ -1,0 +1,16 @@
+---
+description: Run build check before committing/pushing in the sudoku project
+alwaysApply: true
+---
+
+# Pre-push checklist
+
+Before creating any git commit or push in this project, always run:
+
+```bash
+npm run build
+```
+
+A passing build confirms TypeScript compiles and Next.js can bundle every page. This catches type errors on files not directly edited (e.g. adding a required field to a shared type breaks callers elsewhere).
+
+If the build fails, fix all errors before committing. Do not push a broken build.
