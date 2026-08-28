@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { SignInGate } from "@/components/auth/SignInGate";
 import { AppFrame } from "@/components/layout/AppFrame";
 import { MobileAppRoot } from "@/components/layout/MobileAppRoot";
@@ -26,6 +27,7 @@ import type { DogId } from "@/lib/theme/dogs";
 import { formatTime } from "@/lib/game/scoring";
 import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { useOnlineFriends } from "@/lib/friends/useOnlineFriends";
+import { useNotifications } from "@/lib/friends/useNotifications";
 import { useOnline } from "@/lib/hooks/useOnline";
 import {
   getCoachmarkStep,
@@ -62,6 +64,7 @@ import {
 } from "@/lib/stats/progress";
 
 export default function Home() {
+  const router = useRouter();
   const [tab, setTab] = useState<HomeTab>("main");
   // Desired sub-tab when switching to the Friends tab from elsewhere.
   // FriendsTab remounts on tab switch, so it reads this as initialSubTab.
@@ -100,6 +103,19 @@ export default function Home() {
   // Always-on presence: tracks from app mount regardless of active tab
   const onlineIds = useOnlineFriends(userData.user?.id ?? null);
   const online = useOnline();
+
+  // Real-time toasts for friend requests and game invites
+  const handleGameInvite = useCallback(
+    ({ roomCode }: { roomCode: string }) => {
+      router.push(`/game/${roomCode}`);
+    },
+    [router],
+  );
+  useNotifications({
+    userId: userData.user?.id ?? null,
+    onRefresh: () => setTab((t) => t), // nudge friends tab to re-fetch on next mount
+    onGameInvite: handleGameInvite,
+  });
   const statsForMe = data ?? emptyUserData();
   const [signInGateOpen, setSignInGateOpen] = useState(false);
   const statsReady = !userData.loading && !!data;
