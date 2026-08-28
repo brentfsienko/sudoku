@@ -22,8 +22,8 @@ import {
 type Props = {
   /** Wait until splash / sign-in / other coachmarks are out of the way. */
   ready: boolean;
-  /** Synced from the signed-in account so this never repeats on another device. */
-  accountSeen?: boolean;
+  /** Platforms this account already dismissed — each browser family shows once. */
+  accountSeenPlatforms?: Partial<Record<InstallPlatform, boolean>>;
 };
 
 type PathStep = {
@@ -40,7 +40,7 @@ let shownThisLoad = false;
  * Safari and Chrome get different paths. Native chrome is pointed at,
  * but the whole sequence stays on screen — no auto-advance.
  */
-export function IosInstallCoach({ ready, accountSeen = false }: Props) {
+export function IosInstallCoach({ ready, accountSeenPlatforms }: Props) {
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState<InstallPlatform | null>(null);
   const [ipad, setIpad] = useState(false);
@@ -60,18 +60,18 @@ export function IosInstallCoach({ ready, accountSeen = false }: Props) {
       return;
     }
 
-    if (accountSeen || hasInstallCoachCompleted()) return;
+    if (accountSeenPlatforms?.[p] || hasInstallCoachCompleted(p)) return;
 
     shownThisLoad = true;
     setPlatform(p);
     setIpad(isIpad());
     setOpen(true);
-  }, [ready, accountSeen, open]);
+  }, [ready, accountSeenPlatforms, open]);
 
   function dismiss() {
     setOpen(false);
     shownThisLoad = false;
-    void persistInstallCoachSeen();
+    void persistInstallCoachSeen(platform);
   }
 
   if (!open || !platform) return null;

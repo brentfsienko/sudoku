@@ -1,12 +1,18 @@
 "use client";
 
-const KEY = "sudogku-install-coach-v3";
+const KEY_PREFIX = "sudogku-install-coach-v3";
+/** Pre-platform key: same browser already dismissed the stacked overlay. */
+const LEGACY_V3_KEY = "sudogku-install-coach-v3";
 
 export type InstallPlatform =
   | "ios-safari"
   | "ios-chrome"
   | "android-chrome"
   | "desktop-chrome";
+
+function storageKey(platform: InstallPlatform): string {
+  return `${KEY_PREFIX}:${platform}`;
+}
 
 function ua(): string {
   return typeof window === "undefined" ? "" : window.navigator.userAgent;
@@ -43,34 +49,55 @@ export function getInstallPlatform(): InstallPlatform | null {
   return isAndroid() ? "android-chrome" : "desktop-chrome";
 }
 
-export function hasInstallCoachCompleted(): boolean {
+export function hasInstallCoachCompleted(
+  platform?: InstallPlatform | null,
+): boolean {
   if (typeof window === "undefined") return true;
+  const p = platform ?? getInstallPlatform();
+  if (!p) return true;
   try {
-    return window.localStorage.getItem(KEY) === "1";
+    return (
+      window.localStorage.getItem(storageKey(p)) === "1" ||
+      window.localStorage.getItem(LEGACY_V3_KEY) === "1"
+    );
   } catch {
     return true;
   }
 }
 
-export function markInstallCoachCompleted(): void {
+export function markInstallCoachCompleted(
+  platform?: InstallPlatform | null,
+): void {
   if (typeof window === "undefined") return;
+  const p = platform ?? getInstallPlatform();
+  if (!p) return;
   try {
-    window.localStorage.setItem(KEY, "1");
+    window.localStorage.setItem(storageKey(p), "1");
   } catch {
     // ignore quota / private mode
   }
 }
 
 /**
- * Persist "shown once" to this browser and to the signed-in account blob
- * so other devices skip the coach too.
+ * Persist "shown once" for this browser AND this platform on the account,
+ * so another Safari skips it but Chrome still gets its own overlay.
  */
-export async function persistInstallCoachSeen(): Promise<void> {
-  markInstallCoachCompleted();
+export async function persistInstallCoachSeen(
+  platform?: InstallPlatform | null,
+): Promise<void> {
+  const p = platform ?? getInstallPlatform();
+  if (!p) return;
+  markInstallCoachCompleted(p);
   try {
     const { loadUserData, saveUserData } = await import("@/lib/stats/store");
     const data = await loadUserData();
-    await saveUserData({ ...data, installCoachPathSeen: true });
+    await saveUserData({
+      ...data,
+      installCoachSeenByPlatform: {
+        ...data.installCoachSeenByPlatform,
+        [p]: true,
+      },
+    });
   } catch {
     // localStorage is enough if cloud write fails
   }

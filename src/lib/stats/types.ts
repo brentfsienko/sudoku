@@ -7,6 +7,7 @@ import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import type { DogId, ExclusiveDogId } from "@/lib/theme/dogs";
 import { isExclusiveDogId, resolveDogId } from "@/lib/theme/dogs";
 import { coerceProfile } from "./profile";
+import type { InstallPlatform } from "@/lib/pwa/iosInstall";
 
 export type { ActiveSoloSave };
 
@@ -121,6 +122,11 @@ export type UserData = {
   installCoachSeen?: boolean;
   /** Stacked path overlay (Safari/Chrome steps all at once) was dismissed. */
   installCoachPathSeen?: boolean;
+  /**
+   * Add-to-home-screen path overlay dismissed, per browser family.
+   * Safari and Chrome each show once for this account.
+   */
+  installCoachSeenByPlatform?: Partial<Record<InstallPlatform, boolean>>;
 };
 
 /** Pick the newer profile customization when merging two device copies. */
@@ -362,10 +368,43 @@ export function mergeUserData(local: UserData, remote: UserData): UserData {
     installCoachPathSeen: Boolean(
       local.installCoachPathSeen || remote.installCoachPathSeen,
     ),
+    installCoachSeenByPlatform: mergeInstallCoachPlatforms(
+      local.installCoachSeenByPlatform,
+      remote.installCoachSeenByPlatform,
+    ),
   });
 }
 
 const MAX_FINISHED_IDS = 500;
+
+const INSTALL_PLATFORMS: InstallPlatform[] = [
+  "ios-safari",
+  "ios-chrome",
+  "android-chrome",
+  "desktop-chrome",
+];
+
+function normalizeInstallCoachPlatforms(
+  raw: Partial<Record<InstallPlatform, boolean>> | undefined,
+): Partial<Record<InstallPlatform, boolean>> {
+  if (!raw || typeof raw !== "object") return {};
+  const out: Partial<Record<InstallPlatform, boolean>> = {};
+  for (const p of INSTALL_PLATFORMS) {
+    if (raw[p] === true) out[p] = true;
+  }
+  return out;
+}
+
+function mergeInstallCoachPlatforms(
+  a: Partial<Record<InstallPlatform, boolean>> | undefined,
+  b: Partial<Record<InstallPlatform, boolean>> | undefined,
+): Partial<Record<InstallPlatform, boolean>> {
+  const out: Partial<Record<InstallPlatform, boolean>> = {};
+  for (const p of INSTALL_PLATFORMS) {
+    if (a?.[p] || b?.[p]) out[p] = true;
+  }
+  return out;
+}
 
 function mergeFinishedIds(
   a: string[] | undefined,
@@ -523,6 +562,9 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
       : [],
     installCoachSeen: Boolean(raw.installCoachSeen),
     installCoachPathSeen: Boolean(raw.installCoachPathSeen),
+    installCoachSeenByPlatform: normalizeInstallCoachPlatforms(
+      raw.installCoachSeenByPlatform,
+    ),
   };
   return {
     ...data,

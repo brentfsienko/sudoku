@@ -21,7 +21,7 @@ import {
   upsertRemote,
   walletFromData,
 } from "./remote";
-import { hasInstallCoachCompleted } from "@/lib/pwa/iosInstall";
+import { getInstallPlatform, hasInstallCoachCompleted } from "@/lib/pwa/iosInstall";
 import {
   applyMultiResult,
   applySoloResult,
@@ -61,13 +61,18 @@ async function currentUserId(): Promise<string | null> {
 
 /** Include this device's in-progress solos AND finished IDs in the blob. */
 function withDeviceData(data: UserData): UserData {
+  const platform = getInstallPlatform();
+  const byPlatform = { ...data.installCoachSeenByPlatform };
+  if (platform && hasInstallCoachCompleted(platform)) {
+    byPlatform[platform] = true;
+  }
   return {
     ...data,
     activeSolos: mergeActiveSolos(data.activeSolos, loadActiveSolos()),
     finishedSoloIds: [...new Set([...(data.finishedSoloIds ?? []), ...getFinishedIds()])],
     installCoachSeen: Boolean(data.installCoachSeen),
-    installCoachPathSeen:
-      Boolean(data.installCoachPathSeen) || hasInstallCoachCompleted(),
+    installCoachPathSeen: Boolean(data.installCoachPathSeen),
+    installCoachSeenByPlatform: byPlatform,
   };
 }
 
