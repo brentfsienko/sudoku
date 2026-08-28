@@ -75,9 +75,9 @@ export function useGameEvents({ myRole, mode, playing }: Props) {
 
     let myCount = 0;
     let oppCount = 0;
-    for (const [, entry] of cells) {
+    for (const entry of Object.values(cells)) {
       if (!entry?.value) continue;
-      if (entry.filledBy === myRole) myCount++;
+      if (entry.owner === myRole) myCount++;
       else oppCount++;
     }
 
