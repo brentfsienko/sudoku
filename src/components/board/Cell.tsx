@@ -13,6 +13,8 @@ export type CellView = {
   selected: boolean;
   related: boolean;
   sameValue: boolean;
+  /** Digit from the currently selected filled cell — matching notes are bolded. */
+  highlightNote: number | null;
   error: boolean;
   /** Ring color when another player has this cell selected. */
   peerRingColor: string | null;
@@ -86,15 +88,22 @@ function CellInner({ cell, onSelect }: Props) {
         </span>
       ) : cell.notes.length > 0 ? (
         <div className="grid h-full w-full grid-cols-3 grid-rows-3 p-[1px] text-[var(--muted)]">
-          {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => (
-            <span
-              key={n}
-              className="flex items-center justify-center leading-none"
-              style={{ fontSize: "min(2.4vw, 0.6rem)" }}
-            >
-              {cell.notes.includes(n) ? n : ""}
-            </span>
-          ))}
+          {Array.from({ length: 9 }, (_, i) => i + 1).map((n) => {
+            const highlighted = cell.highlightNote === n && cell.notes.includes(n);
+            return (
+              <span
+                key={n}
+                className="flex items-center justify-center leading-none"
+                style={{
+                  fontSize: "min(2.4vw, 0.6rem)",
+                  fontWeight: highlighted ? 800 : 400,
+                  color: highlighted ? "var(--foreground)" : undefined,
+                }}
+              >
+                {cell.notes.includes(n) ? n : ""}
+              </span>
+            );
+          })}
         </div>
       ) : null}
     </button>

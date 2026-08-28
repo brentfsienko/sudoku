@@ -30,6 +30,7 @@ import { useOnlineFriends } from "@/lib/friends/useOnlineFriends";
 import { useNotifications } from "@/lib/friends/useNotifications";
 import { usePushNotifications } from "@/lib/push/usePushNotifications";
 import { PushPermissionPrompt } from "@/components/pwa/PushPermissionPrompt";
+import { IosInstallCoach } from "@/components/pwa/IosInstallCoach";
 import { useOnline } from "@/lib/hooks/useOnline";
 import {
   getCoachmarkStep,
@@ -185,6 +186,9 @@ export default function Home() {
           onDismiss={() => setShowPushPrompt(false)}
         />
       )}
+      <IosInstallCoach
+        ready={playReady && !signInGateOpen && !coachmarkStep}
+      />
       <AppSplash ready={playReady} />
     <MobileAppRoot>
       <AppFrame variant={tab === "main" ? "accent" : "background"}>

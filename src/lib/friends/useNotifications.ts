@@ -57,6 +57,7 @@ export function useNotifications({ userId, onRefresh, onGameInvite, onFirstNotif
           filter: `to_user_id=eq.${userId}`,
         },
         async (payload) => {
+          console.log("[notifications] friend_request INSERT", payload.new);
           const fromId = (payload.new as { from_user_id: string }).from_user_id;
           const profile = await fetchMyPublicProfile(fromId);
           const name = profile?.username ?? "someone";
@@ -71,7 +72,9 @@ export function useNotifications({ userId, onRefresh, onGameInvite, onFirstNotif
           onRefreshRef.current?.();
         },
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log("[notifications] friend_requests channel:", status, err ?? "");
+      });
 
     // Game invites channel
     const inviteChannel = sb
@@ -85,6 +88,7 @@ export function useNotifications({ userId, onRefresh, onGameInvite, onFirstNotif
           filter: `guest_id=eq.${userId}`,
         },
         async (payload) => {
+          console.log("[notifications] game_invite INSERT", payload.new);
           const row = payload.new as {
             host_id: string;
             room_code: string;
@@ -109,7 +113,9 @@ export function useNotifications({ userId, onRefresh, onGameInvite, onFirstNotif
           onRefreshRef.current?.();
         },
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log("[notifications] game_invites channel:", status, err ?? "");
+      });
 
     return () => {
       void sb.removeChannel(friendChannel);

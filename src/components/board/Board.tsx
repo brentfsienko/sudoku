@@ -78,6 +78,7 @@ export function Board({
           selectedValue != null &&
           value === selectedValue &&
           selectedCell !== index,
+        highlightNote: selectedValue,
         error,
         peerRingColor: peerByCell.get(index) ?? null,
         hasBone,
