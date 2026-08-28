@@ -18,20 +18,31 @@ const FUN_ADJECTIVES = [
 ];
 
 const FUN_NAMES = [
-  "rex", "biscuit", "pretzel", "croissant", "waffle", "mochi", "peanut",
-  "cookie", "boba", "truffle", "maple", "pepper", "cheddar", "nacho",
-  "taco", "churro", "dumpling", "nugget", "pickle", "pumpkin", "scone",
-  "tofu", "wonton", "ziggy", "poppet", "sprout", "bubbles", "pudding",
-  "noodle", "bagel", "muffin", "donut", "pretzel", "custard", "gnocchi",
-  "pierogi", "bao", "flapjack", "clover", "breezy", "doodle", "smudge",
-  "snickerdoodle", "éclair", "macaron", "bon_bon", "s'more",
+  "rex", "milo", "coco", "luna", "bean", "pip", "scout", "daisy",
+  "olive", "puff", "kiwi", "mango", "toast", "duke", "ace", "blue",
+  "ruby", "ginger", "pebble", "biscuit", "pretzel", "waffle", "mochi",
+  "peanut", "cookie", "boba", "truffle", "maple", "pepper", "cheddar",
+  "nacho", "taco", "nugget", "pickle", "pumpkin", "scone", "tofu",
+  "ziggy", "poppet", "sprout", "bubbles", "pudding", "bagel", "muffin",
+  "donut", "clover", "doodle", "smudge", "bao", "noodle",
 ];
 
-export function randomUsername(): string {
-  const adj = FUN_ADJECTIVES[Math.floor(Math.random() * FUN_ADJECTIVES.length)];
-  const name = FUN_NAMES[Math.floor(Math.random() * FUN_NAMES.length)];
-  // normalizeUsername strips non-alphanumeric/underscore, so é→e, ' →  stripped
-  return `${adj}_${name}`.toLowerCase().replace(/[^a-z0-9_]/g, "");
+function pick<T>(xs: readonly T[]): T {
+  return xs[Math.floor(Math.random() * xs.length)]!;
+}
+
+/** Letters only — no digits, hyphens, or underscores. */
+function asWordUsername(...parts: string[]): string {
+  const raw = parts.join("").toLowerCase().replace(/[^a-z]/g, "");
+  const sliced = raw.slice(0, 24);
+  return sliced.length >= 3 ? sliced : "pup";
+}
+
+export function randomUsername(opts?: { extraWord?: boolean }): string {
+  if (opts?.extraWord) {
+    return asWordUsername(pick(FUN_ADJECTIVES), pick(FUN_NAMES));
+  }
+  return asWordUsername(pick(FUN_NAMES));
 }
 
 function coerceDogId(

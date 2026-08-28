@@ -20,6 +20,7 @@ import type { Profile } from "@/lib/stats/types";
 import type { Difficulty, GameMode } from "@/lib/game/types";
 import type { Friend, FriendRequest, GameInvite, PublicProfile } from "./types";
 import { resolveDogId } from "@/lib/theme/dogs";
+import { randomUsername } from "@/lib/stats/profile";
 import { normalizeUsername, validateUsername } from "./username";
 
 type ProfileRow = {
@@ -56,22 +57,28 @@ export async function syncPublicProfile(
     preferredUsername?.toLowerCase().replace(/[^a-z0-9_]/g, "") ||
     existing?.username;
 
-  const base = normalizeUsername(profile.username) || "pup";
-
   if (!username) {
-    for (let i = 0; i < 8; i++) {
-      const candidate = `${base}_${Math.floor(1000 + Math.random() * 9000)}`;
+    const tried = new Set<string>();
+    const guesses = [
+      normalizeUsername(profile.username),
+      ...Array.from({ length: 10 }, (_, i) =>
+        randomUsername({ extraWord: i >= 6 }),
+      ),
+    ];
+    for (const guess of guesses) {
+      if (!guess || tried.has(guess) || validateUsername(guess)) continue;
+      tried.add(guess);
       const { data: taken } = await sb
         .from("player_profiles")
         .select("user_id")
-        .ilike("username", candidate)
+        .ilike("username", guess)
         .maybeSingle();
       if (!taken) {
-        username = candidate;
+        username = guess;
         break;
       }
     }
-    username ??= `pup_${Date.now().toString(36).slice(-6)}`;
+    username ??= randomUsername({ extraWord: true });
   }
 
   const { error } = await sb.from("player_profiles").upsert(
