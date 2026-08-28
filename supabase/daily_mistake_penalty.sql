@@ -1,8 +1,6 @@
--- Fix: allow verified daily solves under 15s onto the leaderboard.
--- Board verification in /api/daily/submit is the anti-cheat; the elapsed floor
--- falsely rejected fast legitimate solves while local UI still showed "done".
---
--- Run in Supabase SQL editor (safe to re-run).
+-- Daily mistake penalty mode: raise the mistakes cap from 10 → 99.
+-- Run this in the Supabase SQL editor after deploying the daily-penalty app update.
+-- Safe to re-run (create or replace).
 
 create or replace function public.submit_daily_result(
   p_date date,

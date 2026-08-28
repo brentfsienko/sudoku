@@ -301,3 +301,22 @@ button {
 .animate-greeting-cursor {
   animation: greeting-cursor-blink 0.85s step-end infinite;
 }
+
+/* ── Daily penalty time flash ── */
+@keyframes penalty-flash {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+.animate-penalty-flash {
+  animation: penalty-flash 1.8s ease-out forwards;
+}

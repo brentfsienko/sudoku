@@ -78,7 +78,7 @@ async function upsertDailyResult(args: {
     return { ok: false, error: "Server missing SUPABASE_SECRET_KEY" };
   }
 
-  const mistakes = Math.min(Math.max(args.mistakes, 0), 10);
+  const mistakes = Math.min(Math.max(args.mistakes, 0), 99);
   let elapsed = Math.min(Math.max(args.elapsedSeconds, 0), 86400);
   if (!args.solved) elapsed = 0;
 

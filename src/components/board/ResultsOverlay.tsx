@@ -22,6 +22,8 @@ type Props = {
   onHome: () => void;
   bonesFound?: number;
   winBoneBonus?: number;
+  /** Total time penalty added (daily only). When set, shows a "Time penalty" row. */
+  penaltySeconds?: number;
 };
 
 function StatRow({ label, value }: { label: string; value: string }) {
@@ -45,6 +47,7 @@ export function ResultsOverlay({
   onHome,
   bonesFound = 0,
   winBoneBonus = 0,
+  penaltySeconds,
 }: Props) {
   const contrib = cellContributions(snapshot.puzzle, snapshot.solution, snapshot.cells);
 
@@ -91,6 +94,12 @@ export function ResultsOverlay({
 
         <div className="mt-5 rounded-2xl bg-[var(--surface-soft)] px-4 py-2">
           <StatRow label="Time" value={formatTime(elapsedSeconds)} />
+          {penaltySeconds != null && penaltySeconds > 0 && (
+            <StatRow
+              label="Time penalty"
+              value={`+${penaltySeconds}s`}
+            />
+          )}
           <StatRow label="Mistakes" value={`${snapshot.mistakes}`} />
           <StatRow label="Hints used" value={`${snapshot.hintsUsed}`} />
           {mode === "single" && solved && (

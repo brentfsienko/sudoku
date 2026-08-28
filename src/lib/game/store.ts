@@ -32,6 +32,8 @@ export type GameSnapshot = {
   mistakes: number;
   hintsUsed: number;
   cells: BoardCells;
+  /** null = no mistake limit (daily penalty mode). A positive number = fail after that many mistakes. */
+  maxMistakes: number | null;
 };
 
 export type GameController = {
@@ -72,6 +74,7 @@ export function createSnapshot(args: {
   solution: string;
   difficulty: Difficulty;
   mode: GameMode;
+  maxMistakes?: number | null;
 }): GameSnapshot {
   return {
     puzzle: args.puzzle,
@@ -86,6 +89,7 @@ export function createSnapshot(args: {
     mistakes: 0,
     hintsUsed: 0,
     cells: {},
+    maxMistakes: args.maxMistakes !== undefined ? args.maxMistakes : MAX_MISTAKES,
   };
 }
 
@@ -100,7 +104,9 @@ function checkFinished(s: GameSnapshot): GameSnapshot {
   if (isSolved(s.puzzle, s.solution, s.cells)) {
     return { ...s, status: "done", finishedAt: Date.now() };
   }
-  if (s.mistakes >= MAX_MISTAKES) {
+  // null = daily penalty mode (no heart fail). undefined = old snapshot, treat as MAX_MISTAKES.
+  const limit = s.maxMistakes === undefined ? MAX_MISTAKES : s.maxMistakes;
+  if (limit !== null && s.mistakes >= limit) {
     return { ...s, status: "done", finishedAt: Date.now() };
   }
   return s;

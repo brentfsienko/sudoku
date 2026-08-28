@@ -19,6 +19,8 @@ import {
   digitCounts,
   isSolved,
   MAX_MISTAKES,
+  mistakePenaltySeconds,
+  nextMistakePenaltySeconds,
 } from "@/lib/game/engine";
 import { finalScore, liveScore } from "@/lib/game/scoring";
 import {
@@ -103,7 +105,27 @@ export function GameScreen({
     analyticsMode ?? (mode === "single" ? "solo" : "multiplayer");
 
   const now = useNow(snapshot.status === "playing");
-  const elapsed = elapsedSeconds(snapshot, now);
+  const rawElapsed = elapsedSeconds(snapshot, now);
+
+  // Daily penalty mode: no heart limit, add exponential time per mistake.
+  const isDailyPenalty = snapshot.maxMistakes === null;
+  const penaltySeconds = isDailyPenalty ? mistakePenaltySeconds(snapshot.mistakes) : 0;
+  const elapsed = rawElapsed + penaltySeconds;
+
+  // Flash "+Xs" when a daily mistake is registered.
+  const prevMistakesRef = useRef(snapshot.mistakes);
+  const [penaltyFlash, setPenaltyFlash] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isDailyPenalty) return;
+    if (snapshot.mistakes > prevMistakesRef.current) {
+      const cost = nextMistakePenaltySeconds(prevMistakesRef.current);
+      setPenaltyFlash(`+${cost}s`);
+      const id = setTimeout(() => setPenaltyFlash(null), 1800);
+      prevMistakesRef.current = snapshot.mistakes;
+      return () => clearTimeout(id);
+    }
+    prevMistakesRef.current = snapshot.mistakes;
+  }, [snapshot.mistakes, isDailyPenalty]);
 
   const counts = useMemo(
     () => digitCounts(snapshot.puzzle, snapshot.solution, snapshot.cells),
@@ -265,8 +287,10 @@ export function GameScreen({
         <StatsBar
           difficultyLabel={DIFFICULTY_LABELS[snapshot.difficulty]}
           mistakes={snapshot.mistakes}
-          maxMistakes={MAX_MISTAKES}
+          maxMistakes={snapshot.maxMistakes ?? MAX_MISTAKES}
+          unlimitedMistakes={isDailyPenalty}
           timeLabel={formatClock(elapsed)}
+          penaltyFlash={penaltyFlash}
           score={score}
           paused={paused}
           showPause={!isMulti}
@@ -346,6 +370,7 @@ export function GameScreen({
           onHome={onExit}
           winBoneBonus={winBoneBonus}
           bonesFound={bonePlay.sessionBones}
+          penaltySeconds={penaltySeconds > 0 ? penaltySeconds : undefined}
         />
       )}
     </div>

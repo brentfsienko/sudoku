@@ -34,7 +34,11 @@ import { useTrackRedditGameStart } from "@/lib/analytics/useTrackRedditGameStart
 
 function buildInitialSnapshot(activeId: string): GameSnapshot {
   const saved = loadActiveSolo(activeId);
-  if (saved && isActiveSolo(saved.snapshot)) return saved.snapshot;
+  if (saved && isActiveSolo(saved.snapshot)) {
+    // Always enforce penalty mode for daily — no heart limit, even for snapshots
+    // saved before this feature was introduced.
+    return { ...saved.snapshot, maxMistakes: null };
+  }
 
   const dateStr = getPSTDate();
   const puzzle = getDailyPuzzle(dateStr);
@@ -43,6 +47,7 @@ function buildInitialSnapshot(activeId: string): GameSnapshot {
     solution: puzzle.solution,
     difficulty: puzzle.difficulty,
     mode: "single",
+    maxMistakes: null,
   });
 }
 

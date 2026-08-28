@@ -250,7 +250,7 @@ begin
     raise exception 'not authenticated';
   end if;
 
-  mistakes := least(greatest(coalesce(p_mistakes, 0), 0), 10);
+  mistakes := least(greatest(coalesce(p_mistakes, 0), 0), 99);
   elapsed := least(greatest(coalesce(p_elapsed, 0), 0), 86400);
 
   if not p_solved then

@@ -4,6 +4,20 @@ import { stringToGrid } from "@/lib/sudoku/generator";
 export const MAX_MISTAKES = 3;
 export const MAX_HINTS = 3;
 
+/**
+ * Total time penalty (seconds) accumulated after `n` mistakes in daily mode.
+ * Sequence: 5, 15, 35, 75, … (5 * (2^n - 1))
+ */
+export function mistakePenaltySeconds(n: number): number {
+  if (n <= 0) return 0;
+  return 5 * (Math.pow(2, n) - 1);
+}
+
+/** Cost of the *next* mistake (the (n+1)th): 5, 10, 20, 40, … */
+export function nextMistakePenaltySeconds(currentMistakes: number): number {
+  return 5 * Math.pow(2, currentMistakes);
+}
+
 export type BoardCells = Record<number, CellEntry>;
 
 export function rowOf(index: number): number {

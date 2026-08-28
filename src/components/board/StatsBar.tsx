@@ -6,7 +6,11 @@ type Props = {
   difficultyLabel: string;
   mistakes: number;
   maxMistakes: number;
+  /** When true, show mistake count only (no /max denominator). */
+  unlimitedMistakes?: boolean;
   timeLabel: string;
+  /** Brief penalty label to flash next to the time (e.g. "+5s"). */
+  penaltyFlash?: string | null;
   score: number;
   paused: boolean;
   showPause: boolean;
@@ -33,22 +37,40 @@ export function StatsBar({
   difficultyLabel,
   mistakes,
   maxMistakes,
+  unlimitedMistakes = false,
   timeLabel,
+  penaltyFlash,
   score,
   paused,
   showPause,
   onTogglePause,
 }: Props) {
+  const mistakeValue = unlimitedMistakes
+    ? `${mistakes}`
+    : `${mistakes}/${maxMistakes}`;
+
   return (
     <div className="flex items-center justify-between rounded-2xl bg-[var(--surface-soft)] px-4 py-2.5">
       <Stat label="Score" value={score.toLocaleString()} />
       <Stat label="Level" value={difficultyLabel} />
       <Stat
         label="Mistakes"
-        value={`${mistakes}/${maxMistakes}`}
+        value={mistakeValue}
         danger={mistakes > 0}
       />
-      <Stat label="Time" value={timeLabel} />
+      <div className="flex flex-col items-center">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+          Time
+        </span>
+        <div className="flex items-baseline gap-1">
+          <span className="font-display text-base font-bold">{timeLabel}</span>
+          {penaltyFlash && (
+            <span className="animate-penalty-flash font-display text-xs font-bold text-[var(--cell-error-text)]">
+              {penaltyFlash}
+            </span>
+          )}
+        </div>
+      </div>
       {showPause && (
         <button
           type="button"
