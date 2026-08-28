@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   ChevronDownIcon,
   InstallDesktopIcon,
+  MoreHorizontalIcon,
   MoreVerticalIcon,
   PawIcon,
   PlusIcon,
@@ -18,7 +19,7 @@ import {
   type InstallPlatform,
 } from "@/lib/pwa/iosInstall";
 
-type Step = 0 | 1 | 2 | 3;
+type Step = 0 | 1 | 2 | 3 | 4;
 
 type Props = {
   /** Wait until splash / sign-in / other coachmarks are out of the way. */
@@ -26,12 +27,15 @@ type Props = {
 };
 
 function lastStep(platform: InstallPlatform): Step {
-  return platform === "ios-chrome" ? 3 : 2;
+  if (platform === "ios-safari") return 4;
+  if (platform === "ios-chrome") return 3;
+  return 2;
 }
 
 /**
  * One-time coach for installing Sudogku as an app.
  * Browser chrome lives outside the page — arrows point at it.
+ * Safari iPhone: ••• (bottom-right) → Share → View More → Add to Home Screen.
  * Chrome iOS: Share (top-right) → View More → Add to Home Screen.
  */
 export function IosInstallCoach({ ready }: Props) {
@@ -48,6 +52,61 @@ export function IosInstallCoach({ ready }: Props) {
     setIpad(isIpad());
     setStep(0);
   }, [ready]);
+
+  // Native Share / ⋮ live outside the page — opening them blurs the webview.
+  useEffect(() => {
+    if (step !== 1) return;
+    let advanced = false;
+    const advance = () => {
+      if (advanced) return;
+      advanced = true;
+      setStep(2);
+    };
+    window.addEventListener("blur", advance);
+    const onVis = () => {
+      if (document.hidden) advance();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.removeEventListener("blur", advance);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [step]);
+
+  // View More (and Safari Share opening the sheet) often shrinks the visual viewport.
+  useEffect(() => {
+    const watching =
+      (platform === "ios-chrome" && step === 2) ||
+      (platform === "ios-safari" && (step === 2 || step === 3));
+    if (!watching) return;
+    const readH = () => window.visualViewport?.height ?? window.innerHeight;
+    const baseline = readH();
+    let armed = false;
+    let advanced = false;
+    const armTimer = window.setTimeout(() => {
+      armed = true;
+    }, 700);
+
+    const maybeAdvance = () => {
+      if (!armed || advanced) return;
+      if (readH() <= baseline - 20) {
+        advanced = true;
+        setStep((s) => ((s ?? 0) + 1) as Step);
+      }
+    };
+
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", maybeAdvance);
+    window.addEventListener("resize", maybeAdvance);
+    const poll = window.setInterval(maybeAdvance, 200);
+
+    return () => {
+      window.clearTimeout(armTimer);
+      window.clearInterval(poll);
+      vv?.removeEventListener("resize", maybeAdvance);
+      window.removeEventListener("resize", maybeAdvance);
+    };
+  }, [step, platform]);
 
   function finish() {
     markInstallCoachCompleted();
@@ -88,13 +147,22 @@ export function IosInstallCoach({ ready }: Props) {
           onSkip={finish}
         />
       )}
+      {step === 2 && platform === "ios-safari" && (
+        <ShareInMenuStep onNext={next} onSkip={finish} />
+      )}
       {step === 2 && platform === "ios-chrome" && (
         <ViewMoreStep onNext={next} onSkip={finish} />
       )}
-      {step === 2 && platform !== "ios-chrome" && (
+      {step === 2 && platform !== "ios-safari" && platform !== "ios-chrome" && (
         <AddStep platform={platform} onDone={finish} onSkip={finish} />
       )}
-      {step === 3 && (
+      {step === 3 && platform === "ios-safari" && (
+        <ViewMoreStep onNext={next} onSkip={finish} />
+      )}
+      {step === 3 && platform !== "ios-safari" && (
+        <AddStep platform={platform} onDone={finish} onSkip={finish} />
+      )}
+      {step === 4 && (
         <AddStep platform={platform} onDone={finish} onSkip={finish} />
       )}
     </div>
@@ -166,11 +234,12 @@ function ChromePointStep({
   onNext: () => void;
   onSkip: () => void;
 }) {
-  const chromeTopRight =
+  const topRight =
     platform === "android-chrome" ||
     platform === "desktop-chrome" ||
-    platform === "ios-chrome";
-  const iosTop = platform.startsWith("ios") && ipad;
+    platform === "ios-chrome" ||
+    (platform === "ios-safari" && ipad);
+  const bottomRight = platform === "ios-safari" && !ipad;
 
   const copy = pointCopy(platform, ipad);
 
@@ -180,10 +249,10 @@ function ChromePointStep({
       <p className="mt-1 text-[11px] font-medium text-white/70">{copy.sub}</p>
       <span
         className={`absolute border-8 border-transparent ${
-          chromeTopRight
+          topRight
             ? "bottom-full right-4 border-b-[var(--foreground)]"
-            : iosTop
-              ? "left-1/2 bottom-full -translate-x-1/2 border-b-[var(--foreground)]"
+            : bottomRight
+              ? "top-full right-6 border-t-[var(--foreground)]"
               : "left-1/2 top-full -translate-x-1/2 border-t-[var(--foreground)]"
         }`}
       />
@@ -218,7 +287,7 @@ function ChromePointStep({
     </div>
   );
 
-  if (chromeTopRight) {
+  if (topRight) {
     return (
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
         <div className="flex w-full justify-end pr-3 pt-[max(0.5rem,env(safe-area-inset-top))]">
@@ -232,12 +301,16 @@ function ChromePointStep({
     );
   }
 
-  if (iosTop) {
+  if (bottomRight) {
     return (
-      <div className="animate-float-in relative z-10 mx-auto mt-[max(0.75rem,env(safe-area-inset-top))] flex w-full max-w-sm flex-col items-center gap-4 px-4">
-        {target}
-        {bubble}
-        {nav}
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+        <div className="mt-auto flex w-full max-w-sm flex-col items-end gap-3 self-end px-4 pb-2">
+          {nav}
+          {bubble}
+        </div>
+        <div className="mb-1 flex justify-end pr-3 pb-[env(safe-area-inset-bottom)]">
+          <div className="animate-bounce">{target}</div>
+        </div>
       </div>
     );
   }
@@ -278,9 +351,9 @@ function pointCopy(
     default:
       return {
         title: ipad
-          ? "tap Share at the top of Safari"
-          : "tap Share at the bottom of Safari",
-        sub: "the square with the arrow pointing up",
+          ? "tap the ••• in Safari's toolbar"
+          : "tap the ••• in the bottom-right of Safari",
+        sub: "three dots, next to the address bar",
       };
   }
 }
@@ -292,7 +365,56 @@ function pointIcon(platform: InstallPlatform): ReactNode {
   if (platform === "desktop-chrome") {
     return <InstallDesktopIcon width={28} height={28} />;
   }
+  if (platform === "ios-safari") {
+    return <MoreHorizontalIcon width={28} height={28} />;
+  }
   return <ShareIcon width={28} height={28} />;
+}
+
+function ShareInMenuStep({
+  onNext,
+  onSkip,
+}: {
+  onNext: () => void;
+  onSkip: () => void;
+}) {
+  return (
+    <div className="animate-float-in relative z-10 mx-auto mt-auto mb-8 w-full max-w-sm px-4 pb-[env(safe-area-inset-bottom)]">
+      <div className="rounded-3xl bg-white p-5 shadow-lg">
+        <p className="mb-3 text-center text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
+          in the Safari menu
+        </p>
+        <div className="mb-4 flex items-center gap-3 rounded-2xl border-2 border-[var(--primary)] bg-[var(--primary-soft)] px-3 py-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[var(--foreground)] shadow-sm">
+            <ShareIcon width={20} height={20} />
+          </span>
+          <div className="min-w-0 text-left">
+            <p className="text-sm font-bold text-[var(--foreground)]">Share</p>
+            <p className="text-[11px] font-medium text-[var(--muted)]">
+              first row — square with the arrow pointing up
+            </p>
+          </div>
+        </div>
+        <p className="mb-4 text-center text-sm leading-snug text-[var(--foreground)]">
+          tap Share, then the iOS share sheet will open.
+        </p>
+        <button
+          type="button"
+          onClick={onNext}
+          className="ui-button w-full rounded-full bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95"
+        >
+          next →
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="mt-2 w-full py-2 text-xs font-semibold text-[var(--muted)]"
+        >
+          skip
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function ViewMoreStep({
@@ -303,7 +425,7 @@ function ViewMoreStep({
   onSkip: () => void;
 }) {
   return (
-    <div className="animate-float-in relative z-10 mx-auto my-auto w-full max-w-sm px-4">
+    <div className="animate-float-in relative z-10 mx-auto mt-auto mb-8 w-full max-w-sm px-4 pb-[env(safe-area-inset-bottom)]">
       <div className="rounded-3xl bg-white p-5 shadow-lg">
         <p className="mb-3 text-center text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
           in the share sheet
@@ -415,10 +537,11 @@ function addRow(platform: InstallPlatform): {
         icon: <InstallDesktopIcon width={20} height={20} />,
       };
     case "ios-chrome":
+    case "ios-safari":
       return {
         caption: "after View More",
         title: "Add to Home Screen",
-        sub: "scroll down the list — it's usually near the bottom",
+        sub: "scroll down the list — look for the square with a plus",
         footer: "then tap Add in the top-right. sudogku will land on your home screen like any other app.",
         icon: <PlusIcon width={20} height={20} />,
       };
