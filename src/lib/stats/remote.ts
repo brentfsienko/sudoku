@@ -31,10 +31,15 @@ function applyWallet(data: UserData, wallet: WalletSnapshot): UserData {
   });
 }
 
-/** Reads the signed-in user's saved data row, or null if none exists yet. */
-export async function fetchRemote(userId: string): Promise<UserData | null> {
+/** Reads the signed-in user's saved data row. */
+export type RemoteLoad =
+  | { ok: true; data: UserData }
+  | { ok: true; data: null }
+  | { ok: false };
+
+export async function loadRemote(userId: string): Promise<RemoteLoad> {
   const sb = getSupabase();
-  if (!sb) return null;
+  if (!sb) return { ok: false };
   const { data, error } = await sb
     .from("user_data")
     .select("data")
@@ -42,9 +47,9 @@ export async function fetchRemote(userId: string): Promise<UserData | null> {
     .maybeSingle();
   if (error) {
     console.warn("[stats] remote fetch failed:", error.message);
-    return null;
+    return { ok: false };
   }
-  if (!data) return null;
+  if (!data) return { ok: true, data: null };
   const raw = data.data as Partial<UserData>;
   const normalized = normalizeUserData(raw);
   const needsRepair =
@@ -55,7 +60,13 @@ export async function fetchRemote(userId: string): Promise<UserData | null> {
   if (needsRepair) {
     void upsertRemote(userId, normalized);
   }
-  return normalized;
+  return { ok: true, data: normalized };
+}
+
+/** Reads the signed-in user's saved data row, or null if none / fetch failed. */
+export async function fetchRemote(userId: string): Promise<UserData | null> {
+  const loaded = await loadRemote(userId);
+  return loaded.ok ? loaded.data : null;
 }
 
 function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
@@ -69,21 +80,28 @@ function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
 
 /**
  * Upsert gameplay stats. Server preserves bones / ownedExclusiveDogs.
- * No legacy table upsert fallback — direct writes are revoked by RLS.
+ * Returns the saved blob (with server wallet) so every device can pin to it.
  */
-export async function upsertRemote(userId: string, data: UserData): Promise<void> {
+export async function upsertRemote(
+  userId: string,
+  data: UserData,
+): Promise<UserData | null> {
   const sb = getSupabase();
-  if (!sb) return;
+  if (!sb) return null;
   try {
-    const { error } = await withTimeout(
+    const { data: returned, error } = await withTimeout(
       sb.rpc("upsert_user_stats", { p_data: data }),
       12_000,
     );
     if (error) {
       console.warn("[stats] upsert_user_stats failed:", error.message);
+      return null;
     }
+    if (!returned || typeof returned !== "object") return null;
+    return normalizeUserData(returned as Partial<UserData>);
   } catch (err) {
     console.warn("[stats] remote upsert failed:", err);
+    return null;
   }
 }
 
@@ -101,7 +119,14 @@ function parseWalletPayload(raw: unknown): WalletSnapshot | null {
   const owned = Array.isArray(obj.ownedExclusiveDogs)
     ? (obj.ownedExclusiveDogs as ExclusiveDogId[])
     : [];
-  return { bones: Math.max(0, bonesNum), ownedExclusiveDogs: owned };
+  return {
+    bones: Math.max(0, bonesNum),
+    ownedExclusiveDogs: owned,
+    bonesUpdatedAt:
+      typeof obj.bonesUpdatedAt === "number" && obj.bonesUpdatedAt > 0
+        ? obj.bonesUpdatedAt
+        : Date.now(),
+  };
 }
 
 /**
@@ -155,10 +180,8 @@ export async function purchaseExclusiveDogRemote(
   }
   if (!data || typeof data !== "object") return null;
   const obj = data as Record<string, unknown>;
-  const wallet = parseWalletPayload(data) ?? {
-    bones: 0,
-    ownedExclusiveDogs: [],
-  };
+  const wallet = parseWalletPayload(data);
+  if (!wallet) return null;
   return {
     ok: obj.ok === true,
     error: typeof obj.error === "string" ? obj.error : undefined,

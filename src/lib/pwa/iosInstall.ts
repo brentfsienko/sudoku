@@ -1,6 +1,6 @@
 "use client";
 
-const KEY = "sudogku-install-coach-v2";
+const KEY = "sudogku-install-coach-v3";
 
 export type InstallPlatform =
   | "ios-safari"
@@ -70,7 +70,7 @@ export async function persistInstallCoachSeen(): Promise<void> {
   try {
     const { loadUserData, saveUserData } = await import("@/lib/stats/store");
     const data = await loadUserData();
-    await saveUserData({ ...data, installCoachSeen: true });
+    await saveUserData({ ...data, installCoachPathSeen: true });
   } catch {
     // localStorage is enough if cloud write fails
   }

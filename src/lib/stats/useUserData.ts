@@ -215,6 +215,31 @@ export function useUserData(): UseUserData {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const uid = user?.id;
+    if (!uid || !isSupabaseConfigured) return;
+    const sb = getSupabase();
+    if (!sb) return;
+    const channel = sb
+      .channel(`user-data-wallet-${uid}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_data",
+          filter: `user_id=eq.${uid}`,
+        },
+        () => {
+          void refresh();
+        },
+      )
+      .subscribe();
+    return () => {
+      void sb.removeChannel(channel);
+    };
+  }, [user?.id, refresh]);
+
   const updateProfile = useCallback(
     async (next: Partial<Profile>) => {
       const current = dataRef.current ?? (await loadUserData());

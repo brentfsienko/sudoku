@@ -119,6 +119,8 @@ export type UserData = {
    * reappears on another device for the same account.
    */
   installCoachSeen?: boolean;
+  /** Stacked path overlay (Safari/Chrome steps all at once) was dismissed. */
+  installCoachPathSeen?: boolean;
 };
 
 /** Pick the newer profile customization when merging two device copies. */
@@ -357,6 +359,9 @@ export function mergeUserData(local: UserData, remote: UserData): UserData {
     activeSolos: mergeActiveSolos(local.activeSolos, remote.activeSolos),
     finishedSoloIds: mergeFinishedIds(local.finishedSoloIds, remote.finishedSoloIds),
     installCoachSeen: Boolean(local.installCoachSeen || remote.installCoachSeen),
+    installCoachPathSeen: Boolean(
+      local.installCoachPathSeen || remote.installCoachPathSeen,
+    ),
   });
 }
 
@@ -517,6 +522,7 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
       ? (raw.finishedSoloIds as string[])
       : [],
     installCoachSeen: Boolean(raw.installCoachSeen),
+    installCoachPathSeen: Boolean(raw.installCoachPathSeen),
   };
   return {
     ...data,

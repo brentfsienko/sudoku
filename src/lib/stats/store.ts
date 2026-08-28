@@ -17,8 +17,9 @@ import { loadLocal, saveLocal } from "./local";
 import {
   applyWallet,
   awardGameBonesRemote,
-  fetchRemote,
+  loadRemote,
   upsertRemote,
+  walletFromData,
 } from "./remote";
 import { hasInstallCoachCompleted } from "@/lib/pwa/iosInstall";
 import {
@@ -64,8 +65,9 @@ function withDeviceData(data: UserData): UserData {
     ...data,
     activeSolos: mergeActiveSolos(data.activeSolos, loadActiveSolos()),
     finishedSoloIds: [...new Set([...(data.finishedSoloIds ?? []), ...getFinishedIds()])],
-    installCoachSeen:
-      Boolean(data.installCoachSeen) || hasInstallCoachCompleted(),
+    installCoachSeen: Boolean(data.installCoachSeen),
+    installCoachPathSeen:
+      Boolean(data.installCoachPathSeen) || hasInstallCoachCompleted(),
   };
 }
 
@@ -79,6 +81,14 @@ function applyFinishedIdsToDevice(data: UserData): void {
   if (data.finishedSoloIds?.length) {
     applyFinishedIds(data.finishedSoloIds);
   }
+}
+
+async function loadRemoteRetry(uid: string) {
+  let loaded = await withTimeout(loadRemote(uid), 6000, { ok: false } as const);
+  if (!loaded.ok) {
+    loaded = await withTimeout(loadRemote(uid), 6000, { ok: false } as const);
+  }
+  return loaded;
 }
 
 /**
@@ -96,9 +106,9 @@ export async function loadUserData(): Promise<UserData> {
     return withDeviceActiveSolos(loadLocal());
   }
 
-  const remote = await withTimeout(fetchRemote(uid), 6000, null);
-  if (remote) {
-    data = mergeUserData(data, remote);
+  const remote = await loadRemoteRetry(uid);
+  if (remote.ok && remote.data) {
+    data = mergeUserData(data, remote.data);
   }
   applyFinishedIdsToDevice(data);
   applyActiveSolosToDeviceCache(data);
@@ -110,11 +120,17 @@ export async function loadUserData(): Promise<UserData> {
 export const STATS_UPDATED_EVENT = "sudogku:stats-updated";
 
 export async function saveUserData(data: UserData): Promise<void> {
-  const withActives = withDeviceActiveSolos(data);
-  applyActiveSolosToDeviceCache(withActives);
-  saveLocal(withActives);
+  let next = withDeviceActiveSolos(data);
+  applyActiveSolosToDeviceCache(next);
+  saveLocal(next);
   const uid = await currentUserId();
-  if (uid) await upsertRemote(uid, withActives);
+  if (uid) {
+    const saved = await upsertRemote(uid, next);
+    if (saved) {
+      next = applyWallet(next, walletFromData(saved));
+      saveLocal(next);
+    }
+  }
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(STATS_UPDATED_EVENT));
   }
@@ -124,17 +140,22 @@ export async function saveUserData(data: UserData): Promise<void> {
 export async function seedRemoteIfMissing(): Promise<void> {
   const uid = await currentUserId();
   if (!uid) return;
-  const remote = await withTimeout(fetchRemote(uid), 6000, null);
-  if (!remote) void upsertRemote(uid, withDeviceActiveSolos(loadLocal()));
+  const remote = await loadRemoteRetry(uid);
+  if (!remote.ok) return;
+  if (!remote.data) void upsertRemote(uid, withDeviceActiveSolos(loadLocal()));
 }
 
 async function loadForWrite(): Promise<UserData> {
   const uid = await currentUserId();
   let data = loadLocal();
   if (!uid) return data;
-  const remote = await withTimeout(fetchRemote(uid), 6000, null);
-  if (remote) data = mergeUserData(data, remote);
+  const remote = await loadRemoteRetry(uid);
+  if (remote.ok && remote.data) data = mergeUserData(data, remote.data);
   return data;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /** Apply a game result, award bones on the server wallet when signed in. */
@@ -145,13 +166,23 @@ async function commitGameWithBones(
 ): Promise<void> {
   const delta = Math.max(0, (dataAfter.bones ?? 0) - (dataBefore.bones ?? 0));
   let next = dataAfter;
-  if (delta > 0 && gameId) {
-    const wallet = await awardGameBonesRemote(gameId, delta);
+  const uid = await currentUserId();
+  if (delta > 0 && gameId && uid) {
+    let wallet = await awardGameBonesRemote(gameId, delta);
+    if (!wallet) {
+      await sleep(500);
+      wallet = await awardGameBonesRemote(gameId, delta);
+    }
     if (wallet) {
       next = applyWallet(dataAfter, wallet);
     } else {
-      // Signed-out or RPC unavailable: keep local delta only (not synced as mint).
-      next = dataAfter;
+      // Don't keep an optimistic local total — other devices use the server wallet.
+      next = {
+        ...dataAfter,
+        bones: dataBefore.bones,
+        bonesUpdatedAt: dataBefore.bonesUpdatedAt,
+        ownedExclusiveDogs: dataBefore.ownedExclusiveDogs,
+      };
     }
   }
   await saveUserData(next);

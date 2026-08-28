@@ -7,3 +7,13 @@
 
 alter table public.friend_requests replica identity full;
 alter table public.game_invites    replica identity full;
+
+-- user_data PK is user_id, so default replica identity is enough to filter
+-- on that column. Add the table to the realtime publication so every signed-in
+-- device sees wallet (bones) updates immediately.
+do $$
+begin
+  alter publication supabase_realtime add table public.user_data;
+exception
+  when duplicate_object then null;
+end $$;

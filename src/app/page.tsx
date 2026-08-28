@@ -188,7 +188,7 @@ export default function Home() {
       )}
       <IosInstallCoach
         ready={playReady && !signInGateOpen && !coachmarkStep && !userData.loading}
-        accountSeen={Boolean(userData.data?.installCoachSeen)}
+        accountSeen={Boolean(userData.data?.installCoachPathSeen)}
       />
       <AppSplash ready={playReady} />
     <MobileAppRoot>

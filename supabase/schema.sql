@@ -9,6 +9,8 @@ create table if not exists public.user_data (
 
 -- Row-level security: each signed-in user can only read their own row.
 -- Writes go through security definer RPCs (upsert_user_stats, award_game_bones, …).
+-- Realtime on this table keeps the bone wallet in sync across devices
+-- (see realtime_replica_identity.sql).
 alter table public.user_data enable row level security;
 
 drop policy if exists "read own data" on public.user_data;
