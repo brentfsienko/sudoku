@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Board } from "./Board";
 import { NumberPad } from "./NumberPad";
 import { ActionBar } from "./ActionBar";
@@ -63,7 +63,7 @@ type Props = {
     squaresFilled: number;
     bonesFound: number;
     winBoneBonus: number;
-  }) => void;
+  }) => void | Promise<void>;
 };
 
 function useNow(active: boolean): number {
@@ -170,6 +170,7 @@ export function GameScreen({
   }, [solved, mode, opponent, contrib, me.role]);
 
   const finishReported = useRef(false);
+  const persistRef = useRef<Promise<void>>(Promise.resolve());
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
 
@@ -177,7 +178,7 @@ export function GameScreen({
     finishReported.current = false;
   }, [snapshot.puzzle, snapshot.startedAt]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!done || finishReported.current) return;
     finishReported.current = true;
 
@@ -191,18 +192,20 @@ export function GameScreen({
       elapsedSeconds: elapsed,
       mistakes: snapshot.mistakes,
     });
-    onFinishRef.current?.({
-      solved,
-      score: computedFinal,
-      elapsedSeconds: elapsed,
-      mistakes: snapshot.mistakes,
-      hintsUsed: snapshot.hintsUsed,
-      squaresFilled: contrib[me.role] ?? contrib.total,
-      bonesFound,
-      winBoneBonus,
-    });
-    // Fire once when the board hits "done". Do not depend on onFinish /
-    // sessionBones — a re-render used to cancel the rAF and skip the award.
+    persistRef.current = Promise.resolve(
+      onFinishRef.current?.({
+        solved,
+        score: computedFinal,
+        elapsedSeconds: elapsed,
+        mistakes: snapshot.mistakes,
+        hintsUsed: snapshot.hintsUsed,
+        squaresFilled: contrib[me.role] ?? contrib.total,
+        bonesFound,
+        winBoneBonus,
+      }),
+    ).then(() => undefined);
+    // Fire once when the board hits "done". Layout effect runs before paint
+    // so Home can't navigate away before persist is scheduled.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done, snapshot.puzzle, snapshot.startedAt]);
 
@@ -366,8 +369,24 @@ export function GameScreen({
           opponent={opponent}
           finalScore={computedFinal}
           solved={solved}
-          onRematch={onRematch}
-          onHome={onExit}
+          onRematch={
+            onRematch
+              ? () => {
+                  void persistRef.current
+                    .catch((err) => {
+                      console.warn("[game] persist failed:", err);
+                    })
+                    .then(onRematch);
+                }
+              : undefined
+          }
+          onHome={() => {
+            void persistRef.current
+              .catch((err) => {
+                console.warn("[game] persist failed:", err);
+              })
+              .then(onExit);
+          }}
           winBoneBonus={winBoneBonus}
           bonesFound={bonePlay.sessionBones}
           penaltySeconds={penaltySeconds > 0 ? penaltySeconds : undefined}

@@ -791,6 +791,10 @@ export type SoloResult = {
   daily?: boolean;
 };
 
+export function soloBoneAward(r: Pick<SoloResult, "won" | "bonesFound">): number {
+  return Math.max(0, r.bonesFound) + (r.won ? GAME_WIN_BONE_BONUS : 0);
+}
+
 export type MultiResult = {
   mode: "coop" | "competitive";
   solved: boolean;
@@ -804,6 +808,18 @@ export type MultiResult = {
   score: number;
   bonesFound: number;
 };
+
+export function multiBoneAward(r: MultiResult): number {
+  const winBonus =
+    r.mode === "coop"
+      ? r.solved
+        ? GAME_WIN_BONE_BONUS
+        : 0
+      : r.mySquares > r.opponentSquares
+        ? GAME_WIN_BONE_BONUS
+        : 0;
+  return Math.max(0, r.bonesFound) + winBonus;
+}
 
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);

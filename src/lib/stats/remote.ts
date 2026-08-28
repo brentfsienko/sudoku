@@ -150,6 +150,18 @@ export async function awardGameBonesRemote(
   return parseWalletPayload(data);
 }
 
+/** Current server wallet (ledger-backed). */
+export async function getBoneWalletRemote(): Promise<WalletSnapshot | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb.rpc("get_bone_wallet");
+  if (error) {
+    console.warn("[stats] get_bone_wallet failed:", error.message);
+    return null;
+  }
+  return parseWalletPayload(data);
+}
+
 /** @deprecated Use awardGameBonesRemote — positive add_bones is rejected server-side. */
 export async function addBonesRemote(
   amount: number,

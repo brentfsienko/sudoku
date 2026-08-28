@@ -207,10 +207,13 @@ export function useUserData(): UseUserData {
     const onVisible = () => {
       if (document.visibilityState === "visible") void refresh();
     };
+    const onStats = () => {
+      void refresh();
+    };
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("focus", onVisible);
     window.addEventListener("pageshow", onVisible);
-    window.addEventListener(STATS_UPDATED_EVENT, onVisible);
+    window.addEventListener(STATS_UPDATED_EVENT, onStats);
 
     return () => {
       active = false;
@@ -218,7 +221,7 @@ export function useUserData(): UseUserData {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", onVisible);
       window.removeEventListener("pageshow", onVisible);
-      window.removeEventListener(STATS_UPDATED_EVENT, onVisible);
+      window.removeEventListener(STATS_UPDATED_EVENT, onStats);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -236,6 +239,18 @@ export function useUserData(): UseUserData {
           event: "*",
           schema: "public",
           table: "user_data",
+          filter: `user_id=eq.${uid}`,
+        },
+        () => {
+          void refresh();
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "bone_wallets",
           filter: `user_id=eq.${uid}`,
         },
         () => {

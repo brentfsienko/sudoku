@@ -124,7 +124,7 @@ function SoloGame({
       onExit={persistAndExit}
       onAbandon={abandonAndExit}
       onRematch={onRematch}
-      onFinish={({
+      onFinish={async ({
         solved,
         score,
         elapsedSeconds,
@@ -132,24 +132,22 @@ function SoloGame({
         hintsUsed,
         squaresFilled,
         bonesFound,
-      }) =>
-        void (async () => {
-          await recordSoloGame(
-            {
-              won: solved,
-              score,
-              difficulty: snapshot.difficulty,
-              elapsedSeconds,
-              mistakes,
-              hintsUsed,
-              squaresFilled,
-              bonesFound,
-            },
-            { activeId },
-          );
-          onWalletSync();
-        })()
-      }
+      }) => {
+        await recordSoloGame(
+          {
+            won: solved,
+            score,
+            difficulty: snapshot.difficulty,
+            elapsedSeconds,
+            mistakes,
+            hintsUsed,
+            squaresFilled,
+            bonesFound,
+          },
+          { activeId },
+        );
+        onWalletSync();
+      }}
     />
   );
 }

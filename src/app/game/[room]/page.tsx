@@ -170,7 +170,7 @@ function RoomInner({
       onRematch={game.rematch}
       streak={wallet.streak}
       savedBones={wallet.bones}
-      onFinish={({
+      onFinish={async ({
         solved,
         score,
         elapsedSeconds,
@@ -181,7 +181,7 @@ function RoomInner({
         if (!snap) return;
         const contrib = cellContributions(snap.puzzle, snap.solution, snap.cells);
         const oppRole = game.opponent?.role;
-        void recordMultiGame(
+        await recordMultiGame(
           {
             mode: snap.mode === "competitive" ? "competitive" : "coop",
             solved,
@@ -196,7 +196,8 @@ function RoomInner({
             bonesFound,
           },
           { roomCode: code },
-        ).then(syncWallet);
+        );
+        syncWallet();
       }}
     />
     </>

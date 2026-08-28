@@ -18,6 +18,7 @@ import { loadLocal, saveLocal } from "./local";
 import {
   applyWallet,
   awardGameBonesRemote,
+  getBoneWalletRemote,
   loadRemote,
   upsertRemote,
   walletFromData,
@@ -29,6 +30,8 @@ import {
   emptyUserData,
   mergeActiveSolos,
   mergeUserData,
+  multiBoneAward,
+  soloBoneAward,
   type MultiResult,
   type SoloResult,
   type UserData,
@@ -120,10 +123,10 @@ export async function loadUserData(): Promise<UserData> {
 
   const remote = await loadRemoteRetry(uid);
   if (remote.ok && remote.data) {
-    // Remote is this account's cloud blob. Local is this account's scoped
-    // cache only — never the guest / other-account unscoped keys.
     data = mergeUserData(data, remote.data);
   }
+  const wallet = await getBoneWalletRemote();
+  if (wallet) data = applyWallet(data, wallet);
   data = { ...data, accountId: uid };
   applyFinishedIdsToDevice(data);
   applyActiveSolosToDeviceCache(data);
@@ -172,6 +175,8 @@ async function loadForWrite(): Promise<UserData> {
   if (!uid) return data;
   const remote = await loadRemoteRetry(uid);
   if (remote.ok && remote.data) data = mergeUserData(data, remote.data);
+  const wallet = await getBoneWalletRemote();
+  if (wallet) data = applyWallet(data, wallet);
   return uid ? { ...data, accountId: uid } : data;
 }
 
@@ -179,30 +184,31 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Apply a game result, award bones on the server wallet when signed in. */
+/** Award bones on the server ledger, then pin the returned wallet locally. */
 async function commitGameWithBones(
-  dataBefore: UserData,
   dataAfter: UserData,
   gameId: string,
+  awardAmount: number,
 ): Promise<void> {
-  const delta = Math.max(0, (dataAfter.bones ?? 0) - (dataBefore.bones ?? 0));
   let next = dataAfter;
   const uid = await currentUserId();
-  if (delta > 0 && gameId && uid) {
-    let wallet = await awardGameBonesRemote(gameId, delta);
-    if (!wallet) {
+  if (uid) {
+    let wallet =
+      awardAmount > 0
+        ? await awardGameBonesRemote(gameId, awardAmount)
+        : await getBoneWalletRemote();
+    if (awardAmount > 0 && !wallet) {
       await sleep(500);
-      wallet = await awardGameBonesRemote(gameId, delta);
+      wallet = await awardGameBonesRemote(gameId, awardAmount);
     }
+    if (!wallet) wallet = await getBoneWalletRemote();
     if (wallet) {
       next = applyWallet(dataAfter, wallet);
-    } else {
-      // Don't keep an optimistic local total — other devices use the server wallet.
+    } else if (awardAmount > 0) {
+      // Don't keep an optimistic local total — the DB wallet is source of truth.
       next = {
         ...dataAfter,
-        bones: dataBefore.bones,
-        bonesUpdatedAt: dataBefore.bonesUpdatedAt,
-        ownedExclusiveDogs: dataBefore.ownedExclusiveDogs,
+        bones: Math.max(0, (dataAfter.bones ?? 0) - awardAmount),
       };
     }
   }
@@ -221,14 +227,17 @@ export async function recordSoloGame(
   const gameId =
     opts?.activeId ??
     `solo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  const awardAmount = soloBoneAward(result);
 
   if (opts?.activeId) {
-    // Block duplicate stats/bones if this game was already recorded locally.
-    if (!claimSoloFinish(opts.activeId)) {
-      removeActiveSolo(opts.activeId);
+    const isNewFinish = claimSoloFinish(opts.activeId);
+    removeActiveSolo(opts.activeId);
+    if (!isNewFinish) {
+      // Duplicate finish (or a leftover finished id) — still credit the ledger.
+      const data = await loadForWrite();
+      await commitGameWithBones(data, gameId, awardAmount);
       return;
     }
-    removeActiveSolo(opts.activeId);
   } else {
     claimSoloFinish(gameId);
   }
@@ -244,9 +253,8 @@ export async function recordSoloGame(
   }
 
   const bonesFound = Math.max(0, result.bonesFound);
-  const before = data;
   const after = applySoloResult(data, { ...result, bonesFound });
-  await commitGameWithBones(before, after, gameId);
+  await commitGameWithBones(after, gameId, awardAmount);
 }
 
 /**
@@ -338,7 +346,7 @@ export async function recordMultiGame(
   const data = await loadForWrite();
   const bonesFound = Math.max(0, result.bonesFound);
   const after = applyMultiResult(data, { ...result, bonesFound });
-  await commitGameWithBones(data, after, gameId);
+  await commitGameWithBones(after, gameId, multiBoneAward({ ...result, bonesFound }));
 }
 
 let activeSoloPersistTimer: ReturnType<typeof setTimeout> | null = null;

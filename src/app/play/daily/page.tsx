@@ -132,53 +132,55 @@ function DailyGame({
       onExit={handleExit}
       onAbandon={abandonAndExit}
       // No rematch for daily — the overlay will only show the Home button.
-      onFinish={({ solved, score, elapsedSeconds, mistakes, hintsUsed, squaresFilled, bonesFound }) =>
-        void (async () => {
-          await recordSoloGame(
-            {
-              won: solved,
-              score,
-              difficulty: snapshot.difficulty,
-              elapsedSeconds,
-              mistakes,
-              hintsUsed,
-              squaresFilled,
-              bonesFound,
-              daily: true,
-            },
-            { activeId },
-          );
+      onFinish={async ({
+        solved,
+        score,
+        elapsedSeconds,
+        mistakes,
+        hintsUsed,
+        squaresFilled,
+        bonesFound,
+      }) => {
+        await recordSoloGame(
+          {
+            won: solved,
+            score,
+            difficulty: snapshot.difficulty,
+            elapsedSeconds,
+            mistakes,
+            hintsUsed,
+            squaresFilled,
+            bonesFound,
+            daily: true,
+          },
+          { activeId },
+        );
 
-          // Save result locally and submit to Supabase for both outcomes.
-          // For failures: elapsedSeconds is ignored in ranking (sorted to bottom).
-          // Server verifies the board against the daily solution when solved.
-          saveDailyResultLocal(dateStr, solved ? elapsedSeconds : 0, solved);
-          const submitted = await submitDailyResult(
+        saveDailyResultLocal(dateStr, solved ? elapsedSeconds : 0, solved);
+        const submitted = await submitDailyResult(
+          dateStr,
+          elapsedSeconds,
+          mistakes,
+          solved,
+          solved ? snapshot.solution : undefined,
+        );
+        if (!submitted.ok) {
+          console.warn("[daily] submit failed:", submitted.error);
+          await new Promise((r) => setTimeout(r, 800));
+          const retry = await submitDailyResult(
             dateStr,
             elapsedSeconds,
             mistakes,
             solved,
             solved ? snapshot.solution : undefined,
           );
-          if (!submitted.ok) {
-            console.warn("[daily] submit failed:", submitted.error);
-            // Retry once after a short delay (cold start / flaky network).
-            await new Promise((r) => setTimeout(r, 800));
-            const retry = await submitDailyResult(
-              dateStr,
-              elapsedSeconds,
-              mistakes,
-              solved,
-              solved ? snapshot.solution : undefined,
-            );
-            if (!retry.ok) {
-              console.warn("[daily] submit retry failed:", retry.error);
-            }
+          if (!retry.ok) {
+            console.warn("[daily] submit retry failed:", retry.error);
           }
+        }
 
-          finishedRef.current = true;
-        })()
-      }
+        finishedRef.current = true;
+      }}
     />
   );
 }

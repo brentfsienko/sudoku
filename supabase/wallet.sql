@@ -2,6 +2,9 @@
 -- Stats blob upserts must not clobber bones / ownedExclusiveDogs — those
 -- are only changed by award_game_bones / purchase_exclusive_dog.
 -- Also run security_hardening.sql to revoke direct user_data writes.
+--
+-- For the ledger-backed wallet (bone_wallets + bone_ledger), run bone_ledger.sql
+-- after this file. That migration is the source of truth going forward.
 
 -- Upsert gameplay stats while preserving the server wallet fields.
 create or replace function public.upsert_user_stats(p_data jsonb)
