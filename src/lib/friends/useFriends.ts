@@ -13,6 +13,7 @@ import {
   sendFriendRequest,
   syncPublicProfile,
   updateUsername,
+  deleteGameInvite,
 } from "./api";
 import type { Friend, FriendRequest, GameInvite, PublicProfile } from "./types";
 
@@ -82,6 +83,15 @@ export function useFriends(user: AuthUser | null, profile: Profile | null) {
     [refresh],
   );
 
+  const dismissInvite = useCallback(
+    async (inviteId: string) => {
+      const res = await deleteGameInvite(inviteId);
+      if (res.ok) await refresh();
+      return res;
+    },
+    [refresh],
+  );
+
   const setUsername = useCallback(
     async (username: string) => {
       if (!user) return { ok: false, error: "Sign in to set a username." };
@@ -102,6 +112,7 @@ export function useFriends(user: AuthUser | null, profile: Profile | null) {
     search,
     requestFriend,
     respond,
+    dismissInvite,
     setUsername,
   };
 }

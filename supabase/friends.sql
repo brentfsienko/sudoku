@@ -138,11 +138,18 @@ create policy "game_invites update guest"
   using (auth.uid() = guest_id)
   with check (auth.uid() = guest_id);
 
+drop policy if exists "game_invites delete involved" on public.game_invites;
+create policy "game_invites delete involved"
+  on public.game_invites for delete
+  to authenticated
+  using (auth.uid() = host_id or auth.uid() = guest_id);
+
 -- Guests/receivers may only flip status, not rewrite other columns.
 revoke update on table public.friend_requests from authenticated;
 grant update (status) on table public.friend_requests to authenticated;
 revoke update on table public.game_invites from authenticated;
 grant update (status) on table public.game_invites to authenticated;
+grant delete on table public.game_invites to authenticated;
 
 -- Friends can read each other's daily results (table created in schema.sql).
 drop policy if exists "read friends daily results" on public.daily_results;

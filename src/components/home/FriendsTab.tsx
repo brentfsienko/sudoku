@@ -246,15 +246,22 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
               primary={inv.host.username}
               secondary={`${GAME_MODE_LABELS[inv.mode]} · ${inv.roomCode}`}
               action={
-                <FriendPillButton
-                  variant="primary"
-                  onClick={async () => {
-                    await markInviteJoined(inv.id);
-                    router.push(`/game/${inv.roomCode}?m=${inv.mode}&d=${inv.difficulty}`);
-                  }}
-                >
-                  Join
-                </FriendPillButton>
+                <div className="flex gap-2">
+                  <FriendPillButton
+                    variant="primary"
+                    onClick={async () => {
+                      await markInviteJoined(inv.id);
+                      router.push(`/game/${inv.roomCode}?m=${inv.mode}&d=${inv.difficulty}`);
+                    }}
+                  >
+                    Join
+                  </FriendPillButton>
+                  <FriendPillButton
+                    onClick={() => void friends.dismissInvite(inv.id)}
+                  >
+                    Decline
+                  </FriendPillButton>
+                </div>
               }
             />
           ))}

@@ -426,6 +426,16 @@ export async function markInviteJoined(inviteId: string): Promise<void> {
   await sb.from("game_invites").update({ status: "joined" }).eq("id", inviteId);
 }
 
+export async function deleteGameInvite(
+  inviteId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const sb = getSupabase();
+  if (!sb) return { ok: false, error: "Not configured" };
+  const { error } = await sb.from("game_invites").delete().eq("id", inviteId);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 /** Multiplayer win/loss totals for the Me tab bar. */
 export function multiWinLoss(multi: {
   coopPlayed: number;

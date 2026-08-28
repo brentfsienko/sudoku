@@ -294,6 +294,7 @@ grant update (status) on table public.friend_requests to authenticated;
 
 revoke update on table public.game_invites from authenticated;
 grant update (status) on table public.game_invites to authenticated;
+grant delete on table public.game_invites to authenticated;
 
 create or replace function public.are_friends(a uuid, b uuid)
 returns boolean
@@ -324,6 +325,12 @@ create policy "game_invites insert host"
     and host_id <> guest_id
     and public.are_friends(host_id, guest_id)
   );
+
+drop policy if exists "game_invites delete involved" on public.game_invites;
+create policy "game_invites delete involved"
+  on public.game_invites for delete
+  to authenticated
+  using (auth.uid() = host_id or auth.uid() = guest_id);
 
 -- ─── 6. Trivia: authenticated only ──────────────────────────────────────────
 create table if not exists public.trivia_fact_stats (
