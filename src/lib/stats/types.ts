@@ -114,6 +114,11 @@ export type UserData = {
    * Synced to cloud so every device knows which games to permanently hide.
    */
   finishedSoloIds?: string[];
+  /**
+   * Add-to-home-screen coach has been shown once. Synced so it never
+   * reappears on another device for the same account.
+   */
+  installCoachSeen?: boolean;
 };
 
 /** Pick the newer profile customization when merging two device copies. */
@@ -351,6 +356,7 @@ export function mergeUserData(local: UserData, remote: UserData): UserData {
     ),
     activeSolos: mergeActiveSolos(local.activeSolos, remote.activeSolos),
     finishedSoloIds: mergeFinishedIds(local.finishedSoloIds, remote.finishedSoloIds),
+    installCoachSeen: Boolean(local.installCoachSeen || remote.installCoachSeen),
   });
 }
 
@@ -510,6 +516,7 @@ export function normalizeUserData(raw: Partial<UserData> | null | undefined): Us
     finishedSoloIds: Array.isArray(raw.finishedSoloIds)
       ? (raw.finishedSoloIds as string[])
       : [],
+    installCoachSeen: Boolean(raw.installCoachSeen),
   };
   return {
     ...data,

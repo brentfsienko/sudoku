@@ -20,6 +20,7 @@ import {
   fetchRemote,
   upsertRemote,
 } from "./remote";
+import { hasInstallCoachCompleted } from "@/lib/pwa/iosInstall";
 import {
   applyMultiResult,
   applySoloResult,
@@ -63,6 +64,8 @@ function withDeviceData(data: UserData): UserData {
     ...data,
     activeSolos: mergeActiveSolos(data.activeSolos, loadActiveSolos()),
     finishedSoloIds: [...new Set([...(data.finishedSoloIds ?? []), ...getFinishedIds()])],
+    installCoachSeen:
+      Boolean(data.installCoachSeen) || hasInstallCoachCompleted(),
   };
 }
 

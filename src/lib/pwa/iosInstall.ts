@@ -1,7 +1,6 @@
 "use client";
 
-const KEY = "sudogku-install-coach";
-const LEGACY_IOS_KEY = "sudogku-ios-install-coach";
+const KEY = "sudogku-install-coach-v2";
 
 export type InstallPlatform =
   | "ios-safari"
@@ -47,10 +46,7 @@ export function getInstallPlatform(): InstallPlatform | null {
 export function hasInstallCoachCompleted(): boolean {
   if (typeof window === "undefined") return true;
   try {
-    return (
-      window.localStorage.getItem(KEY) === "1" ||
-      window.localStorage.getItem(LEGACY_IOS_KEY) === "1"
-    );
+    return window.localStorage.getItem(KEY) === "1";
   } catch {
     return true;
   }
@@ -62,6 +58,21 @@ export function markInstallCoachCompleted(): void {
     window.localStorage.setItem(KEY, "1");
   } catch {
     // ignore quota / private mode
+  }
+}
+
+/**
+ * Persist "shown once" to this browser and to the signed-in account blob
+ * so other devices skip the coach too.
+ */
+export async function persistInstallCoachSeen(): Promise<void> {
+  markInstallCoachCompleted();
+  try {
+    const { loadUserData, saveUserData } = await import("@/lib/stats/store");
+    const data = await loadUserData();
+    await saveUserData({ ...data, installCoachSeen: true });
+  } catch {
+    // localStorage is enough if cloud write fails
   }
 }
 
