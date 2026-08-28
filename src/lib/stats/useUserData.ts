@@ -16,6 +16,7 @@ import { ownsExclusiveDog } from "@/lib/bones/ownership";
 import type { ExclusiveDogId } from "@/lib/theme/dogs";
 import { coerceProfile } from "./profile";
 import type { Profile, UserData } from "./types";
+import { clearUserStorage } from "@/lib/auth/clearUserStorage";
 import {
   applyWallet,
   purchaseExclusiveDogRemote,
@@ -155,6 +156,7 @@ export function useUserData(): UseUserData {
       void (async () => {
         try {
           if (event === "SIGNED_OUT" || !u) {
+            clearUserStorage();
             if (active) {
               setDataBoth(loadLocal());
               setLoading(false);
@@ -164,9 +166,10 @@ export function useUserData(): UseUserData {
           if (event === "PASSWORD_RECOVERY" || event === "USER_UPDATED") {
             return;
           }
-          // On sign-in, clear provisional data so home never paints guest
-          // localStorage (random username / wrong history) as this account.
+          // On sign-in, wipe the previous account's localStorage so this account
+          // never sees another user's profile, stats, active games, or daily results.
           if (event === "SIGNED_IN" && active) {
+            clearUserStorage();
             setLoading(true);
             dataRef.current = null;
             setData(null);
@@ -395,6 +398,7 @@ export function useUserData(): UseUserData {
 
   const signOut = useCallback(async () => {
     const sb = getSupabase();
+    clearUserStorage();
     if (sb) await sb.auth.signOut();
     setUser(null);
     await refresh();
