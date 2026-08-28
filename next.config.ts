@@ -23,7 +23,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.liveblocks.io wss://*.liveblocks.io https://vitals.vercel-insights.com https://alb.reddit.com https://www.redditstatic.com https://pixel-config.reddit.com https://www.reddit.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.liveblocks.io wss://*.liveblocks.io https://vitals.vercel-insights.com https://alb.reddit.com https://www.redditstatic.com https://pixel-config.reddit.com https://www.reddit.com https://fcm.googleapis.com https://updates.push.services.mozilla.com https://*.push.apple.com",
               "worker-src 'self' blob:",
               "frame-ancestors 'none'",
               "base-uri 'self'",

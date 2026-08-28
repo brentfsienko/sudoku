@@ -57,3 +57,39 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+// ── Web Push ──────────────────────────────────────────────────────────────────
+
+self.addEventListener("push", (e) => {
+  const data = (e as PushEvent).data?.json() as {
+    title?: string;
+    body?: string;
+    url?: string;
+    tag?: string;
+  } ?? {};
+
+  (e as PushEvent).waitUntil(
+    self.registration.showNotification(data.title ?? "Sudogku 🐾", {
+      body: data.body ?? "",
+      icon: "/dogs/golden.png",
+      badge: "/dogs/golden.png",
+      data: { url: data.url ?? "/" },
+      tag: data.tag,
+    } as NotificationOptions),
+  );
+});
+
+self.addEventListener("notificationclick", (e) => {
+  const evt = e as NotificationEvent;
+  evt.notification.close();
+  const url: string = (evt.notification.data as { url?: string })?.url ?? "/";
+  evt.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((list) => {
+        const existing = list.find((c) => c.url.includes(url) && "focus" in c);
+        if (existing) return (existing as WindowClient).focus();
+        return self.clients.openWindow(url);
+      }),
+  );
+});

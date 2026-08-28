@@ -1,6 +1,21 @@
 "use client";
 
 import { getSupabase } from "@/lib/supabase/client";
+
+type PushPayload = { title: string; body: string; url?: string; tag?: string };
+
+/** Fire-and-forget — sends a push notification to a user's registered devices. */
+async function sendPush(toUserId: string, payload: PushPayload): Promise<void> {
+  try {
+    await fetch("/api/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ toUserId, ...payload }),
+    });
+  } catch {
+    // Non-critical — swallow errors silently
+  }
+}
 import type { Profile } from "@/lib/stats/types";
 import type { Difficulty, GameMode } from "@/lib/game/types";
 import type { Friend, FriendRequest, GameInvite, PublicProfile } from "./types";
@@ -221,6 +236,15 @@ export async function sendFriendRequest(
     status: "pending",
   });
   if (error) return { ok: false, error: error.message };
+
+  // Fire-and-forget push notification to the recipient
+  void sendPush(toUserId, {
+    title: "new friend request 🐾",
+    body: "someone wants to be your friend on sudogku",
+    url: "/",
+    tag: `friend-request-${fromUserId}`,
+  });
+
   return { ok: true };
 }
 
@@ -383,6 +407,16 @@ export async function createGameInvite(
     status: "pending",
   });
   if (error) return { ok: false, error: error.message };
+
+  // Fire-and-forget push notification to the guest
+  const modeLabel = mode === "coop" ? "co-op" : "head-to-head";
+  void sendPush(guestId, {
+    title: `game invite 🎮`,
+    body: `you've been invited to a ${modeLabel} puzzle on sudogku`,
+    url: `/game/${roomCode}`,
+    tag: `game-invite-${roomCode}`,
+  });
+
   return { ok: true };
 }
 

@@ -120,6 +120,7 @@ function SoloGame({
       me={me}
       streak={streak}
       savedBones={savedBones}
+      analyticsMode="solo"
       onExit={persistAndExit}
       onAbandon={abandonAndExit}
       onRematch={onRematch}

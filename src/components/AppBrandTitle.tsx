@@ -56,17 +56,19 @@ export function AppBrandTitle({
 
   return (
     <div
-      className={`flex gap-4 ${
-        headerRow ? "items-end pb-0.5" : "items-center gap-3.5"
+      className={`flex ${
+        headerRow ? "items-end gap-4 pb-0.5" : "items-center gap-3.5"
       } ${align === "start" ? "justify-start" : "justify-center"} ${
         size === "xl" ? "min-w-0" : ""
       } ${className ?? ""}`}
     >
-      {icon}
+      <span className="flex shrink-0 items-center justify-center self-center">
+        {icon}
+      </span>
       <span
         className={`${titleClass} ${light ? "text-white" : "text-[var(--foreground)]"} ${
           headerRow ? "pb-1" : ""
-        }`}
+        } self-center`}
       >
         {APP_NAME}
       </span>

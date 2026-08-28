@@ -13,6 +13,8 @@ type Options = {
   onRefresh?: () => void;
   /** Called with a pending invite so the caller can navigate to the room. */
   onGameInvite?: (invite: Pick<GameInvite, "roomCode" | "mode">) => void;
+  /** Called the first time any notification arrives — use to show a push permission prompt. */
+  onFirstNotification?: () => void;
 };
 
 /**
@@ -22,11 +24,21 @@ type Options = {
  * Requires Realtime to be enabled for both tables in the Supabase dashboard:
  *   Table Editor → friend_requests / game_invites → Realtime toggle ON
  */
-export function useNotifications({ userId, onRefresh, onGameInvite }: Options) {
+export function useNotifications({ userId, onRefresh, onGameInvite, onFirstNotification }: Options) {
   const onRefreshRef = useRef(onRefresh);
   const onGameInviteRef = useRef(onGameInvite);
+  const onFirstRef = useRef(onFirstNotification);
+  const firedFirstRef = useRef(false);
   onRefreshRef.current = onRefresh;
   onGameInviteRef.current = onGameInvite;
+  onFirstRef.current = onFirstNotification;
+
+  function fireFirst() {
+    if (!firedFirstRef.current) {
+      firedFirstRef.current = true;
+      onFirstRef.current?.();
+    }
+  }
 
   useEffect(() => {
     if (!userId || !isSupabaseConfigured) return;
@@ -48,6 +60,7 @@ export function useNotifications({ userId, onRefresh, onGameInvite }: Options) {
           const fromId = (payload.new as { from_user_id: string }).from_user_id;
           const profile = await fetchMyPublicProfile(fromId);
           const name = profile?.username ?? "someone";
+          fireFirst();
           toast(`🐾 ${name} sent you a friend request`, {
             duration: 6000,
             action: {
@@ -81,6 +94,7 @@ export function useNotifications({ userId, onRefresh, onGameInvite }: Options) {
           const profile = await fetchMyPublicProfile(row.host_id);
           const name = profile?.username ?? "someone";
           const modeLabel = GAME_MODE_LABELS[row.mode] ?? row.mode;
+          fireFirst();
           toast(`🎮 ${name} invited you to ${modeLabel}`, {
             duration: 10000,
             action: {

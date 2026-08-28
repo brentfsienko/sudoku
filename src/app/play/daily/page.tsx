@@ -123,6 +123,7 @@ function DailyGame({
       me={me}
       streak={streak}
       savedBones={savedBones}
+      analyticsMode="daily"
       onExit={handleExit}
       onAbandon={abandonAndExit}
       // No rematch for daily — the overlay will only show the Home button.

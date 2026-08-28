@@ -31,6 +31,7 @@ import {
 } from "@/lib/game/types";
 import type { LivePlayer } from "@/lib/liveblocks/useLiveGame";
 import { useTrackRedditGameStart } from "@/lib/analytics/useTrackRedditGameStart";
+import { useGameEvents } from "@/lib/game/useGameEvents";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -151,12 +152,19 @@ function RoomInner({
   }
 
   return (
+    <>
+      <GameEventsWatcher
+        myRole={game.me.role ?? "host"}
+        mode={game.controller.snapshot.mode}
+        playing={game.controller.snapshot.status === "playing"}
+      />
     <GameScreen
       controller={game.controller}
       me={game.me}
       opponent={game.opponent}
       allPlayers={game.allPlayers}
       peers={game.peers}
+      analyticsMode="multiplayer"
       onExit={exit}
       onRematch={game.rematch}
       streak={wallet.streak}
@@ -190,7 +198,21 @@ function RoomInner({
         ).then(syncWallet);
       }}
     />
+    </>
   );
+}
+
+function GameEventsWatcher({
+  myRole,
+  mode,
+  playing,
+}: {
+  myRole: PlayerRole;
+  mode: GameMode;
+  playing: boolean;
+}) {
+  useGameEvents({ myRole, mode, playing });
+  return null;
 }
 
 /** Liveblocks can report "disconnected" briefly during auth — don't fail on that. */

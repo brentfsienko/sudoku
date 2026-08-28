@@ -28,6 +28,8 @@ import { formatTime } from "@/lib/game/scoring";
 import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { useOnlineFriends } from "@/lib/friends/useOnlineFriends";
 import { useNotifications } from "@/lib/friends/useNotifications";
+import { usePushNotifications } from "@/lib/push/usePushNotifications";
+import { PushPermissionPrompt } from "@/components/pwa/PushPermissionPrompt";
 import { useOnline } from "@/lib/hooks/useOnline";
 import {
   getCoachmarkStep,
@@ -104,6 +106,10 @@ export default function Home() {
   const onlineIds = useOnlineFriends(userData.user?.id ?? null);
   const online = useOnline();
 
+  // Push notification subscription
+  const push = usePushNotifications();
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
+
   // Real-time toasts for friend requests and game invites
   const handleGameInvite = useCallback(
     ({ roomCode }: { roomCode: string }) => {
@@ -115,6 +121,13 @@ export default function Home() {
     userId: userData.user?.id ?? null,
     onRefresh: () => setTab((t) => t), // nudge friends tab to re-fetch on next mount
     onGameInvite: handleGameInvite,
+    // Show the push permission prompt once when the first notification arrives
+    // and the user hasn't granted permission yet
+    onFirstNotification: () => {
+      if (push.supported && push.permission === "default" && !push.subscribed) {
+        setShowPushPrompt(true);
+      }
+    },
   });
   const statsForMe = data ?? emptyUserData();
   const [signInGateOpen, setSignInGateOpen] = useState(false);
@@ -163,6 +176,15 @@ export default function Home() {
         userData={userData}
         onClose={() => setSignInGateOpen(false)}
       />
+      {showPushPrompt && (
+        <PushPermissionPrompt
+          onAllow={async () => {
+            setShowPushPrompt(false);
+            if (userData.user) await push.subscribe(userData.user.id);
+          }}
+          onDismiss={() => setShowPushPrompt(false)}
+        />
+      )}
       <AppSplash ready={playReady} />
     <MobileAppRoot>
       <AppFrame variant={tab === "main" ? "accent" : "background"}>

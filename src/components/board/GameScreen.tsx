@@ -28,6 +28,10 @@ import {
   type PlayerRole,
 } from "@/lib/game/types";
 import { playerColor } from "@/lib/theme/dogs";
+import {
+  trackGameFinish,
+  type GameFinishMode,
+} from "@/lib/analytics/gameFinish";
 
 type Player = { name: string; dogId: string; role: PlayerRole };
 
@@ -43,6 +47,8 @@ type Props = {
   /** End Game from pause — quit without saving progress as active. */
   onAbandon?: () => void;
   onRematch?: () => void;
+  /** Analytics mode for finish metric (solo / daily / multiplayer). */
+  analyticsMode?: GameFinishMode;
   /** Called once when the game reaches a finished state. */
   streak?: number;
   savedBones?: number;
@@ -78,6 +84,7 @@ export function GameScreen({
   onAbandon,
   onRematch,
   onFinish,
+  analyticsMode,
   streak = 0,
   savedBones = 0,
 }: Props) {
@@ -92,6 +99,8 @@ export function GameScreen({
   const isMulti = mode !== "single";
   const done = snapshot.status === "done";
   const paused = snapshot.status === "paused";
+  const finishAnalyticsMode: GameFinishMode =
+    analyticsMode ?? (mode === "single" ? "solo" : "multiplayer");
 
   const now = useNow(snapshot.status === "playing");
   const elapsed = elapsedSeconds(snapshot, now);
@@ -144,8 +153,16 @@ export function GameScreen({
   }, [snapshot.puzzle, snapshot.startedAt]);
 
   useEffect(() => {
-    if (!done || !onFinish || finishReported.current) return;
+    if (!done || finishReported.current) return;
     finishReported.current = true;
+    trackGameFinish({
+      mode: finishAnalyticsMode,
+      solved,
+      difficulty: snapshot.difficulty,
+      elapsedSeconds: elapsed,
+      mistakes: snapshot.mistakes,
+    });
+    if (!onFinish) return;
     const frame = requestAnimationFrame(() => {
       const fromBoard = countCollectedBones(snapshot, bonePlay.boneCells);
       const bonesFound = Math.max(fromBoard, bonePlay.sessionBones);
@@ -164,15 +181,18 @@ export function GameScreen({
   }, [
     done,
     onFinish,
+    finishAnalyticsMode,
     solved,
     computedFinal,
     elapsed,
     snapshot.mistakes,
     snapshot.hintsUsed,
+    snapshot.difficulty,
     snapshot.cells,
     snapshot.puzzle,
     snapshot.startedAt,
     bonePlay.boneCells,
+    bonePlay.sessionBones,
     contrib,
     me.role,
     winBoneBonus,
