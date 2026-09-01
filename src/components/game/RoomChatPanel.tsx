@@ -6,6 +6,8 @@ import { SendIcon, XIcon } from "@/components/icons";
 import type { RoomChatReturn } from "@/lib/liveblocks/useRoomChat";
 import type { PlayerRole } from "@/lib/game/types";
 
+const PRESETS = ["Woof!", "Bark!", "GG", "Oops!", "🐾"];
+
 type Props = {
   chat: RoomChatReturn;
   myRole: PlayerRole | null;
@@ -17,24 +19,21 @@ function formatTime(at: number): string {
 }
 
 export function RoomChatPanel({ chat, myRole, onClose }: Props) {
-  const { messages, send, markRead } = chat;
+  const { messages, send, sendPreset, markRead } = chat;
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Mark as read when panel is open
   useEffect(() => {
     markRead();
     return () => markRead();
   }, [markRead]);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
-  // Focus input when opened
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -55,7 +54,7 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 340 }}>
+    <div className="flex flex-col" style={{ height: 360 }}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--surface-soft)] px-4 py-3">
         <span className="font-display text-sm font-extrabold text-[var(--foreground)]">Chat</span>
@@ -96,7 +95,10 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
                     {msg.name}
                   </p>
                 )}
-                <p className="text-sm leading-snug break-words">{msg.text}</p>
+                <p className="text-sm leading-snug break-words">
+                  {msg.preset && <span className="mr-1 text-[10px] opacity-60">🐾</span>}
+                  {msg.text}
+                </p>
               </div>
               <span className="mt-0.5 px-1 text-[10px] text-[var(--muted)]">
                 {formatTime(msg.at)}
@@ -106,7 +108,21 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
         })}
       </div>
 
-      {/* Input */}
+      {/* Preset quick-send buttons */}
+      <div className="flex gap-1.5 overflow-x-auto px-3 pb-2 scrollbar-none">
+        {PRESETS.map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => sendPreset(p)}
+            className="font-display shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-1 text-xs font-bold text-[var(--foreground)] transition active:scale-95"
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+
+      {/* Text input */}
       <div className="border-t border-[var(--surface-soft)] px-3 py-2 flex items-center gap-2">
         <input
           ref={inputRef}

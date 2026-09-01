@@ -36,6 +36,10 @@ import { useGameEvents } from "@/lib/game/useGameEvents";
 import { useRoomChat } from "@/lib/liveblocks/useRoomChat";
 import { RoomChatPanel } from "@/components/game/RoomChatPanel";
 import { ChatToggleButton } from "@/components/game/ChatToggleButton";
+import {
+  saveActiveMulti,
+  clearActiveMulti,
+} from "@/lib/game/activeMulti";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -134,6 +138,27 @@ function RoomInner({
   });
 
   const chat = useRoomChat(game.me.role, profile.username);
+
+  // Persist active room so the home screen can offer a rejoin card.
+  useEffect(() => {
+    const snap = game.controller?.snapshot;
+    if (!snap) return;
+    if (snap.status === "playing") {
+      saveActiveMulti({
+        code,
+        mode: snap.mode,
+        difficulty: snap.difficulty,
+        joinedAt: snap.startedAt ?? Date.now(),
+      });
+    } else if (snap.status === "done") {
+      clearActiveMulti();
+    }
+  }, [code, game.controller?.snapshot?.status, game.controller?.snapshot?.mode, game.controller?.snapshot?.difficulty, game.controller?.snapshot?.startedAt]);
+
+  // Clear on unmount (navigating away from the room).
+  useEffect(() => {
+    return () => clearActiveMulti();
+  }, []);
 
   const exit = () => router.push("/");
 
@@ -358,15 +383,23 @@ function Lobby({
         />
       </div>
 
-      {/* Chat panel */}
+      {/* Chat overlay — fixed bottom sheet so it doesn't push the lobby content */}
       {chatOpen && (
-        <div className="mb-3 rounded-2xl bg-white shadow-sm overflow-hidden">
-          <RoomChatPanel
-            chat={chat}
-            myRole={myRole}
-            onClose={() => setChatOpen(false)}
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/30"
+            onClick={() => setChatOpen(false)}
           />
-        </div>
+          <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-white shadow-xl overflow-hidden"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+          >
+            <RoomChatPanel
+              chat={chat}
+              myRole={myRole}
+              onClose={() => setChatOpen(false)}
+            />
+          </div>
+        </>
       )}
 
       <div className="flex flex-1 flex-col items-center justify-center gap-5">

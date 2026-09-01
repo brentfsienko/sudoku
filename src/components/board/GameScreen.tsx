@@ -13,7 +13,6 @@ import { useGameBones } from "@/lib/bones/useGameBones";
 import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { ChevronLeftIcon, PlayIcon } from "@/components/icons";
 import { RoomChatPanel } from "@/components/game/RoomChatPanel";
-import { ChatToggleButton } from "@/components/game/ChatToggleButton";
 import type { RoomChatReturn } from "@/lib/liveblocks/useRoomChat";
 import type { GameController } from "@/lib/game/store";
 import { elapsedSeconds } from "@/lib/game/store";
@@ -251,33 +250,31 @@ export function GameScreen({
         <div className="font-display text-base font-extrabold text-[var(--foreground)]">
           {isMulti ? GAME_MODE_LABELS[mode] : DIFFICULTY_LABELS[snapshot.difficulty]}
         </div>
-        <div className="flex items-center gap-2">
-          {chat && (
-            <ChatToggleButton
-              unread={chat.unread}
-              onClick={() => {
-                setChatOpen((o) => !o);
-                if (!chatOpen) chat.markRead();
-              }}
-            />
-          )}
-          <StreakBonePill
-            streak={streak}
-            bones={bonePlay.displayBones}
-            className="scale-[0.88] origin-top-right"
-          />
-        </div>
+        <StreakBonePill
+          streak={streak}
+          bones={bonePlay.displayBones}
+          className="scale-[0.88] origin-top-right"
+        />
       </div>
 
-      {/* Chat panel (in-game) */}
+      {/* Chat overlay (in-game) — fixed bottom sheet over the board */}
       {chat && chatOpen && (
-        <div className="mx-4 mb-2 rounded-2xl bg-white shadow-sm overflow-hidden">
-          <RoomChatPanel
-            chat={chat}
-            myRole={me.role}
-            onClose={() => setChatOpen(false)}
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/30"
+            onClick={() => setChatOpen(false)}
           />
-        </div>
+          <div
+            className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-white shadow-xl overflow-hidden"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+          >
+            <RoomChatPanel
+              chat={chat}
+              myRole={me.role}
+              onClose={() => setChatOpen(false)}
+            />
+          </div>
+        </>
       )}
 
       {/* Players strip (multiplayer) */}
@@ -386,6 +383,15 @@ export function GameScreen({
           onUndo={controller.undo}
           onToggleNotes={controller.toggleNotes}
           onHint={controller.hint}
+          onChat={
+            chat
+              ? () => {
+                  setChatOpen((o) => !o);
+                  if (!chatOpen) chat.markRead();
+                }
+              : undefined
+          }
+          chatUnread={chat?.unread}
         />
         <NumberPad
           counts={counts}

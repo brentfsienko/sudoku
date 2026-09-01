@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BoneIcon } from "@/components/BoneIcon";
 import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh";
 import { ActiveSoloGames } from "@/components/home/ActiveSoloGames";
+import { ActiveMultiGame } from "@/components/home/ActiveMultiGame";
 import { GameHistoryList } from "@/components/home/GameHistoryList";
 import { DogAvatar } from "@/components/DogAvatar";
 import { PlayTabHeader } from "@/components/home/PlayTabHeader";
@@ -310,6 +311,7 @@ export function MainTab({
               className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-12 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
               style={{ minHeight: PLAY_SHEET_MIN_HEIGHT }}
             >
+              <ActiveMultiGame />
               {statsReady && readyData ? (
                 <ActiveSoloGames
                   profile={readyData.profile}

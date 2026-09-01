@@ -1,6 +1,6 @@
 "use client";
 
-import { BulbIcon, PencilIcon, UndoIcon } from "@/components/icons";
+import { BulbIcon, ChatIcon, PencilIcon, UndoIcon } from "@/components/icons";
 
 type Props = {
   notesMode: boolean;
@@ -10,6 +10,9 @@ type Props = {
   onUndo: () => void;
   onToggleNotes: () => void;
   onHint: () => void;
+  /** Multiplayer chat — shown only when provided. */
+  onChat?: () => void;
+  chatUnread?: boolean;
 };
 
 function ActionButton({
@@ -59,6 +62,8 @@ export function ActionBar({
   onUndo,
   onToggleNotes,
   onHint,
+  onChat,
+  chatUnread,
 }: Props) {
   return (
     <div className="flex items-start justify-around gap-2">
@@ -85,6 +90,16 @@ export function ActionBar({
       >
         <BulbIcon width={22} height={22} />
       </ActionButton>
+      {onChat && (
+        <ActionButton label="Chat" onClick={onChat}>
+          <span className="relative">
+            <ChatIcon width={22} height={22} />
+            {chatUnread && (
+              <span className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-500" />
+            )}
+          </span>
+        </ActionButton>
+      )}
     </div>
   );
 }

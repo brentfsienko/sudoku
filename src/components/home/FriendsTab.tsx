@@ -29,6 +29,16 @@ import type { UseUserData } from "@/lib/stats/useUserData";
 import type { PublicProfile } from "@/lib/friends/types";
 import { useOnline } from "@/lib/hooks/useOnline";
 
+function formatInviteAge(createdAt: string): string {
+  const diffMs = Date.now() - new Date(createdAt).getTime();
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
 type SubTab = "friends" | "daily";
 
 type Props = {
@@ -244,7 +254,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
               key={inv.id}
               avatar={<DogAvatar dogId={inv.host.dogId as DogId} size={44} />}
               primary={inv.host.username}
-              secondary={`${GAME_MODE_LABELS[inv.mode]} · ${inv.roomCode}`}
+              secondary={`${GAME_MODE_LABELS[inv.mode]} · ${inv.roomCode} · ${formatInviteAge(inv.createdAt)}`}
               action={
                 <div className="flex gap-2">
                   <FriendPillButton

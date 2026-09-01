@@ -12,9 +12,10 @@ const BUBBLE_DURATION_MS = 4_000;
 export type RoomChatReturn = {
   messages: ChatMessage[];
   send: (text: string) => void;
+  sendPreset: (text: string) => void;
   unread: boolean;
   markRead: () => void;
-  /** Latest incoming message (not from me) for the speech bubble. */
+  /** Latest PRESET incoming message (not from me) for the speech bubble. */
   latestIncoming: ChatMessage | null;
 };
 
@@ -27,37 +28,50 @@ export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChat
   const [latestIncoming, setLatestIncoming] = useState<ChatMessage | null>(null);
   const bubbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const sendMutation = useMutation(({ storage }, text: string, role: PlayerRole, name: string) => {
-    const trimmed = text.trim().slice(0, MAX_TEXT_LENGTH);
-    if (!trimmed) return;
+  const sendMutation = useMutation(
+    (
+      { storage },
+      text: string,
+      role: PlayerRole,
+      name: string,
+      preset: boolean,
+    ) => {
+      const trimmed = text.trim().slice(0, MAX_TEXT_LENGTH);
+      if (!trimmed) return;
 
-    let list = storage.get("messages");
-    if (!list) {
-      // Older room without messages list — should not happen after initialStorage change,
-      // but guard defensively.
-      return;
-    }
+      const list = storage.get("messages");
+      if (!list) return;
 
-    const msg: ChatMessage = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      from: role,
-      name,
-      text: trimmed,
-      at: Date.now(),
-    };
+      const msg: ChatMessage = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        from: role,
+        name,
+        text: trimmed,
+        at: Date.now(),
+        ...(preset ? { preset: true } : {}),
+      };
 
-    list.push(msg);
+      list.push(msg);
 
-    // Trim front if over cap
-    while (list.length > MAX_MESSAGES) {
-      list.delete(0);
-    }
-  }, []);
+      while (list.length > MAX_MESSAGES) {
+        list.delete(0);
+      }
+    },
+    [],
+  );
 
   const send = useCallback(
     (text: string) => {
       if (!myRole) return;
-      sendMutation(text, myRole, myName);
+      sendMutation(text, myRole, myName, false);
+    },
+    [sendMutation, myRole, myName],
+  );
+
+  const sendPreset = useCallback(
+    (text: string) => {
+      if (!myRole) return;
+      sendMutation(text, myRole, myName, true);
     },
     [sendMutation, myRole, myName],
   );
@@ -67,7 +81,7 @@ export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChat
     setUnread(false);
   }, []);
 
-  // Detect new unread messages and show incoming bubble
+  // Detect new messages: mark unread for all incoming, but only show bubble for presets.
   const prevLengthRef = useRef(messages.length);
   useEffect(() => {
     const prevLen = prevLengthRef.current;
@@ -81,13 +95,17 @@ export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChat
     if (incoming.length > 0) {
       setUnread(true);
 
-      const latest = incoming[incoming.length - 1];
-      setLatestIncoming(latest ?? null);
+      // Only preset messages drive the speech bubble
+      const incomingPresets = incoming.filter((m) => m.preset);
+      if (incomingPresets.length > 0) {
+        const latest = incomingPresets[incomingPresets.length - 1];
+        setLatestIncoming(latest ?? null);
 
-      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
-      bubbleTimerRef.current = setTimeout(() => {
-        setLatestIncoming(null);
-      }, BUBBLE_DURATION_MS);
+        if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+        bubbleTimerRef.current = setTimeout(() => {
+          setLatestIncoming(null);
+        }, BUBBLE_DURATION_MS);
+      }
     }
   }, [messages.length, messages, myRole]);
 
@@ -97,5 +115,5 @@ export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChat
     };
   }, []);
 
-  return { messages, send, unread, markRead, latestIncoming };
+  return { messages, send, sendPreset, unread, markRead, latestIncoming };
 }

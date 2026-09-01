@@ -75,6 +75,8 @@ export type ChatMessage = {
   name: string;
   text: string;
   at: number;
+  /** True for quick-send preset messages (woof, bark, etc.). Only presets show as speech bubbles. */
+  preset?: boolean;
 };
 
 export type Storage = {
