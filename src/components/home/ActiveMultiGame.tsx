@@ -46,7 +46,7 @@ export function ActiveMultiGame() {
       <FriendListPanel title="Active games" titleClassName={homeSectionTitleClass}>
         <div className="flex w-full items-center gap-3 px-3 py-2.5">
           <span
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-white"
             style={{ backgroundColor: accent }}
           >
             <UsersIcon width={20} height={20} />
@@ -57,7 +57,7 @@ export function ActiveMultiGame() {
                 Room {active.code}
               </span>
               <span
-                className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
+                className="shrink-0 rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
                 style={{ backgroundColor: accent }}
               >
                 {GAME_MODE_LABELS[active.mode]}
@@ -71,7 +71,7 @@ export function ActiveMultiGame() {
             <button
               type="button"
               onClick={handleRejoin}
-              className="font-display rounded-full bg-[var(--primary)] px-3.5 py-1.5 text-xs font-extrabold text-white active:scale-95"
+              className="font-display rounded-md bg-[var(--primary)] px-3.5 py-1.5 text-xs font-extrabold text-white active:scale-95"
             >
               Rejoin
             </button>
@@ -79,7 +79,7 @@ export function ActiveMultiGame() {
               type="button"
               onClick={handleDismiss}
               aria-label="Dismiss"
-              className="rounded-full px-2 py-1 text-xs font-semibold text-[var(--muted)] active:scale-95"
+              className="rounded px-2 py-1 text-xs font-semibold text-[var(--muted)] active:scale-95"
             >
               ✕
             </button>

@@ -17,7 +17,7 @@ export function DifficultySelect({ value, onChange }: Props) {
         <select
           value={value}
           onChange={(e) => onChange(e.target.value as Difficulty)}
-          className="font-display w-full appearance-none rounded-2xl border-2 border-[var(--border)] bg-white px-4 py-3.5 text-lg font-bold text-[var(--foreground)] shadow-sm outline-none focus:border-[var(--primary)]"
+          className="font-display w-full appearance-none rounded-md border-2 border-[var(--border)] bg-white px-4 py-3.5 text-lg font-bold text-[var(--foreground)] shadow-sm outline-none focus:border-[var(--primary)]"
         >
           {DIFFICULTIES.map((d) => (
             <option key={d} value={d}>

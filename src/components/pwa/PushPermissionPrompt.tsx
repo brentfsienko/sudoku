@@ -18,7 +18,7 @@ export function PushPermissionPrompt({ onAllow, onDismiss }: Props) {
       aria-modal="true"
       aria-labelledby="push-prompt-title"
     >
-      <div className="animate-pop w-full max-w-sm rounded-3xl bg-[var(--surface)] p-6 shadow-2xl">
+      <div className="animate-pop w-full max-w-sm rounded-lg bg-[var(--surface)] p-6 shadow-2xl">
         <div className="flex flex-col items-center gap-2 text-center">
           <span className="text-[var(--primary)]">
             <PawIcon width={36} height={36} />
@@ -38,14 +38,14 @@ export function PushPermissionPrompt({ onAllow, onDismiss }: Props) {
           <button
             type="button"
             onClick={onAllow}
-            className="font-display w-full rounded-full bg-[var(--primary)] py-3 text-base font-extrabold text-white shadow-sm active:scale-[0.98]"
+            className="font-display w-full rounded-md bg-[var(--primary)] py-3 text-base font-extrabold text-white shadow-sm active:scale-[0.98]"
           >
             Enable
           </button>
           <button
             type="button"
             onClick={onDismiss}
-            className="font-display w-full rounded-full border-2 border-[var(--border)] bg-white py-3 text-base font-extrabold text-[var(--foreground)] active:scale-[0.98]"
+            className="font-display w-full rounded-md border-2 border-[var(--border)] bg-white py-3 text-base font-extrabold text-[var(--foreground)] active:scale-[0.98]"
           >
             Not now
           </button>

@@ -100,7 +100,7 @@ export function Board({
 
   return (
     <div
-      className="box-border flex h-full w-full flex-col rounded-2xl bg-white p-1.5 shadow-[0_8px_24px_-12px_rgba(120,80,40,0.35)]"
+      className="box-border flex h-full w-full flex-col rounded-md bg-white p-1.5 shadow-[0_8px_24px_-12px_rgba(120,80,40,0.35)]"
       style={{ willChange: "transform" }}
     >
       <div className="grid min-h-0 min-w-0 flex-1 grid-cols-9 grid-rows-9 overflow-hidden rounded-lg border-2 border-[var(--grid-line-bold)]">

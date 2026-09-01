@@ -60,7 +60,7 @@ function DogPickerButton({
       type="button"
       onClick={onSelect}
       title={breed}
-      className={`relative flex aspect-square flex-col items-center justify-center gap-0.5 rounded-2xl transition active:scale-95 ${
+      className={`relative flex aspect-square flex-col items-center justify-center gap-0.5 rounded-md transition active:scale-95 ${
         selected ? "ring-2 ring-[var(--primary)]" : "ring-2 ring-transparent"
       }`}
       aria-label={breed}
@@ -74,7 +74,7 @@ function DogPickerButton({
       )}
       {!owned && cost != null && (
         <span
-          className="pointer-events-none absolute inset-0 rounded-2xl bg-white/55"
+          className="pointer-events-none absolute inset-0 rounded-md bg-white/55"
           aria-hidden
         />
       )}
@@ -259,7 +259,7 @@ export function ProfileEditForm({
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
-            className={`ui-input w-full rounded-2xl border-2 bg-[var(--background)] px-3 py-2.5 text-sm font-bold outline-none focus:border-[var(--primary)] ${usernameBorder}`}
+            className={`ui-input w-full rounded-md border-2 bg-[var(--background)] px-3 py-2.5 text-sm font-bold outline-none focus:border-[var(--primary)] ${usernameBorder}`}
             placeholder="your_username"
           />
         </div>
@@ -348,7 +348,7 @@ export function ProfileEditForm({
         type="button"
         onClick={handleDone}
         disabled={saving || usernameStatus === "checking"}
-        className="ui-button w-full rounded-full bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95 disabled:opacity-60"
+        className="ui-button w-full rounded-md bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95 disabled:opacity-60"
       >
         {saving ? "Saving…" : "Save profile"}
       </button>

@@ -22,7 +22,7 @@ export function PwaBrowserHint({ context = "general" }: Props) {
       : "You are in the browser, not the home screen app. Open Sudogku from your home screen for the full app experience.";
 
   return (
-    <div className="mb-4 rounded-2xl border border-[var(--border)] bg-[var(--primary-soft)] px-4 py-3 text-sm leading-snug text-[var(--foreground)]">
+    <div className="mb-4 rounded-md border border-[var(--border)] bg-[var(--primary-soft)] px-4 py-3 text-sm leading-snug text-[var(--foreground)]">
       {copy}
     </div>
   );

@@ -31,7 +31,7 @@ function displayUsername(raw: string): string {
 function ModeBadge({ daily }: { daily: boolean }) {
   return (
     <span
-      className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
+      className="shrink-0 rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
       style={{ backgroundColor: daily ? DAILY_ACCENT : SOLO_ACCENT }}
     >
       {daily ? "Daily" : "Solo"}
@@ -127,14 +127,14 @@ function ActiveSoloRow({
           <button
             type="button"
             onClick={resetSwipe}
-            className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-bold text-[var(--muted)] active:scale-95"
+            className="rounded border border-[var(--border)] bg-white px-3 py-1 text-xs font-bold text-[var(--muted)] active:scale-95"
           >
             Keep
           </button>
           <button
             type="button"
             onClick={onQuit}
-            className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white active:scale-95"
+            className="rounded bg-red-500 px-3 py-1 text-xs font-bold text-white active:scale-95"
           >
             Quit
           </button>

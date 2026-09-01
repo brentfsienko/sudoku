@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Baloo_2, Lora, Nunito, Press_Start_2P } from "next/font/google";
+import { Baloo_2, Lora, Pixelify_Sans, Press_Start_2P } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
@@ -22,10 +22,10 @@ const baloo = Baloo_2({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const nunito = Nunito({
+const pixelifySans = Pixelify_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const lora = Lora({
@@ -68,7 +68,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${baloo.variable} ${nunito.variable} ${lora.variable} ${specialElite.variable} ${pressStart.variable} h-full antialiased`}
+      className={`${baloo.variable} ${pixelifySans.variable} ${lora.variable} ${specialElite.variable} ${pressStart.variable} h-full antialiased`}
     >
       <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh max-md:h-[var(--app-height,100dvh)] max-md:max-h-[var(--app-height,100dvh)]">
         <JsonLd data={[webApplicationJsonLd(), organizationJsonLd()]} />
@@ -94,6 +94,7 @@ export default function RootLayout({
               color: "#4a3b2f",
               borderRadius: "4px",
               fontFamily: "var(--font-sans), ui-sans-serif, system-ui, sans-serif",
+              letterSpacing: "-0.04em",
               fontSize: "14px",
               fontWeight: "600",
             },

@@ -31,7 +31,7 @@ export function BoneDifficultySelect({ value, onChange }: Props) {
               onClick={() => onChange(d)}
               title={HINTS[d]}
               aria-label={HINTS[d]}
-              className={`flex flex-1 flex-col items-center gap-1.5 rounded-2xl border-2 py-3 transition active:scale-[0.97] ${
+              className={`flex flex-1 flex-col items-center gap-1.5 rounded-md border-2 py-3 transition active:scale-[0.97] ${
                 active
                   ? "border-[var(--primary)] bg-[var(--primary-soft)]"
                   : "border-[var(--border)] bg-white"

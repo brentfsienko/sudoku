@@ -26,10 +26,10 @@ export function FriendCodeModal({ username, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xs rounded-3xl bg-white p-6 text-center shadow-xl"
+        className="w-full max-w-xs rounded-lg bg-white p-6 text-center shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="font-serif-title mb-2 text-2xl text-[var(--foreground)]">
+        <h3 className="font-pixel mb-2 text-sm text-[var(--foreground)]">
           Friend code
         </h3>
         <p className="mb-4 text-sm text-[var(--muted)]">
@@ -48,7 +48,7 @@ export function FriendCodeModal({ username, onClose }: Props) {
           <button
             type="button"
             onClick={() => void copy()}
-            className="ui-button w-full rounded-full bg-[var(--primary)] py-3 text-sm font-bold text-white active:scale-[0.98]"
+            className="ui-button w-full rounded-md bg-[var(--primary)] py-3 text-sm font-bold text-white active:scale-[0.98]"
           >
             {status === "copied" ? "Copied!" : status === "failed" ? "Copy failed — tap code" : "Copy"}
           </button>

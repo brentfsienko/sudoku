@@ -177,10 +177,10 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
   return (
     <div className="flex flex-col gap-3">
       {/* Date navigation */}
-      <div className="flex items-center justify-between rounded-2xl bg-[var(--list-panel)] px-4 py-2.5">
+      <div className="flex items-center justify-between rounded-md bg-[var(--list-panel)] px-4 py-2.5">
         <button
           onClick={() => setViewingDate((d) => addDays(d, -1))}
-          className="rounded-full p-1.5 text-[var(--primary)] active:bg-black/5"
+          className="rounded-md p-1.5 text-[var(--primary)] active:bg-black/5"
           aria-label="Previous day"
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
@@ -200,7 +200,7 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
         <button
           onClick={() => setViewingDate((d) => addDays(d, 1))}
           disabled={!canGoForward}
-          className="rounded-full p-1.5 text-[var(--primary)] disabled:opacity-30 active:bg-black/5"
+          className="rounded-md p-1.5 text-[var(--primary)] disabled:opacity-30 active:bg-black/5"
           aria-label="Next day"
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
@@ -213,7 +213,7 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
         <button
           type="button"
           onClick={() => setReloadToken((n) => n + 1)}
-          className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-left active:bg-[var(--surface-soft)]"
+          className="rounded-md border border-[var(--border)] bg-white px-4 py-3 text-left active:bg-[var(--surface-soft)]"
         >
           <p className="font-display text-sm font-bold text-[var(--foreground)]">
             Your score isn’t on the board yet
@@ -225,7 +225,7 @@ export function DailyLeaderboard({ friends, myId, initialDate }: Props) {
       )}
 
       {/* Leaderboard rows */}
-      <div className="rounded-2xl bg-[var(--list-panel)] overflow-hidden">
+      <div className="rounded-md bg-[var(--list-panel)] overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-10 text-sm text-[var(--muted)]">
             Loading…

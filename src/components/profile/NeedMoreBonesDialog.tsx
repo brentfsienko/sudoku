@@ -19,7 +19,7 @@ export function NeedMoreBonesDialog({ open, onClose, cost, balance }: Props) {
       role="presentation"
     >
       <div
-        className="animate-float-in w-full max-w-xs rounded-3xl bg-white p-5 shadow-xl"
+        className="animate-float-in w-full max-w-xs rounded-lg bg-white p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -30,7 +30,7 @@ export function NeedMoreBonesDialog({ open, onClose, cost, balance }: Props) {
         </div>
         <h2
           id="need-bones-title"
-          className="font-serif-title text-center text-xl text-[var(--foreground)]"
+          className="font-pixel text-center text-xs text-[var(--foreground)]"
         >
           Need more bones
         </h2>
@@ -41,7 +41,7 @@ export function NeedMoreBonesDialog({ open, onClose, cost, balance }: Props) {
         <button
           type="button"
           onClick={onClose}
-          className="ui-button mt-4 w-full rounded-full bg-[var(--foreground)] py-2.5 text-sm font-bold text-white"
+          className="ui-button mt-4 w-full rounded-md bg-[var(--foreground)] py-2.5 text-sm font-bold text-white"
         >
           Got it
         </button>

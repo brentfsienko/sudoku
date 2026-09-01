@@ -50,7 +50,7 @@ export function StatsBar({
     : `${mistakes}/${maxMistakes}`;
 
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-[var(--surface-soft)] px-4 py-2.5">
+    <div className="flex items-center justify-between rounded-md bg-[var(--surface-soft)] px-4 py-2.5">
       <Stat label="Score" value={score.toLocaleString()} />
       <Stat label="Level" value={difficultyLabel} />
       <Stat
@@ -75,7 +75,7 @@ export function StatsBar({
         <button
           type="button"
           onClick={onTogglePause}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--paw)] shadow-sm transition active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-[var(--paw)] shadow-sm transition active:scale-95"
           aria-label={paused ? "Resume" : "Pause"}
         >
           {paused ? <PlayIcon width={18} height={18} /> : <PauseIcon width={18} height={18} />}

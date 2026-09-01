@@ -92,7 +92,7 @@ function Pill({
 }) {
   return (
     <span
-      className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
+      className="shrink-0 rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
       style={{ backgroundColor: color }}
     >
       {label}

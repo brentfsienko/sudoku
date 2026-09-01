@@ -10,7 +10,7 @@ type Props = {
 export function StreakBonePill({ streak, bones, className }: Props) {
   return (
     <div
-      className={`flex shrink-0 items-center rounded-full bg-[var(--foreground)] py-1.5 pl-1.5 pr-2 shadow-md ${className ?? ""}`}
+      className={`flex shrink-0 items-center rounded-md bg-[var(--foreground)] py-1.5 pl-1.5 pr-2 shadow-md ${className ?? ""}`}
     >
       <div className="flex min-w-0 items-center gap-1.5 pr-1.5">
         <span className="shrink-0 text-[var(--primary)]">

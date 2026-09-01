@@ -19,13 +19,13 @@ export default function OfflinePage() {
         <div className="flex w-full max-w-xs flex-col gap-3">
           <a
             href="/play"
-            className="font-display rounded-full bg-[var(--primary)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
+            className="font-display rounded-md bg-[var(--primary)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
           >
             Play solo
           </a>
           <a
             href="/play/daily"
-            className="font-display rounded-full bg-[var(--accent)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
+            className="font-display rounded-md bg-[var(--accent)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
           >
             Daily puzzle
           </a>

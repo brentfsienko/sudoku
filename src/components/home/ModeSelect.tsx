@@ -32,7 +32,7 @@ export function ModeSelect({ value, onChange }: Props) {
               key={m.id}
               type="button"
               onClick={() => onChange(m.id)}
-              className={`flex flex-col items-center gap-1 rounded-2xl border-2 px-2 py-3 text-center transition ${
+              className={`flex flex-col items-center gap-1 rounded-md border-2 px-2 py-3 text-center transition ${
                 active
                   ? "border-[var(--primary)] bg-[var(--primary-soft)]"
                   : "border-[var(--border)] bg-white"

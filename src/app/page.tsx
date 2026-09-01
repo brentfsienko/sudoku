@@ -365,7 +365,7 @@ function MeTab({
         onCoachmarkDismiss={onCoachmarkDismiss}
       />
 
-      <div className="flex rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] p-1">
+      <div className="flex rounded-md border border-[var(--border)] bg-[var(--surface-soft)] p-1">
         {(
           [
             { id: "solo", label: "Solo" },
@@ -378,7 +378,7 @@ function MeTab({
               key={t.id}
               type="button"
               onClick={() => setStatsTab(t.id)}
-              className={`font-display flex-1 rounded-xl py-2.5 text-sm font-bold transition active:scale-[0.98] ${
+              className={`font-display flex-1 rounded-md py-2.5 text-sm font-bold transition active:scale-[0.98] ${
                 active
                   ? "bg-white text-[var(--foreground)] shadow-sm"
                   : "text-[var(--muted)]"
@@ -544,7 +544,7 @@ function ProgressSection({
               key={m.id}
               type="button"
               onClick={() => setMetric(m.id)}
-              className="font-display shrink-0 rounded-full border-2 px-4 py-1.5 text-sm font-bold transition active:scale-95"
+              className="font-display shrink-0 rounded border-2 px-4 py-1.5 text-sm font-bold transition active:scale-95"
               style={{
                 borderColor: active ? METRIC_COLORS[m.id] : "var(--border)",
                 backgroundColor: active ? METRIC_COLORS[m.id] : "transparent",
@@ -569,7 +569,7 @@ function ProgressSection({
                   setHistoryFilter(f.id);
                   setSelectedWeek(null);
                 }}
-                className="shrink-0 rounded-full border-2 px-3 py-1 text-xs font-bold transition active:scale-95"
+                className="shrink-0 rounded border-2 px-3 py-1 text-xs font-bold transition active:scale-95"
                 style={{
                   borderColor: active ? f.color : "var(--border)",
                   backgroundColor: active ? f.color : "transparent",
@@ -679,9 +679,9 @@ function SoloSection({ solo }: { solo: SoloStats }) {
             Wins
           </div>
         </div>
-        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--surface-soft)]">
+        <div className="h-2.5 flex-1 overflow-hidden rounded bg-[var(--surface-soft)]">
           <div
-            className="h-full rounded-full bg-[var(--primary)] transition-all"
+            className="h-full rounded bg-[var(--primary)] transition-all"
             style={{ width: `${winPct}%` }}
           />
         </div>
@@ -839,7 +839,7 @@ function OpponentHighlight({
         <span className="text-xs font-bold uppercase tracking-wide">{label}</span>
       </div>
       {top && games > 0 ? (
-        <div className="flex items-center gap-3 rounded-2xl bg-[var(--surface-soft)] p-3">
+        <div className="flex items-center gap-3 rounded-md bg-[var(--surface-soft)] p-3">
           <DogAvatar dogId={top.dogId as DogId} size={44} />
           <div className="min-w-0 flex-1">
             <div className="font-display truncate font-bold text-[var(--foreground)]">
@@ -862,7 +862,7 @@ function OpponentHighlight({
           )}
         </div>
       ) : (
-        <p className="rounded-2xl bg-[var(--surface-soft)] p-3 text-center text-sm text-[var(--muted)]">
+        <p className="rounded-md bg-[var(--surface-soft)] p-3 text-center text-sm text-[var(--muted)]">
           {emptyMessage}
         </p>
       )}
@@ -884,7 +884,7 @@ function SectionHeader({
   return (
     <div className="flex items-center gap-2">
       <span style={{ color: accent ?? "var(--primary)" }}>{icon}</span>
-      <h3 className="font-display text-lg font-extrabold text-[var(--foreground)]">
+      <h3 className="font-pixel text-xs tracking-tighter text-[var(--foreground)]">
         {title}
       </h3>
       {trailing && (
@@ -898,7 +898,7 @@ function SectionHeader({
 
 function StatGrid({ items }: { items: { value: string; label: string }[] }) {
   return (
-    <div className="grid grid-cols-3 overflow-hidden rounded-3xl bg-white shadow-sm">
+    <div className="grid grid-cols-3 overflow-hidden rounded-md bg-white shadow-sm">
       {items.map((it, i) => (
         <div
           key={i}

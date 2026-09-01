@@ -83,6 +83,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  letter-spacing: -0.03em;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -164,19 +165,19 @@ body {
   }
 }
 
-/* Serif headings & stat numbers (Friends / Me tab style) */
+/* Pixel UI text — buttons, labels, stats (Pixelify Sans) */
 .font-display,
 .font-serif-title {
-  font-family: var(--serif);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.04em;
 }
 
-/* 8-bit pixel font — tab titles, section headings */
+/* 8-bit pixel font — tab titles, section headings (Press Start 2P) */
 .font-pixel {
   font-family: var(--font-pixel), monospace;
   font-weight: 400;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.08em;
   line-height: 1.4;
 }
 

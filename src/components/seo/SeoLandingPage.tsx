@@ -75,7 +75,7 @@ export function SeoLandingPage({
           <div className="mt-8">
             <Link
               href={ctaHref}
-              className="inline-flex items-center justify-center rounded-2xl bg-[var(--accent)] px-6 py-3 text-base font-bold text-white shadow-sm transition hover:brightness-105"
+              className="inline-flex items-center justify-center rounded-md bg-[var(--accent)] px-6 py-3 text-base font-bold text-white shadow-sm transition hover:brightness-105"
             >
               {ctaLabel}
             </Link>
@@ -124,7 +124,7 @@ export function SeoLandingPage({
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="block rounded-xl border border-[var(--border)] bg-white/60 p-4 transition hover:border-[var(--accent)]"
+                    className="block rounded-md border border-[var(--border)] bg-white/60 p-4 transition hover:border-[var(--accent)]"
                   >
                     <span className="font-semibold text-[var(--foreground)]">
                       {link.label}

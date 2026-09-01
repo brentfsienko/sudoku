@@ -93,7 +93,7 @@ export function GameSetupSheet({
                   key={m}
                   type="button"
                   onClick={() => setMode(m)}
-                  className="font-display flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition active:scale-[0.98]"
+                  className="font-display flex-1 rounded-md border-2 py-3 text-sm font-bold transition active:scale-[0.98]"
                   style={{
                     borderColor: active ? accent : "var(--border)",
                     backgroundColor: active ? accent : "white",
@@ -118,7 +118,7 @@ export function GameSetupSheet({
               key={d}
               type="button"
               onClick={() => setDifficulty(d)}
-              className={`flex items-center justify-between rounded-2xl border-2 px-4 py-3 text-left transition active:scale-[0.98] ${
+              className={`flex items-center justify-between rounded-md border-2 px-4 py-3 text-left transition active:scale-[0.98] ${
                 difficulty === d
                   ? "border-[var(--primary)] bg-[var(--primary-soft)]"
                   : "border-[var(--border)] bg-white"
@@ -155,7 +155,7 @@ export function GameSetupSheet({
                   key={n}
                   type="button"
                   onClick={() => setPlayerCount(n)}
-                  className={`font-display flex-1 rounded-2xl border-2 py-3 text-sm font-bold transition active:scale-[0.98] ${
+                  className={`font-display flex-1 rounded-md border-2 py-3 text-sm font-bold transition active:scale-[0.98] ${
                     active
                       ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--foreground)]"
                       : "border-[var(--border)] bg-white text-[var(--muted)]"
@@ -176,7 +176,7 @@ export function GameSetupSheet({
       <button
         type="button"
         onClick={handleStart}
-        className="font-display mt-5 w-full rounded-2xl bg-[var(--foreground)] py-4 text-lg font-extrabold text-white transition active:scale-[0.98]"
+        className="font-display mt-5 w-full rounded-md bg-[var(--foreground)] py-4 text-lg font-extrabold text-white transition active:scale-[0.98]"
       >
         {kind === "solo"
           ? "Start puzzle"

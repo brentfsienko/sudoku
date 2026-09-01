@@ -66,7 +66,7 @@ export function MeProfileHeader({
           <button
             type="button"
             onClick={() => setSettingsOpen((v) => !v)}
-            className="rounded-full p-2 text-[var(--foreground)] active:bg-[var(--surface-soft)]"
+            className="rounded-md p-2 text-[var(--foreground)] active:bg-[var(--surface-soft)]"
             aria-label="Settings"
           >
             <SettingsIcon width={24} height={24} />
@@ -156,7 +156,7 @@ export function MeProfileHeader({
               email={userData.user?.email}
               userData={statsData}
             />
-            <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[var(--surface-soft)] text-[var(--muted)]">
+            <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-md border-2 border-white bg-[var(--surface-soft)] text-[var(--muted)]">
               <PencilIcon width={14} height={14} />
             </span>
           </button>
@@ -164,7 +164,7 @@ export function MeProfileHeader({
             <button
               type="button"
               onClick={() => setFriendCodeOpen(true)}
-              className="absolute right-0 top-2 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm active:scale-95"
+              className="absolute right-0 top-2 flex h-10 w-10 items-center justify-center rounded-md border border-[var(--border)] bg-white text-[var(--foreground)] shadow-sm active:scale-95"
               aria-label="Share friend code"
             >
               <ShareIcon width={20} height={20} />

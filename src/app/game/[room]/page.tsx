@@ -309,14 +309,14 @@ function JoinConfirmScreen({
         <button
           type="button"
           onClick={onJoin}
-          className="font-display w-full rounded-full bg-[var(--primary)] py-3.5 font-extrabold text-white transition active:scale-[0.98]"
+          className="font-display w-full rounded-md bg-[var(--primary)] py-3.5 font-extrabold text-white transition active:scale-[0.98]"
         >
           Join game
         </button>
         <button
           type="button"
           onClick={onDecline}
-          className="font-display w-full rounded-full border-2 border-[var(--border)] bg-white py-3 font-bold text-[var(--muted)] transition active:scale-[0.98]"
+          className="font-display w-full rounded-md border-2 border-[var(--border)] bg-white py-3 font-bold text-[var(--muted)] transition active:scale-[0.98]"
         >
           No thanks
         </button>
@@ -361,14 +361,14 @@ function ConnectingScreen({
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="font-display rounded-full bg-[var(--primary)] px-6 py-3 font-extrabold text-white"
+              className="font-display rounded-md bg-[var(--primary)] px-6 py-3 font-extrabold text-white"
             >
               Try again
             </button>
             <button
               type="button"
               onClick={onExit}
-              className="font-display rounded-full px-6 py-2 text-sm font-bold text-[var(--muted)]"
+              className="font-display rounded-md px-6 py-2 text-sm font-bold text-[var(--muted)]"
             >
               Back home
             </button>
@@ -438,7 +438,7 @@ function Lobby({
         <button
           type="button"
           onClick={onExit}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--paw)] shadow-sm active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-[var(--paw)] shadow-sm active:scale-95"
           aria-label="Back"
         >
           <ChevronLeftIcon width={22} height={22} />
@@ -469,7 +469,7 @@ function Lobby({
 
       <div className="flex flex-1 flex-col items-center justify-center gap-5">
         {/* Room code card */}
-        <div className="w-full rounded-3xl bg-white p-6 text-center shadow-sm">
+        <div className="w-full rounded-lg bg-white p-6 text-center shadow-sm">
           <div className="text-sm font-semibold text-[var(--muted)]">Room code</div>
           <div className="font-display my-1 text-5xl font-extrabold tracking-[0.3em] text-[var(--primary)]">
             {code}
@@ -481,7 +481,7 @@ function Lobby({
             <button
               type="button"
               onClick={share}
-              className="font-display mt-4 w-full rounded-full bg-[var(--accent)] py-3 font-extrabold text-white transition active:scale-[0.98]"
+              className="font-display mt-4 w-full rounded-md bg-[var(--accent)] py-3 font-extrabold text-white transition active:scale-[0.98]"
             >
               {copied ? "Link copied!" : "Share invite"}
             </button>
@@ -499,7 +499,7 @@ function Lobby({
             return (
               <div
                 key={i}
-                className="flex flex-col items-center gap-2 rounded-2xl bg-[var(--surface-soft)] py-4"
+                className="flex flex-col items-center gap-2 rounded-md bg-[var(--surface-soft)] py-4"
               >
                 {player ? (
                   <>
@@ -521,7 +521,7 @@ function Lobby({
                   </>
                 ) : (
                   <>
-                    <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-2 border-dashed border-[var(--muted)] text-xl text-[var(--muted)]">
+                    <div className="flex h-[52px] w-[52px] items-center justify-center rounded-md border-2 border-dashed border-[var(--muted)] text-xl text-[var(--muted)]">
                       ?
                     </div>
                     <span className="font-display animate-pulse text-sm font-bold text-[var(--muted)]">
@@ -541,7 +541,7 @@ function Lobby({
               type="button"
               onClick={onStart}
               disabled={!canStart}
-              className="font-display w-full rounded-full bg-[var(--primary)] py-3.5 font-extrabold text-white transition active:scale-[0.98] disabled:opacity-40"
+              className="font-display w-full rounded-md bg-[var(--primary)] py-3.5 font-extrabold text-white transition active:scale-[0.98] disabled:opacity-40"
             >
               {canStart ? `Start game (${allPlayers.length} players)` : "Waiting for players…"}
             </button>

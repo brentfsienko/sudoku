@@ -39,9 +39,9 @@ export function WinLossBar({
           </div>
           <div className="text-xs font-semibold text-[var(--muted)]">Wins</div>
         </div>
-        <div className="mb-5 h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--surface-soft)]">
+        <div className="mb-5 h-2.5 flex-1 overflow-hidden rounded bg-[var(--surface-soft)]">
           <div
-            className="h-full rounded-full transition-all"
+            className="h-full rounded transition-all"
             style={{ width: `${winPct}%`, backgroundColor: color }}
           />
         </div>

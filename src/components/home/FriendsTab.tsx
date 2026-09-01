@@ -90,7 +90,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
             type="button"
             onClick={onSignIn}
             disabled={!online}
-            className="ui-button rounded-full bg-[var(--foreground)] px-6 py-3 text-sm font-bold text-white disabled:opacity-45"
+            className="ui-button rounded-md bg-[var(--foreground)] px-6 py-3 text-sm font-bold text-white disabled:opacity-45"
           >
             {online ? "Sign in" : "Offline"}
           </button>
@@ -155,13 +155,13 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
 
   // Segmented sub-tab pill (shared across both views)
   const subTabPill = (
-    <div className="flex self-start rounded-full border border-[var(--border)] bg-[var(--surface-soft)] p-0.5">
+    <div className="flex self-start rounded border border-[var(--border)] bg-[var(--surface-soft)] p-0.5">
       {(["friends", "daily"] as SubTab[]).map((t) => (
         <button
           key={t}
           type="button"
           onClick={() => setSubTab(t)}
-          className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition ${
+          className={`rounded px-4 py-1.5 text-[13px] font-semibold transition ${
             subTab === t
               ? "bg-white text-[var(--foreground)] shadow-sm"
               : "text-[var(--muted)]"
@@ -184,7 +184,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
           <button
             type="button"
             onClick={() => router.push("/play/daily")}
-            className="flex w-full items-center justify-between rounded-2xl bg-[var(--primary)] px-5 py-3.5 text-left text-white active:opacity-90"
+            className="flex w-full items-center justify-between rounded-md bg-[var(--primary)] px-5 py-3.5 text-left text-white active:opacity-90"
           >
             <div>
               <p className="font-display text-sm font-extrabold">Today's Daily Challenge</p>
@@ -212,7 +212,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
             type="button"
             onClick={() => online && setAddFriendOpen(true)}
             disabled={!online}
-            className="rounded-full p-2 text-[var(--foreground)] active:bg-[var(--surface-soft)] disabled:opacity-40"
+            className="rounded-md p-2 text-[var(--foreground)] active:bg-[var(--surface-soft)] disabled:opacity-40"
             aria-label="Add friend"
           >
             <UserPlusIcon width={24} height={24} />
@@ -221,7 +221,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
       />
       {subTabPill}
       {!online ? (
-        <p className="rounded-2xl bg-[var(--list-panel)] px-3 py-2 text-center text-xs font-semibold text-[var(--muted)]">
+        <p className="rounded-md bg-[var(--list-panel)] px-3 py-2 text-center text-xs font-semibold text-[var(--muted)]">
           Friends search and invites need a connection. You can still play solo or daily offline.
         </p>
       ) : null}
@@ -238,12 +238,12 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
           onBlur={() => online && query.trim().length >= 2 && void runSearch()}
           placeholder={online ? "Search by @username" : "Search needs a connection"}
           disabled={!online}
-          className="w-full rounded-2xl border border-[var(--border)] bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--primary)] disabled:opacity-55"
+          className="w-full rounded-md border border-[var(--border)] bg-white py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--primary)] disabled:opacity-55"
         />
       </div>
 
       {msg && (
-        <p className="rounded-2xl bg-[var(--primary-soft)] px-3 py-2 text-center text-sm font-semibold text-[var(--foreground)]">
+        <p className="rounded-md bg-[var(--primary-soft)] px-3 py-2 text-center text-sm font-semibold text-[var(--foreground)]">
           {msg}
         </p>
       )}

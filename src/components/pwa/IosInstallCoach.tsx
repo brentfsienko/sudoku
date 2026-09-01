@@ -126,14 +126,14 @@ export function IosInstallCoach({ ready, accountSeenPlatforms, onFinished }: Pro
       )}
 
       <div className="relative z-10 mx-auto flex min-h-0 w-full max-w-sm flex-1 flex-col justify-center px-4 py-3">
-        <div className="animate-float-in max-h-full overflow-y-auto rounded-3xl bg-white p-4 shadow-2xl">
+        <div className="animate-float-in max-h-full overflow-y-auto rounded-lg bg-white p-4 shadow-2xl">
           <div className="mb-2 flex items-center gap-2">
             <span className="text-[var(--primary)]">
               <PawIcon width={22} height={22} />
             </span>
             <h2
               id="install-coach-title"
-              className="font-serif-title text-xl text-[var(--foreground)]"
+              className="font-pixel text-xs text-[var(--foreground)]"
             >
               {desktop ? "keep sudogku on your dock" : "keep sudogku in your pocket"}
             </h2>
@@ -145,11 +145,11 @@ export function IosInstallCoach({ ready, accountSeenPlatforms, onFinished }: Pro
           <ol className="flex flex-col">
             {steps.map((step, i) => (
               <li key={step.title} className="flex flex-col items-center">
-                <div className="flex w-full items-center gap-3 rounded-2xl border-2 border-[var(--primary)] bg-[var(--primary-soft)] px-3 py-2.5">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--foreground)] text-xs font-bold text-white">
+                <div className="flex w-full items-center gap-3 rounded-md border-2 border-[var(--primary)] bg-[var(--primary-soft)] px-3 py-2.5">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[var(--foreground)] text-xs font-bold text-white">
                     {i + 1}
                   </span>
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[var(--foreground)] shadow-sm">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white text-[var(--foreground)] shadow-sm">
                     {step.icon}
                   </span>
                   <div className="min-w-0 text-left">
@@ -173,7 +173,7 @@ export function IosInstallCoach({ ready, accountSeenPlatforms, onFinished }: Pro
           <button
             type="button"
             onClick={dismiss}
-            className="ui-button mt-4 w-full rounded-full bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95"
+            className="ui-button mt-4 w-full rounded-md bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95"
           >
             got it 🐾
           </button>
@@ -194,8 +194,8 @@ export function IosInstallCoach({ ready, accountSeenPlatforms, onFinished }: Pro
 function ChromeTarget({ platform }: { platform: InstallPlatform }) {
   return (
     <div className="relative flex h-14 w-14 items-center justify-center">
-      <span className="absolute inset-0 animate-ping rounded-full bg-[var(--primary)] opacity-40" />
-      <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white text-[var(--foreground)] shadow-lg">
+      <span className="absolute inset-0 animate-ping rounded bg-[var(--primary)] opacity-40" />
+      <span className="relative flex h-14 w-14 items-center justify-center rounded bg-white text-[var(--foreground)] shadow-lg">
         {pointIcon(platform)}
       </span>
     </div>

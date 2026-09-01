@@ -75,9 +75,9 @@ export function DailySection({ onViewLeaderboard }: Props) {
       <button
         type="button"
         onClick={() => complete ? onViewLeaderboard() : router.push("/play/daily")}
-        className="flex w-full items-center gap-3 rounded-2xl bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99]"
+        className="flex w-full items-center gap-3 rounded-md bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99]"
       >
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[var(--primary-soft)] text-[var(--primary)]">
           <CalendarIcon />
         </div>
 
@@ -117,7 +117,7 @@ export function DailySection({ onViewLeaderboard }: Props) {
           </p>
         </div>
 
-        <span className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-bold text-[var(--foreground)]">
+        <span className="shrink-0 rounded border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-bold text-[var(--foreground)]">
           {complete ? "Leaderboard" : "Play"}
         </span>
       </button>

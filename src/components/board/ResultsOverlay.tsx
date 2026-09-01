@@ -83,7 +83,7 @@ export function ResultsOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5 backdrop-blur-sm animate-float-in">
-      <div className="animate-pop w-full max-w-sm rounded-3xl bg-[var(--surface)] p-6 shadow-2xl">
+      <div className="animate-pop w-full max-w-sm rounded-lg bg-[var(--surface)] p-6 shadow-2xl">
         <div className="flex flex-col items-center gap-2 text-center">
           <DogAvatar dogId={heroDogId} size={88} ringColor={heroRing} />
           <h2 className="font-display text-2xl font-extrabold text-[var(--foreground)]">
@@ -92,7 +92,7 @@ export function ResultsOverlay({
           <p className="text-sm text-[var(--muted)]">{subtitle}</p>
         </div>
 
-        <div className="mt-5 rounded-2xl bg-[var(--surface-soft)] px-4 py-2">
+        <div className="mt-5 rounded-md bg-[var(--surface-soft)] px-4 py-2">
           <StatRow label="Time" value={formatTime(elapsedSeconds)} />
           {penaltySeconds != null && penaltySeconds > 0 && (
             <StatRow
@@ -142,7 +142,7 @@ export function ResultsOverlay({
             <button
               type="button"
               onClick={onRematch}
-              className="font-display rounded-full bg-[var(--primary)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
+              className="font-display rounded-md bg-[var(--primary)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
             >
               Rematch
             </button>
@@ -150,7 +150,7 @@ export function ResultsOverlay({
           <button
             type="button"
             onClick={onHome}
-            className="font-display rounded-full bg-white py-3.5 text-lg font-extrabold text-[var(--foreground)] shadow-sm transition active:scale-[0.98]"
+            className="font-display rounded-md bg-white py-3.5 text-lg font-extrabold text-[var(--foreground)] shadow-sm transition active:scale-[0.98]"
           >
             Home
           </button>
@@ -183,9 +183,9 @@ function PlayerScore({
             {count}
           </span>
         </div>
-        <div className="mt-1 h-2 overflow-hidden rounded-full bg-[var(--surface-soft)]">
+        <div className="mt-1 h-2 overflow-hidden rounded bg-[var(--surface-soft)]">
           <div
-            className="h-full rounded-full"
+            className="h-full rounded"
             style={{ width: `${pct}%`, backgroundColor: color.hex }}
           />
         </div>

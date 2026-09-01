@@ -65,10 +65,10 @@ export default function ResetPasswordPage() {
       className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-[var(--background)] px-5"
       style={{ paddingTop: "calc(env(safe-area-inset-top) + 2rem)" }}
     >
-      <h1 className="font-serif-title mb-2 text-[2.75rem] leading-none text-[var(--foreground)]">
+      <h1 className="font-pixel mb-2 text-lg leading-snug text-[var(--foreground)]">
         New password
       </h1>
-      <p className="mb-4 font-serif-title text-base text-[var(--foreground)]">
+      <p className="mb-4 text-base text-[var(--foreground)]">
         Set a new password to finish resetting your account.
       </p>
 
@@ -86,7 +86,7 @@ export default function ResetPasswordPage() {
           </p>
           <Link
             href="/"
-            className="ui-button mx-auto rounded-full bg-[var(--foreground)] px-6 py-3 text-sm font-bold text-white"
+            className="ui-button mx-auto rounded-md bg-[var(--foreground)] px-6 py-3 text-sm font-bold text-white"
           >
             Back to app
           </Link>

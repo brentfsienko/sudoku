@@ -72,7 +72,7 @@ export function AddFriendSheet({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
       <div
-        className="animate-float-in w-full max-w-md rounded-t-3xl bg-white px-5 pb-8 pt-4 shadow-xl"
+        className="animate-float-in w-full max-w-md rounded-t-lg bg-white px-5 pb-8 pt-4 shadow-xl"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 2rem)" }}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -82,7 +82,7 @@ export function AddFriendSheet({
           <button
             type="button"
             onClick={close}
-            className="ui-button rounded-full p-2 text-xl leading-none text-[var(--muted)]"
+            className="ui-button rounded-md p-2 text-xl leading-none text-[var(--muted)]"
             aria-label="Close"
           >
             ×
@@ -91,20 +91,20 @@ export function AddFriendSheet({
 
         {view === "menu" ? (
           <div className="flex flex-col gap-4">
-            <p className="text-center font-serif-title text-base leading-snug text-[var(--foreground)]">
+            <p className="text-center text-base leading-snug text-[var(--foreground)]">
               Add a friend to your friends list so you can play together.
             </p>
             <button
               type="button"
               onClick={() => void inviteFriend()}
-              className="ui-button w-full rounded-full bg-[var(--foreground)] py-4 text-base font-bold text-white active:scale-[0.98]"
+              className="ui-button w-full rounded-md bg-[var(--foreground)] py-4 text-base font-bold text-white active:scale-[0.98]"
             >
               Invite a friend
             </button>
             <button
               type="button"
               onClick={() => setView("search")}
-              className="ui-button flex w-full items-center justify-center gap-2 rounded-full bg-[var(--foreground)] py-4 text-base font-bold text-white active:scale-[0.98]"
+              className="ui-button flex w-full items-center justify-center gap-2 rounded-md bg-[var(--foreground)] py-4 text-base font-bold text-white active:scale-[0.98]"
             >
               <SearchIcon width={18} height={18} />
               Search by friend code
@@ -125,21 +125,21 @@ export function AddFriendSheet({
                 onKeyDown={(e) => e.key === "Enter" && void runSearch()}
                 placeholder="@username"
                 autoFocus
-                className="ui-input w-full rounded-2xl border border-[var(--border)] bg-[var(--background)] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--foreground)]"
+                className="ui-input w-full rounded-md border border-[var(--border)] bg-[var(--background)] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--foreground)]"
               />
             </div>
             <button
               type="button"
               onClick={() => void runSearch()}
               disabled={searching}
-              className="ui-button w-full rounded-full bg-[var(--foreground)] py-3 text-sm font-bold text-white disabled:opacity-60"
+              className="ui-button w-full rounded-md bg-[var(--foreground)] py-3 text-sm font-bold text-white disabled:opacity-60"
             >
               {searching ? "Searching…" : "Search"}
             </button>
             {msg && (
               <p className="text-center text-xs font-semibold text-[var(--muted)]">{msg}</p>
             )}
-            <div className="max-h-48 overflow-y-auto rounded-2xl bg-[var(--list-panel)]">
+            <div className="max-h-48 overflow-y-auto rounded-md bg-[var(--list-panel)]">
               {results.map((p) => (
                 <div
                   key={p.userId}

@@ -131,14 +131,14 @@ export function SignInGate({ open, userData, onClose }: Props) {
       aria-modal="true"
       aria-labelledby="sign-in-gate-title"
     >
-      <div className="animate-float-in w-full max-w-sm rounded-3xl bg-white p-5 shadow-lg">
+      <div className="animate-float-in w-full max-w-sm rounded-lg bg-white p-5 shadow-lg">
         <div className="mb-3 flex items-center gap-2">
           <span className="text-[var(--primary)]">
             <PawIcon width={22} height={22} />
           </span>
           <h2
             id="sign-in-gate-title"
-            className="font-serif-title text-xl text-[var(--foreground)]"
+            className="font-pixel text-sm text-[var(--foreground)]"
           >
             {title}
           </h2>
@@ -147,7 +147,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
         {info ? (
           <p className="mb-3 text-sm text-[var(--muted)]">{info}</p>
         ) : (
-          <p className="mb-3 font-serif-title text-sm text-[var(--foreground)]">
+          <p className="mb-3 text-sm text-[var(--foreground)]">
             {mode === "forgot"
               ? "Enter your email and we'll send a reset link."
               : "Sign in with email and password to sync stats and play with friends."}
@@ -161,7 +161,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             autoComplete="email"
-            className="ui-input w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
+            className="ui-input w-full rounded-md border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
           />
           {mode !== "forgot" && (
             <input
@@ -170,7 +170,7 @@ export function SignInGate({ open, userData, onClose }: Props) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              className="ui-input w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
+              className="ui-input w-full rounded-md border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
             />
           )}
           {mode === "signup" && (
@@ -180,14 +180,14 @@ export function SignInGate({ open, userData, onClose }: Props) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm password"
               autoComplete="new-password"
-              className="ui-input w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
+              className="ui-input w-full rounded-md border-2 border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--foreground)]"
             />
           )}
           <button
             type="button"
             onClick={submit}
             disabled={status === "loading"}
-            className="ui-button rounded-full bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95 disabled:opacity-60"
+            className="ui-button rounded-md bg-[var(--foreground)] py-2.5 text-sm font-bold text-white active:scale-95 disabled:opacity-60"
           >
             {status === "loading"
               ? "…"

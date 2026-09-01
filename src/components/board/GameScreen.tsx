@@ -242,7 +242,7 @@ export function GameScreen({
         <button
           type="button"
           onClick={onExit}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--paw)] shadow-sm active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-[var(--paw)] shadow-sm active:scale-95"
           aria-label="Back"
         >
           <ChevronLeftIcon width={22} height={22} />
@@ -332,7 +332,7 @@ export function GameScreen({
           />
         </div>
         {paused && (
-          <div className="absolute inset-3 flex flex-col items-center justify-center gap-5 rounded-2xl bg-[var(--background)]/95">
+          <div className="absolute inset-3 flex flex-col items-center justify-center gap-5 rounded-md bg-[var(--background)]/95">
             <span className="text-[var(--primary)]">
               <PlayIcon width={52} height={52} />
             </span>
@@ -343,14 +343,14 @@ export function GameScreen({
               <button
                 type="button"
                 onClick={() => controller.setPaused(false)}
-                className="font-display w-full rounded-full bg-[var(--primary)] py-3 text-base font-extrabold text-white shadow-sm active:scale-[0.98]"
+                className="font-display w-full rounded-md bg-[var(--primary)] py-3 text-base font-extrabold text-white shadow-sm active:scale-[0.98]"
               >
                 Resume
               </button>
               <button
                 type="button"
                 onClick={onAbandon ?? onExit}
-                className="font-display w-full rounded-full border-2 border-[var(--border)] bg-white py-3 text-base font-extrabold text-[var(--foreground)] active:scale-[0.98]"
+                className="font-display w-full rounded-md border-2 border-[var(--border)] bg-white py-3 text-base font-extrabold text-[var(--foreground)] active:scale-[0.98]"
               >
                 End Game
               </button>

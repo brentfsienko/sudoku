@@ -18,7 +18,7 @@ export function ProfileEditModal({ open, onClose, children }: Props) {
       role="presentation"
     >
       <div
-        className="animate-float-in max-h-[min(90dvh,640px)] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-5 shadow-xl"
+        className="animate-float-in max-h-[min(90dvh,640px)] w-full max-w-md overflow-y-auto rounded-lg bg-white p-5 shadow-xl"
         style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -28,14 +28,14 @@ export function ProfileEditModal({ open, onClose, children }: Props) {
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2
             id="profile-edit-title"
-            className="font-serif-title text-2xl text-[var(--foreground)]"
+            className="font-pixel text-sm text-[var(--foreground)]"
           >
             Edit profile
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="ui-button shrink-0 rounded-full p-2 text-2xl leading-none text-[var(--muted)]"
+            className="ui-button shrink-0 rounded-md p-2 text-2xl leading-none text-[var(--muted)]"
             aria-label="Close"
           >
             ×

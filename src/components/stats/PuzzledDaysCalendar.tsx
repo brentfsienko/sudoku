@@ -70,12 +70,12 @@ export function PuzzledDaysCalendar({ history }: Props) {
   ).length;
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
+    <section className="flex flex-col gap-3 rounded-md border border-[var(--border)] bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={goPrev}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-[var(--foreground)] active:bg-[var(--surface-soft)]"
+          className="flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border)] text-[var(--foreground)] active:bg-[var(--surface-soft)]"
           aria-label="Previous month"
         >
           ‹
@@ -92,7 +92,7 @@ export function PuzzledDaysCalendar({ history }: Props) {
           type="button"
           onClick={goNext}
           disabled={isCurrentMonth}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-[var(--foreground)] active:bg-[var(--surface-soft)] disabled:opacity-35"
+          className="flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border)] text-[var(--foreground)] active:bg-[var(--surface-soft)] disabled:opacity-35"
           aria-label="Next month"
         >
           ›
@@ -118,7 +118,7 @@ export function PuzzledDaysCalendar({ history }: Props) {
           return (
             <div
               key={day}
-              className={`relative flex aspect-square items-center justify-center rounded-full text-xs font-bold ${
+              className={`relative flex aspect-square items-center justify-center rounded-md text-xs font-bold ${
                 isToday
                   ? "ring-2 ring-[var(--primary)] ring-offset-1"
                   : ""

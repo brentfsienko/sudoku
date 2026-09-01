@@ -26,7 +26,7 @@ export function FactGuessCard() {
 
   return (
     <section>
-      <div className="flex items-start gap-3 overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3.5">
+      <div className="flex items-start gap-3 overflow-hidden rounded-md border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3.5">
         <span className="mt-0.5 shrink-0 text-[var(--primary)]">
           <BulbIcon width={18} height={18} />
         </span>

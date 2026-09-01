@@ -86,7 +86,7 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
           type="button"
           onClick={onClose}
           aria-label="Close chat"
-          className="flex h-7 w-7 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--surface-soft)] active:scale-95"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--muted)] hover:bg-[var(--surface-soft)] active:scale-95"
         >
           <XIcon width={16} height={16} />
         </button>
@@ -105,10 +105,10 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
           return (
             <div key={msg.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
               <div
-                className={`max-w-[80%] rounded-2xl px-3 py-2 ${
+                className={`max-w-[80%] rounded-md px-3 py-2 ${
                   isMe
-                    ? "rounded-br-sm bg-[var(--primary)] text-white"
-                    : "rounded-bl-sm bg-[var(--surface-soft)] text-[var(--foreground)]"
+                    ? "bg-[var(--primary)] text-white"
+                    : "bg-[var(--surface-soft)] text-[var(--foreground)]"
                 }`}
               >
                 {!isMe && (
@@ -139,7 +139,7 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
             key={p}
             type="button"
             onClick={() => sendPreset(p)}
-            className="font-display shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-1 text-xs font-bold text-[var(--foreground)] transition active:scale-95"
+            className="font-display shrink-0 rounded-md border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-1 text-xs font-bold text-[var(--foreground)] transition active:scale-95"
           >
             {p}
           </button>
@@ -156,14 +156,14 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
           onKeyDown={handleKeyDown}
           placeholder="Type a message…"
           maxLength={120}
-          className="flex-1 rounded-full bg-[var(--surface-soft)] px-4 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] outline-none"
+          className="flex-1 rounded-md bg-[var(--surface-soft)] px-4 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] outline-none"
         />
         <button
           type="button"
           onClick={handleSend}
           disabled={!draft.trim()}
           aria-label="Send"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white transition active:scale-95 disabled:opacity-40"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--primary)] text-white transition active:scale-95 disabled:opacity-40"
         >
           <SendIcon width={16} height={16} />
         </button>

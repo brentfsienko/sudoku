@@ -302,7 +302,7 @@ export function MainTab({
                 />
               ) : (
                 <div
-                  className="h-11 w-[9.5rem] animate-pulse rounded-full bg-[var(--foreground)]/25"
+                  className="h-11 w-[9.5rem] animate-pulse rounded-md bg-[var(--foreground)]/25"
                   aria-hidden
                 />
               )}
@@ -361,9 +361,9 @@ export function MainTab({
               ) : (
                 <section className="mb-5" aria-busy aria-label="Loading recent games">
                   <div className="mb-2.5 h-4 w-28 animate-pulse rounded bg-[var(--list-panel)]" />
-                  <div className="space-y-2 rounded-2xl bg-[var(--list-panel)] p-3">
-                    <div className="h-14 animate-pulse rounded-xl bg-white/60" />
-                    <div className="h-14 animate-pulse rounded-xl bg-white/60" />
+                  <div className="space-y-2 rounded-md bg-[var(--list-panel)] p-3">
+                    <div className="h-14 animate-pulse rounded-md bg-white/60" />
+                    <div className="h-14 animate-pulse rounded-md bg-white/60" />
                   </div>
                 </section>
               )}

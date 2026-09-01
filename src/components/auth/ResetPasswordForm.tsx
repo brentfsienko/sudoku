@@ -67,7 +67,7 @@ export function ResetPasswordForm() {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="New password"
         autoComplete="new-password"
-        className="ui-input w-full rounded-2xl border-2 border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--foreground)]"
+        className="ui-input w-full rounded-md border-2 border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--foreground)]"
       />
       <input
         type="password"
@@ -75,13 +75,13 @@ export function ResetPasswordForm() {
         onChange={(e) => setConfirm(e.target.value)}
         placeholder="Confirm new password"
         autoComplete="new-password"
-        className="ui-input w-full rounded-2xl border-2 border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--foreground)]"
+        className="ui-input w-full rounded-md border-2 border-[var(--border)] bg-white px-4 py-3 text-sm outline-none focus:border-[var(--foreground)]"
       />
       <button
         type="button"
         onClick={submit}
         disabled={status === "loading"}
-        className="ui-button w-full rounded-full bg-[var(--primary)] py-3.5 text-sm font-bold text-white active:scale-[0.98] disabled:opacity-60"
+        className="ui-button w-full rounded-md bg-[var(--primary)] py-3.5 text-sm font-bold text-white active:scale-[0.98] disabled:opacity-60"
       >
         {status === "loading" ? "Saving…" : "Save new password"}
       </button>

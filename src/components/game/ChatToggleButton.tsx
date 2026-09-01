@@ -13,7 +13,7 @@ export function ChatToggleButton({ unread, onClick }: Props) {
       type="button"
       onClick={onClick}
       aria-label="Open chat"
-      className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--paw)] shadow-sm active:scale-95"
+      className="relative flex h-9 w-9 items-center justify-center rounded-md bg-white text-[var(--paw)] shadow-sm active:scale-95"
     >
       <ChatIcon width={20} height={20} />
       {unread && (
