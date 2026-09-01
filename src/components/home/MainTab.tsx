@@ -31,11 +31,11 @@ import type { UserData } from "@/lib/stats/types";
 
 /** Space reserved for pinned title (must match header + scroll padding-top). */
 const PLAY_HEADER_HEIGHT =
-  "calc(env(safe-area-inset-top) + 1.25rem + 2.75rem + 0.75rem)";
+  "calc(env(safe-area-inset-top) + 1.75rem + 2.75rem + 0.75rem)";
 
 /** Min height for white sheet so it reaches the nav when content is short. */
 const PLAY_SHEET_MIN_HEIGHT =
-  "calc(var(--app-height, 100dvh) - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1.25rem - 2.75rem - 0.75rem - 3.25rem - 3.5rem)";
+  "calc(var(--app-height, 100dvh) - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1.75rem - 2.75rem - 0.75rem - 3.25rem - 3.5rem)";
 
 type Props = {
   data: UserData;
@@ -231,7 +231,7 @@ export function MainTab({
       <header
         className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-[var(--accent)] px-5"
         style={{
-          paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)",
+          paddingTop: "calc(env(safe-area-inset-top) + 1.75rem)",
           height: PLAY_HEADER_HEIGHT,
         }}
       >

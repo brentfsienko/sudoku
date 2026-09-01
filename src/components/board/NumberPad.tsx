@@ -18,8 +18,8 @@ export function NumberPad({ counts, disabled, onInput }: Props) {
             type="button"
             disabled={disabled || done}
             onClick={() => onInput(n)}
-            className="font-display flex aspect-[3/4] items-center justify-center rounded-md bg-white text-[var(--primary)] shadow-sm transition-all duration-100 active:scale-[0.92] active:shadow-none disabled:opacity-30 disabled:active:scale-100"
-            style={{ fontSize: "min(7vw, 1.7rem)", fontWeight: 700 }}
+            className="font-typewriter flex aspect-[3/4] items-center justify-center rounded-md bg-white text-[var(--primary)] shadow-sm transition-all duration-100 active:scale-[0.92] active:shadow-none disabled:opacity-30 disabled:active:scale-100"
+            style={{ fontSize: "min(7vw, 1.7rem)", fontWeight: 400 }}
           >
             {n}
           </button>

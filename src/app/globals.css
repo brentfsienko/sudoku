@@ -59,9 +59,9 @@
   --color-player-3: var(--player-3);
   --color-player-4: var(--player-4);
 
-  --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
-  --font-pixel: var(--font-pixel);
+  --font-sans: var(--font-typewriter);
+  --font-display: var(--font-typewriter);
+  --font-pixel: var(--font-typewriter);
 }
 
 * {
@@ -82,8 +82,8 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  letter-spacing: -0.03em;
+  font-family: var(--typewriter);
+  letter-spacing: 0.02em;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -165,20 +165,15 @@ body {
   }
 }
 
-/* Pixel UI text — buttons, labels, stats (Pixelify Sans) */
+/* Body, titles, buttons, stats — same typewriter face as the greeting bubble.
+   Special Elite keeps 2/5 and similar letters distinct, unlike arcade pixel faces. */
 .font-display,
-.font-serif-title {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-weight: 500;
-  letter-spacing: -0.04em;
-}
-
-/* 8-bit pixel font — tab titles, section headings (Press Start 2P) */
+.font-serif-title,
 .font-pixel {
-  font-family: var(--font-pixel), monospace;
+  font-family: var(--typewriter);
   font-weight: 400;
-  letter-spacing: -0.08em;
-  line-height: 1.4;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
 }
 
 /* Sans UI: buttons, inputs, labels */
@@ -188,7 +183,7 @@ button,
 input,
 select,
 textarea {
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--typewriter);
 }
 
 /* prevent text selection on tappy UI */

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Baloo_2, Lora, Pixelify_Sans, Press_Start_2P } from "next/font/google";
+import { Lora } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
@@ -16,29 +16,10 @@ import { OfflineDailySync } from "@/components/pwa/OfflineDailySync";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const baloo = Baloo_2({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const pixelifySans = Pixelify_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
 const lora = Lora({
   variable: "--font-serif",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
-});
-
-const pressStart = Press_Start_2P({
-  variable: "--font-pixel",
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
 });
 
 /** Self-hosted typewriter face — avoids Google Fonts fetch during Vercel builds. */
@@ -68,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${baloo.variable} ${pixelifySans.variable} ${lora.variable} ${specialElite.variable} ${pressStart.variable} h-full antialiased`}
+      className={`${lora.variable} ${specialElite.variable} h-full antialiased`}
     >
       <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh max-md:h-[var(--app-height,100dvh)] max-md:max-h-[var(--app-height,100dvh)]">
         <JsonLd data={[webApplicationJsonLd(), organizationJsonLd()]} />
@@ -93,8 +74,8 @@ export default function RootLayout({
               border: "1px solid #efe2cf",
               color: "#4a3b2f",
               borderRadius: "4px",
-              fontFamily: "var(--font-sans), ui-sans-serif, system-ui, sans-serif",
-              letterSpacing: "-0.04em",
+              fontFamily: "var(--font-typewriter), 'Courier New', Courier, monospace",
+              letterSpacing: "0.02em",
               fontSize: "14px",
               fontWeight: "600",
             },

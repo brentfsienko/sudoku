@@ -8,7 +8,7 @@ type Props = {
 export function TabScreenHeader({ title, action }: Props) {
   return (
     <div className="flex items-center justify-between">
-      <h1 className="font-pixel text-xl leading-snug tracking-tighter text-[var(--foreground)]">
+      <h1 className="font-pixel text-2xl leading-snug text-[var(--foreground)]">
         {title}
       </h1>
       {action}

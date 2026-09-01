@@ -884,7 +884,7 @@ function SectionHeader({
   return (
     <div className="flex items-center gap-2">
       <span style={{ color: accent ?? "var(--primary)" }}>{icon}</span>
-      <h3 className="font-pixel text-xs tracking-tighter text-[var(--foreground)]">
+      <h3 className="font-pixel text-sm text-[var(--foreground)]">
         {title}
       </h3>
       {trailing && (

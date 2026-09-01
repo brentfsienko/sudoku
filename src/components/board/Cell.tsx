@@ -77,11 +77,11 @@ function CellInner({ cell, onSelect }: Props) {
       )}
       {cell.value ? (
         <span
-          className="font-display leading-none"
+          className="font-typewriter leading-none"
           style={{
             color: textColor,
-            fontWeight: cell.given ? 700 : 600,
-            fontSize: "min(5.2vw, 1.5rem)",
+            fontWeight: 400,
+            fontSize: cell.given ? "min(5.4vw, 1.55rem)" : "min(5.2vw, 1.5rem)",
           }}
         >
           {cell.value}
