@@ -3,6 +3,7 @@
 import type { PlayerRole } from "@/lib/game/types";
 import { playerColor } from "@/lib/theme/dogs";
 import { DogAvatar } from "./DogAvatar";
+import { ChatBubble } from "./game/ChatBubble";
 
 type Props = {
   name: string;
@@ -13,6 +14,8 @@ type Props = {
   subtitle?: string;
   online?: boolean;
   compact?: boolean;
+  /** Incoming chat message to show as a speech bubble above the avatar. */
+  bubble?: string | null;
 };
 
 export function PlayerBadge({
@@ -23,11 +26,13 @@ export function PlayerBadge({
   subtitle,
   online = true,
   compact,
+  bubble,
 }: Props) {
   const color = playerColor(role);
   return (
     <div className="flex items-center gap-2">
       <div className="relative">
+        {bubble && <ChatBubble text={bubble} />}
         <DogAvatar dogId={dogId} size={size} ringColor={color.hex} />
         <span
           className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white"

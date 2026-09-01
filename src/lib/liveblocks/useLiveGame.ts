@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LiveMap, LiveObject } from "@liveblocks/client";
+import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
 import {
   useMutation,
   useMyPresence,
@@ -418,5 +418,6 @@ export function buildInitialStorage(args: {
       hostName: "",
       hostId: "",
     }),
+    messages: new LiveList([]),
   };
 }

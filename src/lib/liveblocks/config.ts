@@ -1,4 +1,4 @@
-import { createClient, LiveMap, LiveObject } from "@liveblocks/client";
+import { createClient, LiveList, LiveMap, LiveObject } from "@liveblocks/client";
 import { createRoomContext, createLiveblocksContext } from "@liveblocks/react";
 import type {
   CellEntry,
@@ -69,10 +69,19 @@ export type GameMeta = {
   hostId: string;
 };
 
+export type ChatMessage = {
+  id: string;
+  from: PlayerRole;
+  name: string;
+  text: string;
+  at: number;
+};
+
 export type Storage = {
   /** Keyed by cell index ("0".."80"). */
   cells: LiveMap<string, CellEntry>;
   meta: LiveObject<GameMeta>;
+  messages: LiveList<ChatMessage>;
 };
 
 export type UserMeta = {

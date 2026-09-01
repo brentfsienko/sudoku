@@ -12,6 +12,9 @@ import { countCollectedBones } from "@/lib/bones/collect";
 import { useGameBones } from "@/lib/bones/useGameBones";
 import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { ChevronLeftIcon, PlayIcon } from "@/components/icons";
+import { RoomChatPanel } from "@/components/game/RoomChatPanel";
+import { ChatToggleButton } from "@/components/game/ChatToggleButton";
+import type { RoomChatReturn } from "@/lib/liveblocks/useRoomChat";
 import type { GameController } from "@/lib/game/store";
 import { elapsedSeconds } from "@/lib/game/store";
 import {
@@ -54,6 +57,8 @@ type Props = {
   /** Called once when the game reaches a finished state. */
   streak?: number;
   savedBones?: number;
+  /** Multiplayer room chat — only provided in multiplayer context. */
+  chat?: RoomChatReturn;
   onFinish?: (info: {
     solved: boolean;
     score: number;
@@ -89,7 +94,9 @@ export function GameScreen({
   analyticsMode,
   streak = 0,
   savedBones = 0,
+  chat,
 }: Props) {
+  const [chatOpen, setChatOpen] = useState(false);
   const { snapshot } = controller;
   const bonePlay = useGameBones(
     controller,
@@ -244,12 +251,34 @@ export function GameScreen({
         <div className="font-display text-base font-extrabold text-[var(--foreground)]">
           {isMulti ? GAME_MODE_LABELS[mode] : DIFFICULTY_LABELS[snapshot.difficulty]}
         </div>
-        <StreakBonePill
-          streak={streak}
-          bones={bonePlay.displayBones}
-          className="scale-[0.88] origin-top-right"
-        />
+        <div className="flex items-center gap-2">
+          {chat && (
+            <ChatToggleButton
+              unread={chat.unread}
+              onClick={() => {
+                setChatOpen((o) => !o);
+                if (!chatOpen) chat.markRead();
+              }}
+            />
+          )}
+          <StreakBonePill
+            streak={streak}
+            bones={bonePlay.displayBones}
+            className="scale-[0.88] origin-top-right"
+          />
+        </div>
       </div>
+
+      {/* Chat panel (in-game) */}
+      {chat && chatOpen && (
+        <div className="mx-4 mb-2 rounded-2xl bg-white shadow-sm overflow-hidden">
+          <RoomChatPanel
+            chat={chat}
+            myRole={me.role}
+            onClose={() => setChatOpen(false)}
+          />
+        </div>
+      )}
 
       {/* Players strip (multiplayer) */}
       {isMulti && (
@@ -273,6 +302,11 @@ export function GameScreen({
                     showCount={mode === "competitive"}
                     online={isOnline}
                     alignRight={idx > 0 && (allPlayers ?? []).length <= 2}
+                    bubble={
+                      chat && !isMe && chat.latestIncoming?.from === player.role
+                        ? chat.latestIncoming.text
+                        : undefined
+                    }
                   />
                 </div>
               </div>
@@ -409,6 +443,7 @@ function PlayerStat({
   you,
   online,
   alignRight,
+  bubble,
 }: {
   player: Player;
   count: number;
@@ -416,6 +451,7 @@ function PlayerStat({
   you?: boolean;
   online: boolean;
   alignRight?: boolean;
+  bubble?: string | null;
 }) {
   const color = playerColor(player.role);
   return (
@@ -427,6 +463,7 @@ function PlayerStat({
         size={36}
         compact
         online={online}
+        bubble={bubble}
       />
       <div>
         <div className="font-display text-sm font-bold leading-tight" style={{ color: color.hex }}>

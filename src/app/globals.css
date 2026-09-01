@@ -320,3 +320,25 @@ button {
 .animate-penalty-flash {
   animation: penalty-flash 1.8s ease-out forwards;
 }
+
+@keyframes chat-bubble-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.9);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px) scale(0.95);
+  }
+}
+.animate-chat-bubble {
+  animation: chat-bubble-in 4s ease-out forwards;
+}

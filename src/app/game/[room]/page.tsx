@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   LiveblocksProvider,
@@ -33,6 +33,9 @@ import {
 import type { LivePlayer } from "@/lib/liveblocks/useLiveGame";
 import { useTrackRedditGameStart } from "@/lib/analytics/useTrackRedditGameStart";
 import { useGameEvents } from "@/lib/game/useGameEvents";
+import { useRoomChat } from "@/lib/liveblocks/useRoomChat";
+import { RoomChatPanel } from "@/components/game/RoomChatPanel";
+import { ChatToggleButton } from "@/components/game/ChatToggleButton";
 
 function parseDifficulty(value: string | null): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty)
@@ -130,6 +133,8 @@ function RoomInner({
     hostName: profile.username,
   });
 
+  const chat = useRoomChat(game.me.role, profile.username);
+
   const exit = () => router.push("/");
 
   if (game.loading) {
@@ -148,6 +153,8 @@ function RoomInner({
         isFull={game.isFull}
         onStart={game.startGame}
         onExit={exit}
+        chat={chat}
+        myRole={game.me.role}
       />
     );
   }
@@ -170,6 +177,7 @@ function RoomInner({
       onRematch={game.rematch}
       streak={wallet.streak}
       savedBones={wallet.bones}
+      chat={chat}
       onFinish={async ({
         solved,
         score,
@@ -285,6 +293,8 @@ function Lobby({
   isFull,
   onStart,
   onExit,
+  chat,
+  myRole,
 }: {
   code: string;
   isHost: boolean;
@@ -295,8 +305,11 @@ function Lobby({
   isFull: boolean;
   onStart: () => void;
   onExit: () => void;
+  chat: ReturnType<typeof useRoomChat>;
+  myRole: PlayerRole | null;
 }) {
   const [copied, setCopied] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   async function share() {
     const url =
@@ -336,8 +349,25 @@ function Lobby({
           </span>
           {GAME_MODE_LABELS[mode]}
         </div>
-        <div className="h-9 w-9" />
+        <ChatToggleButton
+          unread={chat.unread}
+          onClick={() => {
+            setChatOpen((o) => !o);
+            if (!chatOpen) chat.markRead();
+          }}
+        />
       </div>
+
+      {/* Chat panel */}
+      {chatOpen && (
+        <div className="mb-3 rounded-2xl bg-white shadow-sm overflow-hidden">
+          <RoomChatPanel
+            chat={chat}
+            myRole={myRole}
+            onClose={() => setChatOpen(false)}
+          />
+        </div>
+      )}
 
       <div className="flex flex-1 flex-col items-center justify-center gap-5">
         {/* Room code card */}
@@ -381,6 +411,11 @@ function Lobby({
                       role={player.role}
                       size={52}
                       compact
+                      bubble={
+                        !isMe && chat.latestIncoming?.from === player.role
+                          ? chat.latestIncoming.text
+                          : null
+                      }
                     />
                     <span className="font-display text-sm font-bold text-[var(--foreground)]">
                       {player.name}
