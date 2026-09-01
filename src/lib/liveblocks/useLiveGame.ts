@@ -310,12 +310,25 @@ export function useLiveGame(opts: {
     };
   }, [meta, cellsMap]);
 
-  const peers: PeerCursor[] = others.map((o) => ({
-    role: (o.presence.role as PlayerRole | null) ?? null,
-    name: o.presence.name,
-    dogId: o.presence.dogId,
-    selectedCell: o.presence.selectedCell,
-  }));
+  // Deduplicate others by role: stale connections from reconnecting players can
+  // appear multiple times in `others`. Keep only the first connection per role.
+  const peers: PeerCursor[] = useMemo(() => {
+    const seen = new Set<string>();
+    const result: PeerCursor[] = [];
+    for (const o of others) {
+      const role = (o.presence.role as PlayerRole | null) ?? null;
+      const key = role ?? `conn-${o.connectionId}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push({
+        role,
+        name: o.presence.name,
+        dogId: o.presence.dogId,
+        selectedCell: o.presence.selectedCell,
+      });
+    }
+    return result;
+  }, [others]);
 
   const opponentPeer = peers.find((p) => p.role !== myRole) ?? peers[0] ?? null;
   const opponent = opponentPeer
@@ -328,13 +341,16 @@ export function useLiveGame(opts: {
       }
     : null;
 
-  // All players (self + peers) sorted by role for consistent display order.
+  // All players (self + peers) sorted by role. Self wins its role slot;
+  // peers are deduplicated so no role appears twice.
   const allPlayers: LivePlayer[] = useMemo(() => {
-    const self: LivePlayer = { name: myPresence.name, dogId: myPresence.dogId, role: myRole };
-    const others_: LivePlayer[] = peers
-      .filter((p) => p.role != null)
-      .map((p) => ({ name: p.name, dogId: p.dogId, role: p.role as PlayerRole }));
-    return [self, ...others_].sort((a, b) => a.role.localeCompare(b.role));
+    const roleMap = new Map<PlayerRole, LivePlayer>();
+    roleMap.set(myRole, { name: myPresence.name, dogId: myPresence.dogId, role: myRole });
+    for (const p of peers) {
+      if (!p.role || roleMap.has(p.role)) continue;
+      roleMap.set(p.role, { name: p.name, dogId: p.dogId, role: p.role });
+    }
+    return Array.from(roleMap.values()).sort((a, b) => a.role.localeCompare(b.role));
   }, [myPresence.name, myPresence.dogId, myRole, peers]);
 
   const controller: GameController | null =
