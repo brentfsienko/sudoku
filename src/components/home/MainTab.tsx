@@ -13,7 +13,7 @@ import {
   GameSetupSheet,
   type GameSetupResult,
 } from "@/components/home/GameSetupSheet";
-import { FactGuessCard } from "@/components/home/FactGuessCard";
+import { DailyDogCard } from "@/components/home/DailyDogCard";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 import { StartGameSheet } from "@/components/home/StartGameSheet";
 import { DogGreetingBubble } from "@/components/home/DogGreetingBubble";
@@ -345,9 +345,7 @@ export function MainTab({
                 </div>
               </section>
 
-              <div className="mb-5">
-                <FactGuessCard />
-              </div>
+              <DailyDogCard />
 
               {statsReady && readyData ? (
                 <GameHistoryList

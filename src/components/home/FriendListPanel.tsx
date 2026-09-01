@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 /** Section headings on the home tab (Play, Recent games, etc.) */
 export const homeSectionTitleClass =
-  "font-pixel text-left text-base leading-snug text-[var(--foreground)]";
+  "font-pixel text-left text-sm leading-snug tracking-tighter text-[var(--foreground)]";
 
 type Props = {
   title: string;
@@ -23,7 +23,7 @@ export function FriendListPanel({
       <h2
         className={
           titleClassName ??
-          "font-pixel text-base text-[var(--foreground)]"
+          "font-pixel text-sm tracking-tighter text-[var(--foreground)]"
         }
       >
         {title}
