@@ -12,7 +12,7 @@ import { countCollectedBones } from "@/lib/bones/collect";
 import { useGameBones } from "@/lib/bones/useGameBones";
 import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { ChevronLeftIcon, PlayIcon } from "@/components/icons";
-import { RoomChatPanel } from "@/components/game/RoomChatPanel";
+import { ChatSheet } from "@/components/game/ChatSheet";
 import type { RoomChatReturn } from "@/lib/liveblocks/useRoomChat";
 import type { GameController } from "@/lib/game/store";
 import { elapsedSeconds } from "@/lib/game/store";
@@ -257,24 +257,13 @@ export function GameScreen({
         />
       </div>
 
-      {/* Chat overlay (in-game) — fixed bottom sheet over the board */}
+      {/* Chat overlay (in-game) — animated bottom sheet */}
       {chat && chatOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/30"
-            onClick={() => setChatOpen(false)}
-          />
-          <div
-            className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-3xl bg-white shadow-xl overflow-hidden"
-            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-          >
-            <RoomChatPanel
-              chat={chat}
-              myRole={me.role}
-              onClose={() => setChatOpen(false)}
-            />
-          </div>
-        </>
+        <ChatSheet
+          chat={chat}
+          myRole={me.role}
+          onClose={() => setChatOpen(false)}
+        />
       )}
 
       {/* Players strip (multiplayer) */}

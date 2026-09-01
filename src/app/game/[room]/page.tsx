@@ -34,7 +34,7 @@ import type { LivePlayer } from "@/lib/liveblocks/useLiveGame";
 import { useTrackRedditGameStart } from "@/lib/analytics/useTrackRedditGameStart";
 import { useGameEvents } from "@/lib/game/useGameEvents";
 import { useRoomChat } from "@/lib/liveblocks/useRoomChat";
-import { RoomChatPanel } from "@/components/game/RoomChatPanel";
+import { ChatSheet } from "@/components/game/ChatSheet";
 import { ChatToggleButton } from "@/components/game/ChatToggleButton";
 import {
   saveActiveMulti,
@@ -383,23 +383,13 @@ function Lobby({
         />
       </div>
 
-      {/* Chat overlay — fixed bottom sheet so it doesn't push the lobby content */}
+      {/* Chat overlay — animated bottom sheet */}
       {chatOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/30"
-            onClick={() => setChatOpen(false)}
-          />
-          <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-3xl bg-white shadow-xl overflow-hidden"
-            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-          >
-            <RoomChatPanel
-              chat={chat}
-              myRole={myRole}
-              onClose={() => setChatOpen(false)}
-            />
-          </div>
-        </>
+        <ChatSheet
+          chat={chat}
+          myRole={myRole}
+          onClose={() => setChatOpen(false)}
+        />
       )}
 
       <div className="flex flex-1 flex-col items-center justify-center gap-5">
