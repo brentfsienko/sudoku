@@ -285,9 +285,16 @@ function JoinConfirmScreen({
   onDecline: () => void;
 }) {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
-      <DogAvatar dogId="golden" size={88} />
-      <div className="space-y-1">
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col items-center justify-center gap-7 px-6 text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/brand/Sudogku_Orange.svg"
+        alt="Sudogku"
+        className="w-48"
+        style={{ imageRendering: "pixelated" }}
+        aria-hidden
+      />
+      <div className="space-y-2">
         <h2 className="font-display text-2xl font-extrabold text-[var(--foreground)]">
           Game invite 🎮
         </h2>

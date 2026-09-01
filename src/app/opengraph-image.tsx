@@ -1,12 +1,12 @@
 import { ImageResponse } from "next/og";
-import { brandDogDataUrl } from "@/lib/brand-dog-data-url";
+import { brandLogoDataUrl } from "@/lib/brand-logo-data-url";
 
 export const alt = "Sudogku — free online Sudoku, solo and multiplayer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default function OgImage() {
-  const dogSrc = brandDogDataUrl();
+  const logoSrc = brandLogoDataUrl();
 
   return new ImageResponse(
     (
@@ -18,53 +18,38 @@ export default function OgImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#7ec4cf",
+          background: "#fdf6ec",
         }}
       >
         <div
           style={{
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            gap: 40,
-            background: "#fdf6ec",
-            borderRadius: 40,
-            padding: "56px 72px",
-            boxShadow: "0 24px 48px rgba(74, 59, 47, 0.15)",
+            gap: 32,
+            background: "#ffffff",
+            borderRadius: 48,
+            padding: "64px 80px 56px",
+            boxShadow: "0 24px 64px rgba(73,59,47,0.12)",
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={dogSrc}
-            width={280}
-            height={280}
-            alt=""
+            src={logoSrc}
+            width={560}
+            height={232}
+            alt="Sudogku"
             style={{ objectFit: "contain" }}
           />
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
+              fontSize: 28,
+              fontWeight: 600,
+              color: "#9a8a79",
+              letterSpacing: "0.02em",
             }}
           >
-            <div
-              style={{
-                fontSize: 88,
-                fontWeight: 700,
-                color: "#4a3b2f",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Sudogku
-            </div>
-            <div
-              style={{
-                fontSize: 32,
-                color: "#9a8a79",
-              }}
-            >
-              Sudoku with friends
-            </div>
+            Sudoku with friends
           </div>
         </div>
       </div>

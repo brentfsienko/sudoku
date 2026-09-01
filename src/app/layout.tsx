@@ -45,7 +45,7 @@ const specialElite = localFont({
 export const metadata: Metadata = ROOT_METADATA;
 
 export const viewport: Viewport = {
-  themeColor: "#7ec4cf",
+  themeColor: "#f2a059",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

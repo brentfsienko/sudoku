@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AppBrandTitle } from "@/components/AppBrandTitle";
 import { BoneIcon } from "@/components/BoneIcon";
 
 const SPLASH_TAGLINES = [
@@ -87,8 +86,15 @@ export function AppSplash({ ready }: Props) {
       aria-busy={!ready}
       aria-label="Loading Sudogku"
     >
-      <BoneIcon size={72} className="animate-bone-spin-slow" />
-      <AppBrandTitle appIcon size="lg" iconSize={70} align="center" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/brand/Sudogku_Orange.svg"
+        alt="Sudogku"
+        className="w-56"
+        style={{ imageRendering: "pixelated" }}
+        aria-label="Sudogku"
+      />
+      <BoneIcon size={36} className="animate-bone-spin-slow text-[var(--primary)]" />
       <p className="max-w-xs text-center text-sm font-semibold text-[var(--muted)]">
         {tagline}
       </p>

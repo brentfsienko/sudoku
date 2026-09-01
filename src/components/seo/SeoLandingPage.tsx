@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BRAND_DOG_IMAGE } from "@/lib/brand";
 import { LANDING_FAQ, SITE_NAME, absoluteUrl, faqJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 
@@ -58,16 +57,11 @@ export function SeoLandingPage({
         <div className="mx-auto flex max-w-3xl items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={BRAND_DOG_IMAGE}
-            alt=""
-            width={56}
-            height={56}
-            className="h-14 w-14 object-contain"
+            src="/brand/Sudogku_Orange.svg"
+            alt={SITE_NAME}
+            className="h-10 w-auto"
+            style={{ imageRendering: "pixelated" }}
           />
-          <div>
-            <p className="font-serif-title text-3xl leading-none">{SITE_NAME}</p>
-            <p className="mt-1 text-sm text-white/85">Free online Sudoku</p>
-          </div>
         </div>
       </header>
 

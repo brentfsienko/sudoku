@@ -1,12 +1,15 @@
-import { APP_NAME } from "@/lib/brand";
-
-/** Matches TabScreenHeader (Friends / Me) — title only; dog sits on the sheet edge below. */
+/** Pinned header for the Play tab — Sudogku logo lockup. */
 export function PlayTabHeader() {
   return (
     <div className="flex items-center justify-between">
-      <h1 className="font-serif-title text-[2.75rem] leading-none text-white">
-        {APP_NAME}
-      </h1>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/brand/Sudogku_Orange.svg"
+        alt="Sudogku"
+        className="h-10 w-auto"
+        style={{ imageRendering: "pixelated" }}
+        aria-label="Sudogku"
+      />
     </div>
   );
 }
