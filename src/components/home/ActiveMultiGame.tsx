@@ -59,11 +59,11 @@ export function ActiveMultiGame() {
                 className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
                 style={{ backgroundColor: MULTI_ACCENT }}
               >
-                Multi
+                {GAME_MODE_LABELS[active.mode]}
               </span>
             </div>
             <span className="text-[10px] font-semibold text-[var(--muted)]">
-              {DIFFICULTY_LABELS[active.difficulty]} · {GAME_MODE_LABELS[active.mode]} · In progress
+              {DIFFICULTY_LABELS[active.difficulty]} · In progress
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
