@@ -1,3 +1,5 @@
+export type BarkKind = "yap" | "woof" | "deep" | "howl";
+
 export type DailyBreed = {
   id: string;
   name: string;
@@ -5,7 +7,13 @@ export type DailyBreed = {
   height: string;
   weight: string;
   image: string;
-  facts: string[];
+  story: string;
+  pronunciation: string;
+  lat: number;
+  lng: number;
+  sourceUrl: string;
+  sourceLabel: string;
+  bark: BarkKind;
 };
 
 export const DAILY_BREEDS: DailyBreed[] = [
@@ -16,11 +24,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "21–24 in",
     weight: "55–75 lb",
     image: "/breeds/golden-retriever.jpg",
-    facts: [
-      "Bred in the 1800s to retrieve waterfowl without damaging the bird.",
-      "Their water-repellent double coat dries surprisingly fast after a swim.",
-      "One of the most common breeds trained as guide and therapy dogs.",
-    ],
+    pronunciation: "GOLD-en re-TREE-ver",
+    lat: 57.5,
+    lng: -4.2,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Golden_Retriever",
+    sourceLabel: "Wikipedia",
+    story:
+      "In the Scottish Highlands of the 1800s, hunters wanted a dog that could fetch waterfowl from icy lakes without leaving a mark on the bird. The golden’s water-repellent coat still dries in a hurry after a swim. That same gentle mouth and eager brain made them one of the world’s favorite guide and therapy dogs.",
   },
   {
     id: "shiba-inu",
@@ -29,11 +40,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "13–17 in",
     weight: "17–23 lb",
     image: "/breeds/shiba-inu.jpg",
-    facts: [
-      "One of Japan’s oldest native breeds, once used to hunt small game in the mountains.",
-      "The famous “Shiba scream” is a high-pitched protest when they are unhappy.",
-      "They cat-lick themselves clean and often act aloof with strangers.",
-    ],
+    pronunciation: "SHEE-bah EE-noo",
+    lat: 36.2,
+    lng: 138.2,
+    bark: "yap",
+    sourceUrl: "https://en.wikipedia.org/wiki/Shiba_Inu",
+    sourceLabel: "Wikipedia",
+    story:
+      "High in Japan’s mountains, the Shiba once hunted small game with a bold, catlike independence that never really left the breed. They still lick themselves clean and keep a cool distance from strangers. Cross them, and you may hear the famous Shiba scream — a protest as dramatic as it is loud.",
   },
   {
     id: "pug",
@@ -42,11 +56,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "10–13 in",
     weight: "14–18 lb",
     image: "/breeds/pug.jpg",
-    facts: [
-      "Imperial Chinese courts kept pugs as companions for centuries.",
-      "Their facial wrinkles were prized; the forehead wrinkle is sometimes called a prince mark.",
-      "Pugs are brachycephalic — those short snouts mean they overheat easily.",
-    ],
+    pronunciation: "PUG",
+    lat: 34.8,
+    lng: 113.6,
+    bark: "yap",
+    sourceUrl: "https://en.wikipedia.org/wiki/Pug",
+    sourceLabel: "Wikipedia",
+    story:
+      "For centuries, imperial Chinese courts kept pugs as living lap ornaments, and those deep facial folds were a point of pride — a wrinkle on the forehead was even called a prince mark. The trade-off is a short snout that makes hot days hard work. A pug would rather share a sofa than a long run in the sun.",
   },
   {
     id: "beagle",
@@ -55,11 +72,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "13–15 in",
     weight: "20–30 lb",
     image: "/breeds/beagle.jpg",
-    facts: [
-      "Beagles hunt by scent and can follow a trail that is days old.",
-      "Their howl is called a bay — packs used it to stay in touch in the field.",
-      "Snoopy is a beagle, which helped make the breed a household name.",
-    ],
+    pronunciation: "BEE-gul",
+    lat: 52.2,
+    lng: -1.2,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Beagle",
+    sourceLabel: "Wikipedia",
+    story:
+      "English packs once followed beagles through hedgerows by sound as much as sight: their bay is a rolling howl that says “I have the trail.” A beagle’s nose can pick up a scent days old, which is why they still work at airports. And yes — Snoopy is a beagle, which did not hurt the breed’s fame.",
   },
   {
     id: "poodle",
@@ -68,11 +88,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "10–15 in (mini) · 15+ in (standard)",
     weight: "10–70 lb depending on size",
     image: "/breeds/poodle.jpg",
-    facts: [
-      "The fancy clip started as a working cut: hair left on joints to keep water retrievers warm.",
-      "Poodles are among the most trainable breeds and often dominate dog sports.",
-      "A low-shedding coat makes them a frequent pick for allergy-conscious homes.",
-    ],
+    pronunciation: "POO-dul",
+    lat: 48.8,
+    lng: 2.3,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Poodle",
+    sourceLabel: "Wikipedia",
+    story:
+      "That fancy clip began as workwear: hunters left hair on the joints so a water retriever would not freeze. Under the pom-poms is one of the sharpest students in dog sport, and a low-shedding coat that allergy-conscious families still seek out. Whether toy or standard, the poodle would rather learn a trick than sit still.",
   },
   {
     id: "pomeranian",
@@ -81,11 +104,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "6–7 in",
     weight: "3–7 lb",
     image: "/breeds/pomeranian.jpg",
-    facts: [
-      "Queen Victoria’s tiny Pom helped shrink the breed from a 30-pound sled-dog cousin.",
-      "That fox-like face sits on a double coat that puffs into a round “ruff.”",
-      "They are vocal watchdogs and will announce visitors at full volume.",
-    ],
+    pronunciation: "pom-er-AY-nee-un",
+    lat: 54.4,
+    lng: 18.4,
+    bark: "yap",
+    sourceUrl: "https://en.wikipedia.org/wiki/Pomeranian_dog",
+    sourceLabel: "Wikipedia",
+    story:
+      "Pomeranians once looked more like small sled dogs. Queen Victoria’s tiny companions helped shrink the breed into the fox-faced puffball we know, complete with a ruff of double coat. What did not shrink was the watchdog instinct — a Pom will announce the mail carrier as if the house were under siege.",
   },
   {
     id: "siberian-husky",
@@ -94,11 +120,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "20–24 in",
     weight: "35–60 lb",
     image: "/breeds/siberian-husky.jpg",
-    facts: [
-      "The Chukchi people bred them to pull light loads over long frozen distances.",
-      "Many have striking ice-blue eyes, or one blue and one brown.",
-      "Huskies “talk” more than they bark — lots of howls and woo-woos.",
-    ],
+    pronunciation: "sy-BEER-ee-un HUS-kee",
+    lat: 66.0,
+    lng: 170.0,
+    bark: "howl",
+    sourceUrl: "https://en.wikipedia.org/wiki/Siberian_Husky",
+    sourceLabel: "Wikipedia",
+    story:
+      "The Chukchi people of Siberia needed a dog that could pull light loads across endless ice without burning out. Huskies still carry that endurance, often with ice-blue eyes — or one of each color. They would rather howl and “talk” than bark, a leftover conversation from the trail.",
   },
   {
     id: "pembroke-welsh-corgi",
@@ -107,11 +136,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "10–12 in",
     weight: "22–30 lb",
     image: "/breeds/pembroke-welsh-corgi.jpg",
-    facts: [
-      "Bred to nip at cattle heels; those short legs kept them under kicking range.",
-      "Queen Elizabeth II kept more than 30 Pembrokes during her reign.",
-      "Welsh folklore says they were gifts from woodland fairies.",
-    ],
+    pronunciation: "PEM-brook WELSH KOR-gee",
+    lat: 51.8,
+    lng: -4.8,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Pembroke_Welsh_Corgi",
+    sourceLabel: "Wikipedia",
+    story:
+      "On Welsh farms, a corgi’s job was to nip cattle heels while staying under the kick line — hence those famous short legs. Folklore says the dogs were gifts from woodland fairies. Queen Elizabeth II kept more than thirty Pembrokes, which turned a herding dog into a royal icon.",
   },
   {
     id: "dalmatian",
@@ -120,11 +152,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "19–24 in",
     weight: "45–70 lb",
     image: "/breeds/dalmatian.jpg",
-    facts: [
-      "Puppies are born pure white; spots fill in during the first weeks of life.",
-      "They ran beside horse-drawn fire coaches and became firehouse mascots.",
-      "Each coat’s spot pattern is as unique as a fingerprint.",
-    ],
+    pronunciation: "dal-MAY-shun",
+    lat: 44.1,
+    lng: 16.2,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Dalmatian_dog",
+    sourceLabel: "Wikipedia",
+    story:
+      "Dalmatian puppies arrive as blank white canvases; the spots bloom in the first weeks, each coat as unique as a fingerprint. They once ran beside horse-drawn fire coaches, clearing the road and guarding the horses. That partnership is why they still live in firehouses in people’s imaginations — and sometimes in real ones.",
   },
   {
     id: "greyhound",
@@ -133,11 +168,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "27–30 in",
     weight: "60–70 lb",
     image: "/breeds/greyhound.jpg",
-    facts: [
-      "They can sprint over 40 mph, among the fastest of all land mammals.",
-      "Off the track they are famous couch potatoes who love long naps.",
-      "A deep chest and flexible spine work like a spring with every stride.",
-    ],
+    pronunciation: "GRAY-hound",
+    lat: 52.5,
+    lng: -1.9,
+    bark: "howl",
+    sourceUrl: "https://en.wikipedia.org/wiki/Greyhound",
+    sourceLabel: "Wikipedia",
+    story:
+      "A greyhound’s deep chest and springy spine can push them past 40 miles an hour, among the fastest of land mammals. The surprise is what happens after the sprint: they are legendary couch potatoes. Give them a burst of speed, then a soft blanket, and they have had a perfect day.",
   },
   {
     id: "basenji",
@@ -146,11 +184,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "16–17 in",
     weight: "22–24 lb",
     image: "/breeds/basenji.jpg",
-    facts: [
-      "Often called the barkless dog — they yodel thanks to an unusually shaped larynx.",
-      "They groom like cats and have almost no doggy odor.",
-      "Ancient Egyptian art shows dogs that look a lot like today’s Basenji.",
-    ],
+    pronunciation: "buh-SEN-jee",
+    lat: 1.0,
+    lng: 22.0,
+    bark: "howl",
+    sourceUrl: "https://en.wikipedia.org/wiki/Basenji",
+    sourceLabel: "Wikipedia",
+    story:
+      "In Central Africa the Basenji hunted in silence, and an unusual larynx still makes them yodel instead of bark. They groom like cats and carry almost no doggy smell. Look at ancient Egyptian art and you will see dogs that could walk off the wall into a modern Basenji ring.",
   },
   {
     id: "border-collie",
@@ -159,11 +200,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "18–22 in",
     weight: "30–55 lb",
     image: "/breeds/border-collie.jpg",
-    facts: [
-      "Widely considered the world’s top sheepdog, using an intense “eye” to move flocks.",
-      "Chaser the Border Collie learned more than 1,000 object names in a lab study.",
-      "They need a job — puzzle toys and herding beat a quiet apartment.",
-    ],
+    pronunciation: "BOR-der KOL-ee",
+    lat: 55.4,
+    lng: -2.8,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Border_Collie",
+    sourceLabel: "Wikipedia",
+    story:
+      "Along the English–Scottish border, shepherds needed a dog that could move a flock with a stare. That intense “eye” still makes Border Collies the world’s top sheepdogs. One famous collie named Chaser learned more than a thousand toy names — proof that this breed needs a job, not just a backyard.",
   },
   {
     id: "german-shepherd",
@@ -172,11 +216,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "22–26 in",
     weight: "50–90 lb",
     image: "/breeds/german-shepherd.jpg",
-    facts: [
-      "Captain Max von Stephanitz standardized the breed as a versatile working dog.",
-      "Rin Tin Tin, a WWI rescue, made German Shepherds Hollywood stars.",
-      "They still lead police, military, and search-and-rescue work worldwide.",
-    ],
+    pronunciation: "JER-mun SHEP-erd",
+    lat: 51.2,
+    lng: 10.4,
+    bark: "deep",
+    sourceUrl: "https://en.wikipedia.org/wiki/German_Shepherd",
+    sourceLabel: "Wikipedia",
+    story:
+      "Captain Max von Stephanitz set out to build one versatile German working dog, and the shepherd that resulted still leads police and rescue lines. A World War I stray named Rin Tin Tin then carried the breed onto Hollywood screens. Loyalty and a serious work ethic were never just a movie trick.",
   },
   {
     id: "labrador-retriever",
@@ -185,11 +232,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "21–25 in",
     weight: "55–80 lb",
     image: "/breeds/labrador-retriever.jpg",
-    facts: [
-      "Fishermen used them to haul nets and retrieve fish that slipped the hook.",
-      "An otter-like tail acts as a rudder when they swim.",
-      "They have been America’s most registered breed for decades.",
-    ],
+    pronunciation: "LAB-ruh-dor re-TREE-ver",
+    lat: 48.6,
+    lng: -56.3,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Labrador_Retriever",
+    sourceLabel: "Wikipedia",
+    story:
+      "Off the coast of Newfoundland, fishermen needed a dog that could haul nets and grab fish that wriggled free. The Labrador’s otter tail still steers like a rudder in cold water. Back on land they became America’s most registered breed — a family dog that never quite forgot the harbor.",
   },
   {
     id: "french-bulldog",
@@ -198,11 +248,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "11–13 in",
     weight: "16–28 lb",
     image: "/breeds/french-bulldog.jpg",
-    facts: [
-      "Bat ears are a breed signature — they should stand up on their own.",
-      "Lace makers who moved from England to France brought the early toy bulldogs with them.",
-      "Most Frenchies cannot swim well because of that compact, front-heavy build.",
-    ],
+    pronunciation: "FRENCH BULL-dog",
+    lat: 48.9,
+    lng: 2.3,
+    bark: "yap",
+    sourceUrl: "https://en.wikipedia.org/wiki/French_Bulldog",
+    sourceLabel: "Wikipedia",
+    story:
+      "Lace workers leaving England for France tucked small bulldogs into their luggage, and those dogs grew the bat ears that now define the Frenchie. The compact, front-heavy body is charming on a couch and clumsy in a pool. Most would rather snore beside you than swim a lap.",
   },
   {
     id: "dachshund",
@@ -211,11 +264,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "5–9 in",
     weight: "11–32 lb",
     image: "/breeds/dachshund.jpg",
-    facts: [
-      "The name means “badger dog” — they were bred to go down burrows after prey.",
-      "That long back is powerful, but jumping off couches is risky for their spines.",
-      "They come in smooth, longhaired, and wirehaired coats.",
-    ],
+    pronunciation: "DAHKS-hund",
+    lat: 50.1,
+    lng: 8.7,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Dachshund",
+    sourceLabel: "Wikipedia",
+    story:
+      "The name means “badger dog,” and the long, low body was built to follow prey down a burrow. That same spine is strong in the tunnel and fragile on the sofa — jumping off furniture is a real risk. Smooth, longhaired, or wirehaired, the dachshund still thinks it is bigger than the badger.",
   },
   {
     id: "australian-shepherd",
@@ -224,11 +280,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "18–23 in",
     weight: "40–65 lb",
     image: "/breeds/australian-shepherd.jpg",
-    facts: [
-      "Despite the name, the modern Aussie was developed on American ranches.",
-      "Many are born with naturally bobbed tails.",
-      "Merle coats and bright eyes are common, including odd-eyed dogs.",
-    ],
+    pronunciation: "aw-STRAYL-yun SHEP-erd",
+    lat: 39.8,
+    lng: -98.6,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Australian_Shepherd",
+    sourceLabel: "Wikipedia",
+    story:
+      "Despite the name, the modern Aussie grew up on American ranches, not Australian stations. Many are born with a naturally bobbed tail and a merle coat that can pair with two different eye colors. Put them on cattle — or a frisbee — and the herding brain lights up.",
   },
   {
     id: "boxer",
@@ -237,11 +296,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "21–25 in",
     weight: "50–80 lb",
     image: "/breeds/boxer.jpg",
-    facts: [
-      "The name may come from the way they paw and “box” with their front legs when playing.",
-      "They were among the first breeds used as military and police dogs in Germany.",
-      "A wrinkled forehead and undershot jaw give them an almost human expression.",
-    ],
+    pronunciation: "BOX-er",
+    lat: 50.9,
+    lng: 6.9,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Boxer_(dog)",
+    sourceLabel: "Wikipedia",
+    story:
+      "Watch a boxer play and you may see the namesake move: they rise and bat with their front paws. German police and army kennels were among the first to put that athletic build to work. A wrinkled brow and undershot jaw give them an almost human look, as if they are always about to tell a joke.",
   },
   {
     id: "chihuahua",
@@ -250,11 +312,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "5–8 in",
     weight: "under 6 lb",
     image: "/breeds/chihuahua.jpg",
-    facts: [
-      "Named for the Mexican state of Chihuahua, where they were popularized in the 1800s.",
-      "They are the smallest recognized breed, but many have oversized watchdog energy.",
-      "The apple-head skull is a breed hallmark; some are born with a molera (soft spot).",
-    ],
+    pronunciation: "chee-WAH-wah",
+    lat: 28.6,
+    lng: -106.1,
+    bark: "yap",
+    sourceUrl: "https://en.wikipedia.org/wiki/Chihuahua_(dog)",
+    sourceLabel: "Wikipedia",
+    story:
+      "Named for the Mexican state where travelers first fell for them in the 1800s, Chihuahuas are the smallest recognized breed and among the surest they are large. The apple-shaped skull is a hallmark, and some puppies are even born with a soft spot called a molera. What they lack in pounds they spend in watchdog opinions.",
   },
   {
     id: "great-dane",
@@ -263,11 +328,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "28–32 in",
     weight: "110–175 lb",
     image: "/breeds/great-dane.jpg",
-    facts: [
-      "Among the tallest breeds — some Danes stand over 3 feet at the shoulder.",
-      "They were used to hunt wild boar, then became estate guardians.",
-      "Scooby-Doo is a Great Dane, which did wonders for the breed’s fame.",
-    ],
+    pronunciation: "GRAYT DAYN",
+    lat: 51.3,
+    lng: 9.5,
+    bark: "deep",
+    sourceUrl: "https://en.wikipedia.org/wiki/Great_Dane",
+    sourceLabel: "Wikipedia",
+    story:
+      "Some Great Danes stand more than three feet at the shoulder, a size once aimed at wild boar and later at estate gates. Off duty they are gentle giants who think they are lapdogs. Scooby-Doo did not hurt: a cartoon Dane taught the world to expect a goofy heart in a towering frame.",
   },
   {
     id: "rottweiler",
@@ -276,11 +344,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "22–27 in",
     weight: "80–135 lb",
     image: "/breeds/rottweiler.jpg",
-    facts: [
-      "Descended from Roman drover dogs that marched with the legions.",
-      "Butchers in Rottweil used them to pull carts and guard the day’s cash.",
-      "A calm, confident temperament is the breed standard — not constant barking.",
-    ],
+    pronunciation: "ROT-wy-ler",
+    lat: 48.2,
+    lng: 9.2,
+    bark: "deep",
+    sourceUrl: "https://en.wikipedia.org/wiki/Rottweiler",
+    sourceLabel: "Wikipedia",
+    story:
+      "Roman drover dogs marched with the legions, and in the German town of Rottweil their descendants pulled butchers’ carts and guarded the day’s coins. A proper Rottweiler is calm and confident, not a constant barker. The breed’s story is one of work first, reputation second.",
   },
   {
     id: "yorkshire-terrier",
@@ -289,11 +360,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "7–8 in",
     weight: "under 7 lb",
     image: "/breeds/yorkshire-terrier.jpg",
-    facts: [
-      "Bred in mill towns to catch rats, then became a Victorian fashion companion.",
-      "The floor-length coat is hair, not fur, and is often wrapped to keep it growing.",
-      "Puppies are born black and tan; the famous steel-blue color comes in later.",
-    ],
+    pronunciation: "YORK-sher TAIR-ee-er",
+    lat: 53.8,
+    lng: -1.5,
+    bark: "yap",
+    sourceUrl: "https://en.wikipedia.org/wiki/Yorkshire_Terrier",
+    sourceLabel: "Wikipedia",
+    story:
+      "In Yorkshire mill towns they earned their keep as ratters, then slipped into Victorian parlors as fashion. The floor-length coat is hair, not fur, often wrapped so it can keep growing. Puppies start black and tan; the steel-blue adult color arrives like a slow costume change.",
   },
   {
     id: "boston-terrier",
@@ -302,11 +376,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "15–17 in",
     weight: "12–25 lb",
     image: "/breeds/boston-terrier.jpg",
-    facts: [
-      "One of the first American-born breeds, nicknamed the American Gentleman.",
-      "Tuxedo markings — white blaze, chest, and socks — are part of the look.",
-      "They snore, snort, and snuffle thanks to a short muzzle.",
-    ],
+    pronunciation: "BOS-tun TAIR-ee-er",
+    lat: 42.4,
+    lng: -71.1,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Boston_Terrier",
+    sourceLabel: "Wikipedia",
+    story:
+      "One of the first American-born breeds, the Boston Terrier earned the nickname American Gentleman for its tuxedo markings — white blaze, chest, and socks. That short muzzle means plenty of snoring and snuffling. They were built to be companions in a growing city, not hunters on a moor.",
   },
   {
     id: "akita",
@@ -315,11 +392,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "24–28 in",
     weight: "70–130 lb",
     image: "/breeds/akita.jpg",
-    facts: [
-      "Hachikō, an Akita, waited at a Tokyo station for his owner every day for years.",
-      "They were once reserved for Japanese nobility and used to hunt large game.",
-      "A thick double coat and curled tail are classic northern-spitz features.",
-    ],
+    pronunciation: "ah-KEE-tah",
+    lat: 39.7,
+    lng: 140.1,
+    bark: "deep",
+    sourceUrl: "https://en.wikipedia.org/wiki/Akita_(dog)",
+    sourceLabel: "Wikipedia",
+    story:
+      "Once reserved for Japanese nobility and large game, the Akita carries a thick double coat and a curled tail like other northern spitz dogs. The most famous of them, Hachikō, waited at a Tokyo station for his person long after the last train. Loyalty is not a slogan for this breed; it is the plot.",
   },
   {
     id: "samoyed",
@@ -328,11 +408,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "19–24 in",
     weight: "35–65 lb",
     image: "/breeds/samoyed.jpg",
-    facts: [
-      "The Samoyede people used them to herd reindeer, pull sleds, and sleep as living heaters.",
-      "The “Sammy smile” is an upturned mouth that keeps drool from turning to ice.",
-      "Their white coat is so dense that shed fur is sometimes spun into yarn.",
-    ],
+    pronunciation: "SAM-oy-ed",
+    lat: 67.5,
+    lng: 86.0,
+    bark: "howl",
+    sourceUrl: "https://en.wikipedia.org/wiki/Samoyed_dog",
+    sourceLabel: "Wikipedia",
+    story:
+      "The Samoyede people of Siberia used these white dogs to herd reindeer, pull sleds, and sleep as living heaters. The upturned “Sammy smile” kept drool from freezing on the trail. Their coat is so dense that shed fur is sometimes spun into yarn — a sweater from a snow cloud.",
   },
   {
     id: "bernese-mountain-dog",
@@ -341,11 +424,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "23–28 in",
     weight: "70–115 lb",
     image: "/breeds/bernese-mountain-dog.jpg",
-    facts: [
-      "Farm dogs from the canton of Bern, used to draft carts of milk and cheese.",
-      "The tri-color coat — black, rust, and white — is a breed requirement.",
-      "They are gentle giants who generally prefer cool weather to heat.",
-    ],
+    pronunciation: "bur-NEEZ MOUN-tin dog",
+    lat: 46.9,
+    lng: 7.5,
+    bark: "deep",
+    sourceUrl: "https://en.wikipedia.org/wiki/Bernese_Mountain_Dog",
+    sourceLabel: "Wikipedia",
+    story:
+      "In the Swiss canton of Bern, these tri-color farm dogs drafted carts of milk and cheese between alpine villages. Black, rust, and white is not just pretty — it is the breed’s uniform. They are gentle giants who would rather a cool morning than a hot afternoon.",
   },
   {
     id: "newfoundland",
@@ -354,11 +440,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "26–28 in",
     weight: "100–150 lb",
     image: "/breeds/newfoundland.jpg",
-    facts: [
-      "Webbed feet and a water-resistant coat make them natural lifeguards.",
-      "Nana in Peter Pan was inspired by J.M. Barrie’s Newfoundland, Luath.",
-      "They have a huge lung capacity and a calm rescue instinct in the water.",
-    ],
+    pronunciation: "NEW-fund-land",
+    lat: 49.2,
+    lng: -56.0,
+    bark: "deep",
+    sourceUrl: "https://en.wikipedia.org/wiki/Newfoundland_dog",
+    sourceLabel: "Wikipedia",
+    story:
+      "Webbed feet, a waterproof coat, and huge lungs made the Newfoundland a born lifeguard in icy Atlantic water. J.M. Barrie’s dog Luath inspired Nana in Peter Pan, the nanny who thought in woofs. Calm rescue instinct is still the breed’s quiet superpower.",
   },
   {
     id: "whippet",
@@ -367,11 +456,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "18–22 in",
     weight: "25–40 lb",
     image: "/breeds/whippet.jpg",
-    facts: [
-      "A sighthound built like a miniature Greyhound, once called the poor man’s racehorse.",
-      "They can hit about 35 mph in a short burst, then happily share a blanket.",
-      "Thin skin and low body fat mean they get cold easily.",
-    ],
+    pronunciation: "WIP-it",
+    lat: 54.9,
+    lng: -1.6,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Whippet",
+    sourceLabel: "Wikipedia",
+    story:
+      "English mill towns once called the whippet the poor man’s racehorse: a sighthound in miniature that could hit about 35 miles an hour. After the burst they want a blanket, because thin skin and low fat make them chilly. Speed, then snuggle, is the whole personality.",
   },
   {
     id: "maltese",
@@ -380,11 +472,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "7–9 in",
     weight: "under 7 lb",
     image: "/breeds/maltese.jpg",
-    facts: [
-      "Writers in ancient Greece and Rome already described small white island dogs.",
-      "The floor-length white coat has little to no undercoat, so they shed very little.",
-      "They were lapdogs of European nobility for centuries.",
-    ],
+    pronunciation: "mawl-TEEZ",
+    lat: 35.9,
+    lng: 14.4,
+    bark: "yap",
+    sourceUrl: "https://en.wikipedia.org/wiki/Maltese_dog",
+    sourceLabel: "Wikipedia",
+    story:
+      "Greek and Roman writers already described small white dogs from Mediterranean islands. The Maltese coat has little undercoat, so it sheds almost not at all and can grow to the floor. European nobles kept them as living jewelry — a lapdog with a very old passport.",
   },
   {
     id: "saint-bernard",
@@ -393,11 +488,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "26–30 in",
     weight: "120–180 lb",
     image: "/breeds/saint-bernard.jpg",
-    facts: [
-      "Hospice monks in the Alps used them to find lost travelers in the snow.",
-      "The famous barrel of brandy is a myth popularized by paintings, not history.",
-      "Barry, a 19th-century Saint, is credited with dozens of mountain rescues.",
-    ],
+    pronunciation: "saynt ber-NARD",
+    lat: 45.9,
+    lng: 7.2,
+    bark: "deep",
+    sourceUrl: "https://en.wikipedia.org/wiki/St._Bernard_(dog)",
+    sourceLabel: "Wikipedia",
+    story:
+      "Hospice monks in the Alps sent these dogs into blizzards to find lost travelers. The brandy barrel is a painter’s myth, not a packing list. A 19th-century Saint named Barry is still credited with dozens of mountain rescues — a reminder that the real tool was a nose, not a cask.",
   },
   {
     id: "australian-cattle-dog",
@@ -406,11 +504,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "17–20 in",
     weight: "30–50 lb",
     image: "/breeds/australian-cattle-dog.jpg",
-    facts: [
-      "Bred to drive cattle across huge Australian stations by nipping at heels.",
-      "Puppies are born white; the blue or red speckle fills in as they grow.",
-      "Bluey, an ACD, is often cited as one of the longest-lived dogs on record.",
-    ],
+    pronunciation: "aw-STRAYL-yun KAT-ul dog",
+    lat: -25.3,
+    lng: 133.8,
+    bark: "woof",
+    sourceUrl: "https://en.wikipedia.org/wiki/Australian_Cattle_Dog",
+    sourceLabel: "Wikipedia",
+    story:
+      "On huge Australian stations, these dogs drove cattle by nipping heels across distances that would melt a softer breed. Puppies are born white; the blue or red speckle fills in like a developing photograph. One cattle dog named Bluey is often listed among the longest-lived dogs ever recorded.",
   },
   {
     id: "weimaraner",
@@ -419,11 +520,14 @@ export const DAILY_BREEDS: DailyBreed[] = [
     height: "23–27 in",
     weight: "55–90 lb",
     image: "/breeds/weimaraner.jpg",
-    facts: [
-      "Nicknamed the Grey Ghost for that silver coat and light amber or blue-gray eyes.",
-      "Nobles in Weimar kept the breed exclusive for big-game hunting.",
-      "Photographer William Wegman made Weimaraners pop-culture icons in the 1980s.",
-    ],
+    pronunciation: "VY-muh-rah-ner",
+    lat: 50.98,
+    lng: 11.33,
+    bark: "deep",
+    sourceUrl: "https://en.wikipedia.org/wiki/Weimaraner",
+    sourceLabel: "Wikipedia",
+    story:
+      "Nobles in Weimar kept this silver hunting dog to themselves for big game, and the nickname Grey Ghost still fits the coat and the light eyes. Photographer William Wegman later posed Weimaraners like people, and the world fell for the deadpan stare. Under the art-school fame is still a dog that wants to range.",
   },
 ];
 

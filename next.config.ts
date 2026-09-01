@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.liveblocks.io wss://*.liveblocks.io https://vitals.vercel-insights.com https://alb.reddit.com https://www.redditstatic.com https://pixel-config.reddit.com https://www.reddit.com https://fcm.googleapis.com https://updates.push.services.mozilla.com https://*.push.apple.com",
               "worker-src 'self' blob:",
+              "frame-src https://www.openstreetmap.org",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
