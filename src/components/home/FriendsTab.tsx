@@ -128,6 +128,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
       code,
       result.mode,
       result.difficulty,
+      profile?.username ?? "Someone",
     );
     if (!res.ok) {
       setMsg(res.error ?? "Could not send invite");

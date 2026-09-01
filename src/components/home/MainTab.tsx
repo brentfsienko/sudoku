@@ -178,6 +178,7 @@ export function MainTab({
         code,
         pendingMulti.mode,
         pendingMulti.difficulty,
+        userData.data?.profile?.username ?? "Someone",
       );
     }
     const { mode, difficulty } = pendingMulti;

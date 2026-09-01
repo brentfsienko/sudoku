@@ -61,11 +61,30 @@ export default function GameRoomPage() {
 function RoomRoute() {
   const params = useParams();
   const search = useSearchParams();
+  const router = useRouter();
   const code = String(params.room ?? "").toUpperCase();
   const wantHost = search.get("host") === "1";
   const seedDifficulty = parseDifficulty(search.get("d"));
   const seedMode = parseMode(search.get("m"));
+  const needsConfirm = search.get("confirm") === "1";
+  const fromName = search.get("from") ?? "Someone";
   const [profile] = useState<Profile>(() => getProfile());
+
+  // Show confirmation gate before entering the Liveblocks room
+  if (needsConfirm) {
+    return (
+      <JoinConfirmScreen
+        code={code}
+        fromName={fromName}
+        mode={seedMode}
+        difficulty={seedDifficulty}
+        onJoin={() =>
+          router.replace(`/game/${code}?m=${seedMode}&d=${seedDifficulty}`)
+        }
+        onDecline={() => router.replace("/")}
+      />
+    );
+  }
 
   return (
     <LiveblocksProvider>
@@ -248,6 +267,55 @@ function GameEventsWatcher({
 }) {
   useGameEvents({ myRole, mode, playing });
   return null;
+}
+
+function JoinConfirmScreen({
+  code,
+  fromName,
+  mode,
+  difficulty,
+  onJoin,
+  onDecline,
+}: {
+  code: string;
+  fromName: string;
+  mode: GameMode;
+  difficulty: Difficulty;
+  onJoin: () => void;
+  onDecline: () => void;
+}) {
+  return (
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
+      <DogAvatar dogId="golden" size={88} />
+      <div className="space-y-1">
+        <h2 className="font-display text-2xl font-extrabold text-[var(--foreground)]">
+          Game invite 🎮
+        </h2>
+        <p className="text-base text-[var(--muted)]">
+          <span className="font-bold text-[var(--foreground)]">{fromName}</span> invited you to a{" "}
+          <span className="font-semibold">{GAME_MODE_LABELS[mode]}</span> ·{" "}
+          <span className="font-semibold">{DIFFICULTY_LABELS[difficulty]}</span> game
+        </p>
+        <p className="text-sm text-[var(--muted)]">Room {code}</p>
+      </div>
+      <div className="flex w-full max-w-xs flex-col gap-3">
+        <button
+          type="button"
+          onClick={onJoin}
+          className="font-display w-full rounded-full bg-[var(--primary)] py-3.5 font-extrabold text-white transition active:scale-[0.98]"
+        >
+          Join game
+        </button>
+        <button
+          type="button"
+          onClick={onDecline}
+          className="font-display w-full rounded-full border-2 border-[var(--border)] bg-white py-3 font-bold text-[var(--muted)] transition active:scale-[0.98]"
+        >
+          No thanks
+        </button>
+      </div>
+    </div>
+  );
 }
 
 /** Liveblocks can report "disconnected" briefly during auth — don't fail on that. */

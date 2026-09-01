@@ -387,6 +387,7 @@ export function GameHistoryList({
             code,
             gameMode,
             log.difficulty,
+            profile.username ?? "Someone",
           );
         }
       }

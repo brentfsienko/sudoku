@@ -386,6 +386,7 @@ export async function createGameInvite(
   roomCode: string,
   mode: GameMode,
   difficulty: Difficulty,
+  hostName = "Someone",
 ): Promise<{ ok: boolean; error?: string }> {
   const sb = getSupabase();
   if (!sb) return { ok: false, error: "Not configured" };
@@ -417,10 +418,11 @@ export async function createGameInvite(
 
   // Fire-and-forget push notification to the guest
   const modeLabel = mode === "coop" ? "co-op" : "head-to-head";
+  const confirmUrl = `/game/${roomCode}?confirm=1&from=${encodeURIComponent(hostName)}&m=${mode}&d=${difficulty}`;
   void sendPush(guestId, {
-    title: `game invite 🎮`,
-    body: `you've been invited to a ${modeLabel} puzzle on sudogku`,
-    url: `/game/${roomCode}`,
+    title: `game invite from ${hostName} 🎮`,
+    body: `${hostName} invited you to a ${modeLabel} puzzle — tap to join!`,
+    url: confirmUrl,
     tag: `game-invite-${roomCode}`,
   });
 
