@@ -390,7 +390,7 @@ function Lobby({
             className="fixed inset-0 z-40 bg-black/30"
             onClick={() => setChatOpen(false)}
           />
-          <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-white shadow-xl overflow-hidden"
+          <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-t-3xl bg-white shadow-xl overflow-hidden"
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           >
             <RoomChatPanel
