@@ -61,6 +61,7 @@
 
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
+  --font-pixel: var(--font-pixel);
 }
 
 * {
@@ -169,6 +170,14 @@ body {
   font-family: var(--serif);
   font-weight: 400;
   letter-spacing: -0.02em;
+}
+
+/* 8-bit pixel font — tab titles, section headings */
+.font-pixel {
+  font-family: var(--font-pixel), monospace;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 
 /* Sans UI: buttons, inputs, labels */

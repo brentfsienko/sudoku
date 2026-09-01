@@ -55,7 +55,7 @@ function NavTabs({
               <>
                 {/* Speech bubble above the Me tab */}
                 <div className="pointer-events-none absolute bottom-full left-1/2 mb-3 -translate-x-1/2 whitespace-nowrap">
-                  <div className="relative rounded-xl bg-[var(--foreground)] px-3 py-1.5 text-[11px] font-semibold text-white shadow-lg">
+                  <div className="relative rounded-md bg-[var(--foreground)] px-3 py-1.5 text-[11px] font-semibold text-white shadow-lg">
                     Customize your pup! 🐾
                     {/* Caret pointing down */}
                     <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[var(--foreground)]" />
@@ -68,7 +68,7 @@ function NavTabs({
             )}
 
             <span
-              className={`flex h-9 w-14 items-center justify-center rounded-full transition-colors ${
+              className={`flex h-9 w-14 items-center justify-center rounded-md transition-colors ${
                 isActive ? "bg-[var(--primary-soft)]" : "bg-transparent"
               }`}
               style={{ color: isActive ? "var(--primary)" : "var(--muted)" }}

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 /** Section headings on the home tab (Play, Recent games, etc.) */
 export const homeSectionTitleClass =
-  "font-serif-title text-left text-[1.35rem] leading-tight text-[var(--foreground)]";
+  "font-pixel text-left text-sm leading-snug text-[var(--foreground)]";
 
 type Props = {
   title: string;
@@ -23,12 +23,12 @@ export function FriendListPanel({
       <h2
         className={
           titleClassName ??
-          "font-serif-title text-xl text-[var(--foreground)]"
+          "font-pixel text-sm text-[var(--foreground)]"
         }
       >
         {title}
       </h2>
-      <div className="overflow-hidden rounded-2xl bg-[var(--list-panel)]">
+      <div className="overflow-hidden rounded-md bg-[var(--list-panel)]">
         {empty ? (
           <p className="px-4 py-6 text-center text-sm text-[var(--muted)]">{empty}</p>
         ) : (
@@ -92,7 +92,7 @@ export function FriendPillButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`shrink-0 rounded-full font-bold transition active:scale-95 disabled:opacity-40 disabled:active:scale-100 ${
+      className={`shrink-0 rounded font-bold transition active:scale-95 disabled:opacity-40 disabled:active:scale-100 ${
         compact ? "px-2.5 py-0.5 text-[11px]" : "px-4 py-1.5 text-sm"
       } ${
         variant === "primary"

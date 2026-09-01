@@ -38,13 +38,13 @@ function ActionButton({
       className="relative flex flex-1 flex-col items-center gap-1 text-[var(--muted)] transition active:scale-95 disabled:opacity-30"
     >
       <span
-        className={`relative flex h-12 w-12 items-center justify-center rounded-full ${
+        className={`relative flex h-12 w-12 items-center justify-center rounded-md ${
           active ? "bg-[var(--primary)] text-white" : "bg-white text-[var(--paw)]"
         } shadow-sm`}
       >
         {children}
         {badge != null && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[11px] font-bold text-white">
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded bg-[var(--accent)] px-1 text-[11px] font-bold text-white">
             {badge}
           </span>
         )}

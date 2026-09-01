@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Baloo_2, Lora, Nunito } from "next/font/google";
+import { Baloo_2, Lora, Nunito, Press_Start_2P } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
@@ -34,6 +34,13 @@ const lora = Lora({
   weight: ["400", "600", "700"],
 });
 
+const pressStart = Press_Start_2P({
+  variable: "--font-pixel",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
 /** Self-hosted typewriter face — avoids Google Fonts fetch during Vercel builds. */
 const specialElite = localFont({
   src: "./fonts/SpecialElite-Regular.woff2",
@@ -61,7 +68,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${baloo.variable} ${nunito.variable} ${lora.variable} ${specialElite.variable} h-full antialiased`}
+      className={`${baloo.variable} ${nunito.variable} ${lora.variable} ${specialElite.variable} ${pressStart.variable} h-full antialiased`}
     >
       <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh max-md:h-[var(--app-height,100dvh)] max-md:max-h-[var(--app-height,100dvh)]">
         <JsonLd data={[webApplicationJsonLd(), organizationJsonLd()]} />
@@ -85,7 +92,7 @@ export default function RootLayout({
               background: "#fdf6ec",
               border: "1px solid #efe2cf",
               color: "#4a3b2f",
-              borderRadius: "14px",
+              borderRadius: "4px",
               fontFamily: "var(--font-sans), ui-sans-serif, system-ui, sans-serif",
               fontSize: "14px",
               fontWeight: "600",

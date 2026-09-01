@@ -22,19 +22,19 @@ export function BottomSheet({ open, onClose, title, children, tall }: Props) {
         onClick={onClose}
       />
       <div
-        className={`flex w-full max-w-md flex-col self-center rounded-t-[28px] bg-white shadow-xl ${
+        className={`flex w-full max-w-md flex-col self-center rounded-t-lg bg-white shadow-xl ${
           tall ? "max-h-[92dvh]" : "max-h-[85dvh]"
         }`}
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] px-5 py-4">
-          <h2 className="font-serif-title text-2xl text-[var(--foreground)]">
+          <h2 className="font-pixel text-sm text-[var(--foreground)]">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="ui-button rounded-full p-2 text-2xl leading-none text-[var(--muted)]"
+            className="ui-button rounded-md p-2 text-2xl leading-none text-[var(--muted)]"
             aria-label="Close"
           >
             ×

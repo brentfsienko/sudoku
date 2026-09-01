@@ -75,7 +75,7 @@ export function MeProfileHeader({
       />
 
       {settingsOpen && (
-        <div className="rounded-2xl border border-[var(--border)] bg-white p-3 text-sm shadow-sm">
+        <div className="rounded-md border border-[var(--border)] bg-white p-3 text-sm shadow-sm">
           {userData.user ? (
             <>
               <p className="mb-2 truncate text-xs text-[var(--muted)]">
@@ -142,7 +142,7 @@ export function MeProfileHeader({
           >
             {showAvatarCoachmark && (
               <div className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap">
-                <div className="relative rounded-2xl bg-[var(--foreground)] px-3.5 py-2 text-xs font-semibold text-white shadow-xl">
+                <div className="relative rounded-md bg-[var(--foreground)] px-3.5 py-2 text-xs font-semibold text-white shadow-xl">
                   Tap to customize your pup! 🐾
                   <span className="absolute left-1/2 top-full -translate-x-1/2 border-[6px] border-transparent border-t-[var(--foreground)]" />
                 </div>
@@ -172,9 +172,9 @@ export function MeProfileHeader({
           )}
         </div>
 
-        <p className="font-serif-title max-w-full px-2 text-lg leading-snug text-[var(--foreground)]">
+        <p className="font-pixel max-w-full px-2 text-xs leading-relaxed text-[var(--foreground)]">
           Here are your stats,{" "}
-          <span className="font-semibold">{username}</span>.
+          <span>{username}</span>.
         </p>
       </div>
 

@@ -32,7 +32,7 @@ function JoinCodeInput({ onJoin }: { onJoin: (code: string) => void }) {
   const clean = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
 
   return (
-    <div className="mt-5 rounded-2xl border-2 border-[var(--border)] bg-[var(--background)] p-4">
+    <div className="mt-5 rounded-md border-2 border-[var(--border)] bg-[var(--background)] p-4">
       <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--muted)]">
         Join by code
       </p>
@@ -43,13 +43,13 @@ function JoinCodeInput({ onJoin }: { onJoin: (code: string) => void }) {
           onKeyDown={(e) => e.key === "Enter" && clean.length === 4 && onJoin(clean)}
           placeholder="ABCD"
           maxLength={4}
-          className="ui-input flex-1 rounded-2xl border border-[var(--border)] bg-white py-3 text-center text-xl font-bold uppercase tracking-widest text-[var(--foreground)] outline-none focus:border-[var(--foreground)]"
+          className="ui-input flex-1 rounded-md border border-[var(--border)] bg-white py-3 text-center text-xl font-bold uppercase tracking-widest text-[var(--foreground)] outline-none focus:border-[var(--foreground)]"
         />
         <button
           type="button"
           disabled={clean.length !== 4}
           onClick={() => onJoin(clean)}
-          className="rounded-2xl bg-[var(--foreground)] px-5 py-3 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.98]"
+          className="rounded-md bg-[var(--foreground)] px-5 py-3 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.98]"
         >
           Join
         </button>
@@ -150,7 +150,7 @@ export function StartGameSheet({
   if (!userData.user) {
     return (
       <BottomSheet open={open} onClose={handleClose} title="Invite friends">
-        <p className="mb-4 text-center font-serif-title text-lg text-[var(--foreground)]">
+        <p className="mb-4 text-center font-pixel text-xs text-[var(--foreground)]">
           {online ? "Sign in to play with friends" : "Sign in needs a connection"}
         </p>
         <button
@@ -161,7 +161,7 @@ export function StartGameSheet({
             handleClose();
             onSignIn();
           }}
-          className="ui-button w-full rounded-full bg-[var(--foreground)] py-4 text-sm font-bold text-white disabled:opacity-45"
+          className="ui-button w-full rounded-md bg-[var(--foreground)] py-4 text-sm font-bold text-white disabled:opacity-45"
         >
           {online ? "Sign in" : "Offline"}
         </button>
@@ -183,11 +183,11 @@ export function StartGameSheet({
           {selected.length}/{maxGuests} selected)
         </p>
 
-        <h3 className="font-serif-title mb-2 text-lg text-[var(--foreground)]">
+        <h3 className="font-pixel mb-2 text-xs text-[var(--foreground)]">
           Your friends
         </h3>
 
-        <div className="mb-4 overflow-hidden rounded-2xl bg-[var(--list-panel)]">
+        <div className="mb-4 overflow-hidden rounded-md bg-[var(--list-panel)]">
           {friends.loading ? (
             <p className="px-4 py-6 text-center text-sm text-[var(--muted)]">
               Loading…
@@ -231,13 +231,13 @@ export function StartGameSheet({
         <button
           type="button"
           onClick={() => setAddFriendOpen(true)}
-          className="ui-button mb-5 flex w-full items-center justify-center gap-2 rounded-full border-2 border-[var(--foreground)] bg-white py-3 text-sm font-bold text-[var(--foreground)]"
+          className="ui-button mb-5 flex w-full items-center justify-center gap-2 rounded-md border-2 border-[var(--foreground)] bg-white py-3 text-sm font-bold text-[var(--foreground)]"
         >
           <UserPlusIcon width={18} height={18} />
           Add a friend
         </button>
 
-        <h3 className="font-serif-title mb-2 text-lg text-[var(--foreground)]">
+        <h3 className="font-pixel mb-2 text-xs text-[var(--foreground)]">
           Find by username
         </h3>
         <div className="relative mb-2">
@@ -249,14 +249,14 @@ export function StartGameSheet({
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && void runSearch()}
             placeholder="@username"
-            className="ui-input w-full rounded-2xl border border-[var(--border)] bg-[var(--background)] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--foreground)]"
+            className="ui-input w-full rounded-md border border-[var(--border)] bg-[var(--background)] py-3.5 pl-11 pr-4 text-sm outline-none focus:border-[var(--foreground)]"
           />
         </div>
         <button
           type="button"
           onClick={() => void runSearch()}
           disabled={searching}
-          className="ui-button mb-3 w-full rounded-full bg-[var(--foreground)] py-3 text-sm font-bold text-white disabled:opacity-60"
+          className="ui-button mb-3 w-full rounded-md bg-[var(--foreground)] py-3 text-sm font-bold text-white disabled:opacity-60"
         >
           {searching ? "Searching…" : "Search"}
         </button>
@@ -268,7 +268,7 @@ export function StartGameSheet({
         )}
 
         {discover.length > 0 && (
-          <div className="mb-4 overflow-hidden rounded-2xl bg-[var(--list-panel)]">
+          <div className="mb-4 overflow-hidden rounded-md bg-[var(--list-panel)]">
             {discover.map((p, i) => {
               const isSelected = selected.some((s) => s.userId === p.userId);
               const atCap = !isSelected && selected.length >= maxGuests;
@@ -302,7 +302,7 @@ export function StartGameSheet({
           type="button"
           disabled={!canConfirm}
           onClick={() => onConfirmGuests(selected)}
-          className="font-display mb-3 w-full rounded-2xl bg-[var(--primary)] py-3.5 text-sm font-bold text-white shadow-md transition active:scale-[0.98] disabled:opacity-40"
+          className="font-display mb-3 w-full rounded-md bg-[var(--primary)] py-3.5 text-sm font-bold text-white shadow-md transition active:scale-[0.98] disabled:opacity-40"
         >
           {canConfirm
             ? `Send ${selected.length} invite${selected.length === 1 ? "" : "s"} & play`
@@ -312,7 +312,7 @@ export function StartGameSheet({
         <button
           type="button"
           onClick={handleQuickStart}
-          className="mb-1 flex w-full items-center justify-between rounded-2xl border-2 border-dashed border-[var(--border)] bg-white px-4 py-3 text-left transition active:scale-[0.99]"
+          className="mb-1 flex w-full items-center justify-between rounded-md border-2 border-dashed border-[var(--border)] bg-white px-4 py-3 text-left transition active:scale-[0.99]"
         >
           <div>
             <p className="font-display text-sm font-bold text-[var(--foreground)]">
@@ -322,7 +322,7 @@ export function StartGameSheet({
               Get a code to share with anyone
             </p>
           </div>
-          <span className="shrink-0 rounded-full bg-[var(--primary)] px-3 py-1 text-[11px] font-bold text-white">
+          <span className="shrink-0 rounded bg-[var(--primary)] px-3 py-1 text-[11px] font-bold text-white">
             Create
           </span>
         </button>

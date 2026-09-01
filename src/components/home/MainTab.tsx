@@ -64,9 +64,9 @@ function PlayRow({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center gap-3 rounded-2xl bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-55"
+      className="flex w-full items-center gap-3 rounded-md bg-[var(--list-panel)] px-4 py-3 text-left transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-55"
     >
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--primary-soft)] text-[var(--primary)]">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[var(--primary-soft)] text-[var(--primary)]">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -75,7 +75,7 @@ function PlayRow({
         </p>
         <p className="text-xs text-[var(--muted)]">{subtitle}</p>
       </div>
-      <span className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-bold text-[var(--foreground)]">
+      <span className="shrink-0 rounded border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-bold text-[var(--foreground)]">
         {disabled ? "Offline" : "Start"}
       </span>
     </button>
@@ -309,7 +309,7 @@ export function MainTab({
             </div>
 
             <div
-              className="relative rounded-t-[28px] bg-white px-5 pb-4 pt-12 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
+              className="relative rounded-t-lg bg-white px-5 pb-4 pt-12 shadow-[0_-4px_24px_rgba(74,59,47,0.08)]"
               style={{ minHeight: PLAY_SHEET_MIN_HEIGHT }}
             >
               <ActiveMultiGame />

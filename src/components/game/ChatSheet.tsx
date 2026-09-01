@@ -38,7 +38,7 @@ export function ChatSheet({ chat, myRole, onClose }: Props) {
 
       {/* Sheet — use inset-x + margin auto to center without transform conflicts */}
       <div
-        className={`fixed inset-x-4 z-50 mx-auto max-w-md rounded-3xl bg-white shadow-xl overflow-hidden ${closing ? "animate-sheet-down" : "animate-sheet-up"}`}
+        className={`fixed inset-x-4 z-50 mx-auto max-w-md rounded-lg bg-white shadow-xl overflow-hidden ${closing ? "animate-sheet-down" : "animate-sheet-up"}`}
         style={{
           bottom: "calc(env(safe-area-inset-bottom) + 1rem)",
         }}
