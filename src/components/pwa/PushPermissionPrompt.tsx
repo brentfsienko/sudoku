@@ -8,33 +8,46 @@ type Props = {
 };
 
 /**
- * One-time prompt shown after a friend request or game invite arrives.
- * Sits above the bottom nav as a slim banner.
+ * One-time popup asking signed-in users to enable push notifications.
  */
 export function PushPermissionPrompt({ onAllow, onDismiss }: Props) {
   return (
-    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+3.5rem+0.75rem)] left-1/2 z-40 w-full max-w-sm -translate-x-1/2 px-3">
-      <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 shadow-lg">
-        <span className="shrink-0 text-[var(--primary)]">
-          <PawIcon width={20} height={20} />
-        </span>
-        <p className="min-w-0 flex-1 text-xs font-semibold leading-snug text-[var(--foreground)]">
-          get notified when friends invite you — even when sudogku is closed
-        </p>
-        <div className="flex shrink-0 flex-col gap-1">
+    <div
+      className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-5 backdrop-blur-sm animate-float-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="push-prompt-title"
+    >
+      <div className="animate-pop w-full max-w-sm rounded-3xl bg-[var(--surface)] p-6 shadow-2xl">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <span className="text-[var(--primary)]">
+            <PawIcon width={36} height={36} />
+          </span>
+          <h2
+            id="push-prompt-title"
+            className="font-display text-xl font-extrabold text-[var(--foreground)]"
+          >
+            Enable notifications?
+          </h2>
+          <p className="text-sm text-[var(--muted)]">
+            Get a ping when a friend invites you to play — even if Sudogku is closed.
+          </p>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-2">
           <button
             type="button"
             onClick={onAllow}
-            className="rounded-full bg-[var(--primary)] px-3 py-1 text-xs font-bold text-white"
+            className="font-display w-full rounded-full bg-[var(--primary)] py-3 text-base font-extrabold text-white shadow-sm active:scale-[0.98]"
           >
-            allow
+            Enable
           </button>
           <button
             type="button"
             onClick={onDismiss}
-            className="text-center text-xs font-semibold text-[var(--muted)]"
+            className="font-display w-full rounded-full border-2 border-[var(--border)] bg-white py-3 text-base font-extrabold text-[var(--foreground)] active:scale-[0.98]"
           >
-            not now
+            Not now
           </button>
         </div>
       </div>

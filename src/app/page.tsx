@@ -29,6 +29,10 @@ import { hasAuthIntroCompleted } from "@/lib/auth/onboarding";
 import { useOnlineFriends } from "@/lib/friends/useOnlineFriends";
 import { useNotifications } from "@/lib/friends/useNotifications";
 import { usePushNotifications } from "@/lib/push/usePushNotifications";
+import {
+  hasPushPromptBeenSeen,
+  markPushPromptSeen,
+} from "@/lib/push/prompt";
 import { PushPermissionPrompt } from "@/components/pwa/PushPermissionPrompt";
 import { IosInstallCoach } from "@/components/pwa/IosInstallCoach";
 import { useOnline } from "@/lib/hooks/useOnline";
@@ -110,6 +114,7 @@ export default function Home() {
   // Push notification subscription
   const push = usePushNotifications();
   const [showPushPrompt, setShowPushPrompt] = useState(false);
+  const [installCoachFinished, setInstallCoachFinished] = useState(false);
 
   // Real-time toasts for friend requests and game invites
   const handleGameInvite = useCallback(
@@ -122,10 +127,14 @@ export default function Home() {
     userId: userData.user?.id ?? null,
     onRefresh: () => setTab((t) => t), // nudge friends tab to re-fetch on next mount
     onGameInvite: handleGameInvite,
-    // Show the push permission prompt once when the first notification arrives
-    // and the user hasn't granted permission yet
+    // Backup: if the one-time popup hasn't shown yet, offer it on first invite.
     onFirstNotification: () => {
-      if (push.supported && push.permission === "default" && !push.subscribed) {
+      if (
+        push.supported &&
+        push.permission === "default" &&
+        !push.subscribed &&
+        !hasPushPromptBeenSeen()
+      ) {
         setShowPushPrompt(true);
       }
     },
@@ -170,6 +179,25 @@ export default function Home() {
     }
   }, [userData.loading, userData.authConfigured, userData.user, online]);
 
+  useEffect(() => {
+    if (!playReady || signInGateOpen || coachmarkStep || userData.loading) return;
+    if (!userData.user) return;
+    if (!installCoachFinished) return;
+    if (!push.supported || push.permission !== "default" || push.subscribed) return;
+    if (hasPushPromptBeenSeen()) return;
+    setShowPushPrompt(true);
+  }, [
+    playReady,
+    signInGateOpen,
+    coachmarkStep,
+    userData.loading,
+    userData.user,
+    installCoachFinished,
+    push.supported,
+    push.permission,
+    push.subscribed,
+  ]);
+
   return (
     <>
       <SignInGate
@@ -180,15 +208,20 @@ export default function Home() {
       {showPushPrompt && (
         <PushPermissionPrompt
           onAllow={async () => {
+            markPushPromptSeen();
             setShowPushPrompt(false);
             if (userData.user) await push.subscribe(userData.user.id);
           }}
-          onDismiss={() => setShowPushPrompt(false)}
+          onDismiss={() => {
+            markPushPromptSeen();
+            setShowPushPrompt(false);
+          }}
         />
       )}
       <IosInstallCoach
         ready={playReady && !signInGateOpen && !coachmarkStep && !userData.loading}
         accountSeenPlatforms={userData.data?.installCoachSeenByPlatform}
+        onFinished={() => setInstallCoachFinished(true)}
       />
       <AppSplash ready={playReady} />
     <MobileAppRoot>

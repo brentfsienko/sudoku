@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ChevronDownIcon,
   InstallDesktopIcon,
@@ -24,6 +24,8 @@ type Props = {
   ready: boolean;
   /** Platforms this account already dismissed — each browser family shows once. */
   accountSeenPlatforms?: Partial<Record<InstallPlatform, boolean>>;
+  /** Fired when the overlay is dismissed (or never shown). */
+  onFinished?: () => void;
 };
 
 type PathStep = {
@@ -40,18 +42,31 @@ let shownThisLoad = false;
  * Safari and Chrome get different paths. Native chrome is pointed at,
  * but the whole sequence stays on screen — no auto-advance.
  */
-export function IosInstallCoach({ ready, accountSeenPlatforms }: Props) {
+export function IosInstallCoach({ ready, accountSeenPlatforms, onFinished }: Props) {
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState<InstallPlatform | null>(null);
   const [ipad, setIpad] = useState(false);
+  const finishedRef = useRef(false);
+
+  function finish() {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    onFinished?.();
+  }
 
   useEffect(() => {
     if (!ready) return;
-    if (isStandalonePwa()) return;
+    if (isStandalonePwa()) {
+      finish();
+      return;
+    }
     if (open) return;
 
     const p = getInstallPlatform();
-    if (!p) return;
+    if (!p) {
+      finish();
+      return;
+    }
 
     if (shownThisLoad) {
       setPlatform(p);
@@ -60,18 +75,23 @@ export function IosInstallCoach({ ready, accountSeenPlatforms }: Props) {
       return;
     }
 
-    if (accountSeenPlatforms?.[p] || hasInstallCoachCompleted(p)) return;
+    if (accountSeenPlatforms?.[p] || hasInstallCoachCompleted(p)) {
+      finish();
+      return;
+    }
 
     shownThisLoad = true;
     setPlatform(p);
     setIpad(isIpad());
     setOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, accountSeenPlatforms, open]);
 
   function dismiss() {
     setOpen(false);
     shownThisLoad = false;
     void persistInstallCoachSeen(platform);
+    finish();
   }
 
   if (!open || !platform) return null;

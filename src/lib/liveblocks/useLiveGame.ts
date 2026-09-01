@@ -145,11 +145,16 @@ export function useLiveGame(opts: {
       cells.set(key, { value: digit, notes: [], owner: role, correct });
       if (!correct) m.set("mistakes", m.get("mistakes") + 1);
 
-      // Auto-erase: remove this digit from notes of every peer cell.
-      for (const peer of relatedCells(index)) {
-        const peerCell = cells.get(String(peer));
-        if (peerCell && peerCell.notes.includes(digit)) {
-          cells.set(String(peer), { ...peerCell, notes: peerCell.notes.filter((n) => n !== digit) });
+      // Only clear matching notes in the same row/col/box when the fill is correct.
+      if (correct) {
+        for (const peer of relatedCells(index)) {
+          const peerCell = cells.get(String(peer));
+          if (peerCell && peerCell.notes.includes(digit)) {
+            cells.set(String(peer), {
+              ...peerCell,
+              notes: peerCell.notes.filter((n) => n !== digit),
+            });
+          }
         }
       }
 

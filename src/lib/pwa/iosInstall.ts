@@ -1,5 +1,7 @@
 "use client";
 
+import { isStandalonePwa } from "@/lib/pwa/standalone";
+
 const KEY_PREFIX = "sudogku-install-coach-v3";
 /** Pre-platform key: same browser already dismissed the stacked overlay. */
 const LEGACY_V3_KEY = "sudogku-install-coach-v3";
@@ -63,6 +65,17 @@ export function hasInstallCoachCompleted(
   } catch {
     return true;
   }
+}
+
+/** True when the add-to-home-screen overlay is about to show (or is showing). */
+export function isInstallCoachPending(
+  accountSeenPlatforms?: Partial<Record<InstallPlatform, boolean>>,
+): boolean {
+  if (typeof window === "undefined") return true;
+  if (isStandalonePwa()) return false;
+  const p = getInstallPlatform();
+  if (!p) return false;
+  return !accountSeenPlatforms?.[p] && !hasInstallCoachCompleted(p);
 }
 
 export function markInstallCoachCompleted(

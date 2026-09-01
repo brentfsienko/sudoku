@@ -144,12 +144,17 @@ function reducer(state: State, action: Action): State {
       const entry: CellEntry = { value: digit, notes: [], owner: role, correct };
       const frame = frameFor(s, index);
 
-      // Auto-erase: remove this digit from notes of every peer cell.
       const updatedCells: BoardCells = { ...s.cells, [index]: entry };
-      for (const peer of relatedCells(index)) {
-        const peerCell = updatedCells[peer];
-        if (peerCell && peerCell.notes.includes(digit)) {
-          updatedCells[peer] = { ...peerCell, notes: peerCell.notes.filter((n) => n !== digit) };
+      // Only clear matching notes in the same row/col/box when the fill is correct.
+      if (correct) {
+        for (const peer of relatedCells(index)) {
+          const peerCell = updatedCells[peer];
+          if (peerCell && peerCell.notes.includes(digit)) {
+            updatedCells[peer] = {
+              ...peerCell,
+              notes: peerCell.notes.filter((n) => n !== digit),
+            };
+          }
         }
       }
 
