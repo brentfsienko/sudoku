@@ -364,16 +364,16 @@ button {
 }
 
 @keyframes sheet-up {
-  from { transform: translateX(-50%) translateY(110%); opacity: 0.6; }
-  to   { transform: translateX(-50%) translateY(0);   opacity: 1; }
+  from { transform: translateY(110%); opacity: 0.6; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 .animate-sheet-up {
   animation: sheet-up 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
 @keyframes sheet-down {
-  from { transform: translateX(-50%) translateY(0);   opacity: 1; }
-  to   { transform: translateX(-50%) translateY(110%); opacity: 0.6; }
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(110%); opacity: 0.6; }
 }
 .animate-sheet-down {
   animation: sheet-down 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;

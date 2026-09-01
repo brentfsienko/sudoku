@@ -11,8 +11,7 @@ import {
   type ActiveMultiSave,
 } from "@/lib/game/activeMulti";
 import { DIFFICULTY_LABELS, GAME_MODE_LABELS } from "@/lib/game/types";
-
-const MULTI_ACCENT = "#3b82f6";
+import { COOP_ACCENT, VERSUS_ACCENT } from "@/lib/stats/multi";
 
 export function ActiveMultiGame() {
   const router = useRouter();
@@ -30,6 +29,8 @@ export function ActiveMultiGame() {
 
   if (!active) return null;
 
+  const accent = active.mode === "coop" ? COOP_ACCENT : VERSUS_ACCENT;
+
   function handleRejoin() {
     if (!active) return;
     router.push(`/game/${active.code}?m=${active.mode}&d=${active.difficulty}`);
@@ -46,7 +47,7 @@ export function ActiveMultiGame() {
         <div className="flex w-full items-center gap-3 px-3 py-2.5">
           <span
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-            style={{ backgroundColor: MULTI_ACCENT }}
+            style={{ backgroundColor: accent }}
           >
             <UsersIcon width={20} height={20} />
           </span>
@@ -57,7 +58,7 @@ export function ActiveMultiGame() {
               </span>
               <span
                 className="shrink-0 rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-white"
-                style={{ backgroundColor: MULTI_ACCENT }}
+                style={{ backgroundColor: accent }}
               >
                 {GAME_MODE_LABELS[active.mode]}
               </span>
