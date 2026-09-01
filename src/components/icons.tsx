@@ -67,6 +67,16 @@ export function PlayIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function VolumeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+      <path d="M16 9.5a4 4 0 0 1 0 5" />
+      <path d="M18.5 7a7 7 0 0 1 0 10" />
+    </svg>
+  );
+}
+
 export function SettingsIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base(props)}>
