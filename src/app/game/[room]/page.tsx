@@ -444,11 +444,7 @@ function Lobby({
                       role={player.role}
                       size={52}
                       compact
-                      bubble={
-                        !isMe && chat.latestIncoming?.from === player.role
-                          ? chat.latestIncoming.text
-                          : null
-                      }
+                      bubble={player.role ? (chat.latestByRole[player.role] ?? null) : null}
                     />
                     <span className="font-display text-sm font-bold text-[var(--foreground)]">
                       {player.name}

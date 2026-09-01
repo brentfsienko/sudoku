@@ -15,8 +15,8 @@ export type RoomChatReturn = {
   sendPreset: (text: string) => void;
   unread: boolean;
   markRead: () => void;
-  /** Latest PRESET incoming message (not from me) for the speech bubble. */
-  latestIncoming: ChatMessage | null;
+  /** Latest preset message text keyed by sender role. Includes your own sends. */
+  latestByRole: Partial<Record<string, string>>;
 };
 
 export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChatReturn {
@@ -25,8 +25,8 @@ export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChat
 
   const lastReadAtRef = useRef<number>(Date.now());
   const [unread, setUnread] = useState(false);
-  const [latestIncoming, setLatestIncoming] = useState<ChatMessage | null>(null);
-  const bubbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [latestByRole, setLatestByRole] = useState<Partial<Record<string, string>>>({});
+  const bubbleTimersRef = useRef<Partial<Record<string, ReturnType<typeof setTimeout>>>>({});
 
   const sendMutation = useMutation(
     (
@@ -81,7 +81,6 @@ export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChat
     setUnread(false);
   }, []);
 
-  // Detect new messages: mark unread for all incoming, but only show bubble for presets.
   const prevLengthRef = useRef(messages.length);
   useEffect(() => {
     const prevLen = prevLengthRef.current;
@@ -90,30 +89,42 @@ export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChat
     if (messages.length <= prevLen) return;
 
     const newMsgs = messages.slice(prevLen);
-    const incoming = newMsgs.filter((m) => m.from !== myRole);
 
-    if (incoming.length > 0) {
-      setUnread(true);
+    // Mark unread for messages from others
+    if (newMsgs.some((m) => m.from !== myRole)) setUnread(true);
 
-      // Only preset messages drive the speech bubble
-      const incomingPresets = incoming.filter((m) => m.preset);
-      if (incomingPresets.length > 0) {
-        const latest = incomingPresets[incomingPresets.length - 1];
-        setLatestIncoming(latest ?? null);
+    // Show bubbles for ALL preset messages (any sender, including self)
+    const presets = newMsgs.filter((m) => m.preset);
+    if (presets.length > 0) {
+      const updates: Partial<Record<string, string>> = {};
+      for (const msg of presets) {
+        updates[msg.from] = msg.text;
+      }
+      setLatestByRole((prev) => ({ ...prev, ...updates }));
 
-        if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
-        bubbleTimerRef.current = setTimeout(() => {
-          setLatestIncoming(null);
+      // Auto-clear each role's bubble independently after 4 s
+      for (const msg of presets) {
+        const existing = bubbleTimersRef.current[msg.from];
+        if (existing) clearTimeout(existing);
+        bubbleTimersRef.current[msg.from] = setTimeout(() => {
+          setLatestByRole((prev) => {
+            const next = { ...prev };
+            delete next[msg.from];
+            return next;
+          });
         }, BUBBLE_DURATION_MS);
       }
     }
   }, [messages.length, messages, myRole]);
 
+  // Clean up all timers on unmount
   useEffect(() => {
     return () => {
-      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+      for (const id of Object.values(bubbleTimersRef.current)) {
+        if (id) clearTimeout(id);
+      }
     };
   }, []);
 
-  return { messages, send, sendPreset, unread, markRead, latestIncoming };
+  return { messages, send, sendPreset, unread, markRead, latestByRole };
 }

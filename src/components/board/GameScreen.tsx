@@ -299,11 +299,7 @@ export function GameScreen({
                     showCount={mode === "competitive"}
                     online={isOnline}
                     alignRight={idx > 0 && (allPlayers ?? []).length <= 2}
-                    bubble={
-                      chat && !isMe && chat.latestIncoming?.from === player.role
-                        ? chat.latestIncoming.text
-                        : undefined
-                    }
+                    bubble={chat?.latestByRole[player.role] ?? undefined}
                   />
                 </div>
               </div>

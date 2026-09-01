@@ -24,6 +24,15 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Lock body scroll while chat is open (prevents page jumping on iOS keyboard)
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   useEffect(() => {
     markRead();
     return () => markRead();
