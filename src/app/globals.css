@@ -342,3 +342,23 @@ button {
 .animate-chat-bubble {
   animation: chat-bubble-in 4s ease-out forwards;
 }
+
+@keyframes chat-bubble-in-left {
+  0%   { opacity: 0; transform: translateY(4px) scale(0.9); }
+  15%  { opacity: 1; transform: translateY(0) scale(1); }
+  80%  { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-4px) scale(0.95); }
+}
+.animate-chat-bubble-left {
+  animation: chat-bubble-in-left 4s ease-out forwards;
+}
+
+@keyframes chat-bubble-in-right {
+  0%   { opacity: 0; transform: translateY(4px) scale(0.9); }
+  15%  { opacity: 1; transform: translateY(0) scale(1); }
+  80%  { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-4px) scale(0.95); }
+}
+.animate-chat-bubble-right {
+  animation: chat-bubble-in-right 4s ease-out forwards;
+}

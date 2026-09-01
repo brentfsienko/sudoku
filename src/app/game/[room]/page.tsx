@@ -445,6 +445,7 @@ function Lobby({
                       size={52}
                       compact
                       bubble={player.role ? (chat.latestByRole[player.role] ?? null) : null}
+                      bubbleAlign={i % 2 === 0 ? "left" : "right"}
                     />
                     <span className="font-display text-sm font-bold text-[var(--foreground)]">
                       {player.name}

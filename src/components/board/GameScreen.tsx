@@ -300,6 +300,7 @@ export function GameScreen({
                     online={isOnline}
                     alignRight={idx > 0 && (allPlayers ?? []).length <= 2}
                     bubble={chat?.latestByRole[player.role] ?? undefined}
+                    bubbleAlign={idx === 0 ? "left" : "right"}
                   />
                 </div>
               </div>
@@ -446,6 +447,7 @@ function PlayerStat({
   online,
   alignRight,
   bubble,
+  bubbleAlign,
 }: {
   player: Player;
   count: number;
@@ -454,6 +456,7 @@ function PlayerStat({
   online: boolean;
   alignRight?: boolean;
   bubble?: string | null;
+  bubbleAlign?: "left" | "center" | "right";
 }) {
   const color = playerColor(player.role);
   return (
@@ -466,6 +469,7 @@ function PlayerStat({
         compact
         online={online}
         bubble={bubble}
+        bubbleAlign={bubbleAlign}
       />
       <div>
         <div className="font-display text-sm font-bold leading-tight" style={{ color: color.hex }}>

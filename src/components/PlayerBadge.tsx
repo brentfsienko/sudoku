@@ -16,6 +16,8 @@ type Props = {
   compact?: boolean;
   /** Incoming chat message to show as a speech bubble above the avatar. */
   bubble?: string | null;
+  /** Which edge the bubble anchors to. Defaults to "center". */
+  bubbleAlign?: "left" | "center" | "right";
 };
 
 export function PlayerBadge({
@@ -27,12 +29,13 @@ export function PlayerBadge({
   online = true,
   compact,
   bubble,
+  bubbleAlign,
 }: Props) {
   const color = playerColor(role);
   return (
     <div className="flex items-center gap-2">
       <div className="relative">
-        {bubble && <ChatBubble text={bubble} />}
+        {bubble && <ChatBubble text={bubble} align={bubbleAlign} />}
         <DogAvatar dogId={dogId} size={size} ringColor={color.hex} />
         <span
           className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white"
