@@ -1,3 +1,5 @@
+import extraBreeds from "./extraBreeds.json";
+
 export type BarkKind = "yap" | "woof" | "deep" | "howl";
 
 export type DailyBreed = {
@@ -17,7 +19,7 @@ export type DailyBreed = {
   bark: BarkKind;
 };
 
-export const DAILY_BREEDS: DailyBreed[] = [
+export const CORE_BREEDS: DailyBreed[] = [
   {
     id: "golden-retriever",
     name: "Golden Retriever",
@@ -569,15 +571,19 @@ export function todayDateKey(now = Date.now()): string {
   return new Date(now).toLocaleDateString("en-CA");
 }
 
-function hashDateKey(key: string): number {
-  let h = 0;
-  for (let i = 0; i < key.length; i++) {
-    h = (h * 31 + key.charCodeAt(i)) >>> 0;
-  }
-  return h;
+export const DAILY_BREEDS: DailyBreed[] = [
+  ...CORE_BREEDS,
+  ...(extraBreeds as DailyBreed[]),
+];
+
+function dayOfYear(now: number): number {
+  const [y, m, d] = todayDateKey(now).split("-").map(Number) as [number, number, number];
+  const start = Date.UTC(y, 0, 1);
+  const cur = Date.UTC(y, m - 1, d);
+  return Math.floor((cur - start) / 86_400_000);
 }
 
 export function breedForDay(now = Date.now()): DailyBreed {
-  const idx = hashDateKey(todayDateKey(now)) % DAILY_BREEDS.length;
-  return DAILY_BREEDS[idx]!;
+  const n = DAILY_BREEDS.length;
+  return DAILY_BREEDS[dayOfYear(now) % n]!;
 }
