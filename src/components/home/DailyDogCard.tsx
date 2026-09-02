@@ -231,9 +231,16 @@ export function DailyDogCard() {
               {unseen && <SparkleCover />}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="font-display text-sm font-bold text-[var(--foreground)]">
-                {breed.name}
-              </p>
+              <div className="relative overflow-hidden rounded-sm">
+                <p
+                  className={`font-display text-sm font-bold text-[var(--foreground)] ${
+                    unseen ? "blur-[5px] select-none" : ""
+                  }`}
+                >
+                  {breed.name}
+                </p>
+                {unseen && <SparkleCover />}
+              </div>
               <p className="text-xs text-[var(--muted)]">
                 {unseen ? "New pup today — tap to reveal" : "Tap for the story"}
               </p>

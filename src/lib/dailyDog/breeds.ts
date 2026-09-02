@@ -511,7 +511,7 @@ export const CORE_BREEDS: DailyBreed[] = [
     sourceLabel: "Wikipedia",
     intro: "Hello pups, today’s daily dog is the Maltese — a little white cloud with a very old passport.",
     story:
-      "Greek and Roman writers already described small white dogs from Mediterranean islands. The Maltese coat has little undercoat, so it sheds almost not at all and can grow to the floor. European nobles kept them as living jewelry — a lapdog with a very old passport. The coat is single-layered hair that can be kept in a short pet trim, and they were lap warmers for people who could afford not to hunt."
+      "Greek and Roman writers already described small white dogs from Mediterranean islands. The Maltese coat has little undercoat, so it hardly sheds and can grow to the floor. European nobles kept them as living jewelry — a lapdog with a very old passport. The coat is single-layered hair that can be kept in a short pet trim, and they were lap warmers for people who could afford not to hunt."
   },
   {
     id: "saint-bernard",
