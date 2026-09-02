@@ -5,12 +5,17 @@ import { createPortal } from "react-dom";
 import { ChevronDownIcon, PlayIcon, VolumeIcon, XIcon } from "@/components/icons";
 import { OriginMiniMap } from "@/components/home/OriginMiniMap";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
-import { breedForDay, todayDateKey, type BarkKind } from "@/lib/dailyDog/breeds";
+import {
+  breedForDateKey,
+  msUntilNextUtcMidnight,
+  todayDateKey,
+  type BarkKind,
+} from "@/lib/dailyDog/breeds";
 import { hasSeenDailyDog, markDailyDogSeen } from "@/lib/dailyDog/seen";
 
 function useDailyBreed() {
   const [dayKey, setDayKey] = useState(todayDateKey);
-  const breed = useMemo(() => breedForDay(), [dayKey]);
+  const breed = useMemo(() => breedForDateKey(dayKey), [dayKey]);
 
   useEffect(() => {
     const tick = () => {
@@ -18,9 +23,13 @@ function useDailyBreed() {
       setDayKey((prev) => (prev === next ? prev : next));
     };
     tick();
-    const id = window.setInterval(tick, 60_000);
-    return () => window.clearInterval(id);
-  }, []);
+    const interval = window.setInterval(tick, 30_000);
+    const midnight = window.setTimeout(tick, msUntilNextUtcMidnight() + 250);
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(midnight);
+    };
+  }, [dayKey]);
 
   return { breed, dayKey };
 }
@@ -56,6 +65,38 @@ function playClip(
   });
 }
 
+const SPARKLES = [
+  { top: "6%", left: "10%", delay: "0s", size: 9 },
+  { top: "18%", left: "72%", delay: "0.25s", size: 11 },
+  { top: "42%", left: "8%", delay: "0.5s", size: 8 },
+  { top: "38%", left: "78%", delay: "0.7s", size: 10 },
+  { top: "68%", left: "22%", delay: "0.15s", size: 9 },
+  { top: "74%", left: "62%", delay: "0.9s", size: 12 },
+  { top: "88%", left: "40%", delay: "0.4s", size: 8 },
+];
+
+function SparkleCover() {
+  return (
+    <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-md" aria-hidden>
+      <span className="absolute inset-0 bg-white/25 animate-dog-sparkle-veil" />
+      {SPARKLES.map((s, i) => (
+        <span
+          key={i}
+          className="absolute text-[#f7e38a] drop-shadow-sm animate-dog-sparkle"
+          style={{
+            top: s.top,
+            left: s.left,
+            fontSize: s.size,
+            animationDelay: s.delay,
+          }}
+        >
+          ✦
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function DailyDogCard() {
   const { breed, dayKey } = useDailyBreed();
   const [open, setOpen] = useState(false);
@@ -72,6 +113,7 @@ export function DailyDogCard() {
 
   useEffect(() => {
     setUnseen(!hasSeenDailyDog(dayKey));
+    setOpen(false);
   }, [dayKey]);
 
   useEffect(() => {
@@ -117,6 +159,8 @@ export function DailyDogCard() {
     setSaying(true);
     playClip(`/sounds/names/${breed.id}.m4a`, audioRef, () => setSaying(false));
   }
+
+  const story = `${breed.intro.replace(/\s+$/, "")} ${breed.story}`.replace(/\s+/g, " ").trim();
 
   const photoViewer =
     portalReady && photoOpen
@@ -175,12 +219,23 @@ export function DailyDogCard() {
             aria-expanded={false}
             className="flex w-full items-center gap-3 px-4 py-3 text-left transition active:scale-[0.99]"
           >
+            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={breed.image}
+                alt=""
+                width={48}
+                height={48}
+                className={`h-12 w-12 object-cover ${unseen ? "scale-110 blur-[6px]" : ""}`}
+              />
+              {unseen && <SparkleCover />}
+            </span>
             <div className="min-w-0 flex-1">
               <p className="font-display text-sm font-bold text-[var(--foreground)]">
-                Today’s pup
+                {breed.name}
               </p>
               <p className="text-xs text-[var(--muted)]">
-                {unseen ? "New pup today — tap for the story" : "Tap for the story"}
+                {unseen ? "New pup today — tap to reveal" : "Tap for the story"}
               </p>
             </div>
             <ChevronDownIcon width={20} height={20} className="shrink-0 text-[var(--muted)]" />
@@ -218,63 +273,54 @@ export function DailyDogCard() {
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={openPhoto}
-              className="mt-3 block w-full"
-              aria-label={`View larger photo of ${breed.name}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={breed.image}
-                alt={breed.name}
-                className="h-44 w-full rounded-md object-cover"
-              />
-            </button>
-
-            <div className="mt-3 flex items-start gap-3">
-              <dl className="min-w-0 flex-1 space-y-1.5 text-sm">
-                <div>
-                  <dt className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                    Origin
-                  </dt>
-                  <dd className="font-display text-[var(--foreground)]">{breed.origin}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                    Height
-                  </dt>
-                  <dd className="font-display text-[var(--foreground)]">{breed.height}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                    Weight
-                  </dt>
-                  <dd className="font-display text-[var(--foreground)]">{breed.weight}</dd>
-                </div>
-              </dl>
-              <div className="flex w-[7.25rem] shrink-0 flex-col items-stretch gap-1">
+            <div className="mt-3 flex gap-3">
+              <button
+                type="button"
+                onClick={openPhoto}
+                className="w-1/2 shrink-0"
+                aria-label={`View larger photo of ${breed.name}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={breed.image}
+                  alt={breed.name}
+                  className="aspect-square w-full rounded-md object-cover"
+                />
+              </button>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <dl className="space-y-1.5 text-sm">
+                  <div>
+                    <dt className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+                      Origin
+                    </dt>
+                    <dd className="font-display text-[var(--foreground)]">{breed.origin}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+                      Height
+                    </dt>
+                    <dd className="font-display text-[var(--foreground)]">{breed.height}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
+                      Weight
+                    </dt>
+                    <dd className="font-display text-[var(--foreground)]">{breed.weight}</dd>
+                  </div>
+                </dl>
                 <button
                   type="button"
                   onClick={onBark}
                   disabled={barking}
-                  className="inline-flex flex-col items-center gap-1 rounded-md bg-[var(--foreground)] px-2 py-2.5 text-center text-[11px] font-bold leading-tight text-white active:scale-95 disabled:opacity-70"
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-md bg-[var(--foreground)] px-2 py-2 text-xs font-bold text-white active:scale-95 disabled:opacity-70"
                 >
-                  <PlayIcon width={16} height={16} />
-                  {barking ? "Woofing…" : "Play a similar bark"}
+                  <PlayIcon width={14} height={14} />
+                  {barking ? "Woofing…" : "Play bark"}
                 </button>
-                <p className="text-[10px] leading-snug text-[var(--muted)]">
-                  Not this exact breed — just a similar size of bark.
-                </p>
               </div>
             </div>
 
-            <p className="mt-3 font-display text-sm font-bold text-[var(--foreground)]">
-              {breed.intro}
-            </p>
-            <p className="mt-1.5 text-sm leading-relaxed text-[var(--foreground)]">
-              {breed.story}
-            </p>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--foreground)]">{story}</p>
 
             <div className="mt-3">
               <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">

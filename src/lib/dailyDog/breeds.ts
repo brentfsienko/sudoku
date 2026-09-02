@@ -566,9 +566,14 @@ export const CORE_BREEDS: DailyBreed[] = [
   },
 ];
 
-/** Local calendar date YYYY-MM-DD — one breed per day in the user's timezone. */
+/** UTC calendar date YYYY-MM-DD — same Daily Dog for everyone, new drop at 00:00 UTC. */
 export function todayDateKey(now = Date.now()): string {
-  return new Date(now).toLocaleDateString("en-CA");
+  return new Date(now).toISOString().slice(0, 10);
+}
+
+export function msUntilNextUtcMidnight(now = Date.now()): number {
+  const d = new Date(now);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1) - now;
 }
 
 export const DAILY_BREEDS: DailyBreed[] = [
@@ -576,14 +581,18 @@ export const DAILY_BREEDS: DailyBreed[] = [
   ...(extraBreeds as DailyBreed[]),
 ];
 
-function dayOfYear(now: number): number {
-  const [y, m, d] = todayDateKey(now).split("-").map(Number) as [number, number, number];
+function utcDayOfYear(key: string): number {
+  const [y, m, d] = key.split("-").map(Number) as [number, number, number];
   const start = Date.UTC(y, 0, 1);
   const cur = Date.UTC(y, m - 1, d);
   return Math.floor((cur - start) / 86_400_000);
 }
 
-export function breedForDay(now = Date.now()): DailyBreed {
+export function breedForDateKey(key: string): DailyBreed {
   const n = DAILY_BREEDS.length;
-  return DAILY_BREEDS[dayOfYear(now) % n]!;
+  return DAILY_BREEDS[utcDayOfYear(key) % n]!;
+}
+
+export function breedForDay(now = Date.now()): DailyBreed {
+  return breedForDateKey(todayDateKey(now));
 }

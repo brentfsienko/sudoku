@@ -310,6 +310,34 @@ button {
   animation: new-badge-blink 2.4s ease-in-out infinite;
 }
 
+@keyframes dog-sparkle-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.7) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25) rotate(18deg);
+  }
+}
+.animate-dog-sparkle {
+  animation: dog-sparkle-twinkle 1.35s ease-in-out infinite;
+}
+
+@keyframes dog-sparkle-veil {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+.animate-dog-sparkle-veil {
+  animation: dog-sparkle-veil 2.2s ease-in-out infinite;
+}
+
 /* ── Greeting speech-bubble typewriter cursor ── */
 @keyframes greeting-cursor-blink {
   0%,
