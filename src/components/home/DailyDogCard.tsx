@@ -173,7 +173,10 @@ export function DailyDogCard() {
     playClip(`/sounds/names/${breed.id}.m4a`, audioRef, () => setSaying(false));
   }
 
-  const story = `${breed.intro.replace(/\s+$/, "")} ${breed.story}`.replace(/\s+/g, " ").trim();
+  const paragraphs = breed.story
+    .split(/\n\n+/)
+    .map((p) => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
 
   const photoViewer =
     portalReady && photoOpen
@@ -340,7 +343,11 @@ export function DailyDogCard() {
               </div>
             </div>
 
-            <p className="mt-3 text-sm leading-relaxed text-[var(--foreground)]">{story}</p>
+            <div className="mt-3 space-y-3 text-sm leading-relaxed text-[var(--foreground)]">
+              {paragraphs.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
 
             <div className="mt-3">
               <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
