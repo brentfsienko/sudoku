@@ -157,6 +157,20 @@ function RoomInner({
   });
 
   const chat = useRoomChat(game.me.role, profile.username);
+  const [chatOpen, setChatOpen] = useState(false);
+
+  function toggleChat() {
+    setChatOpen((open) => !open);
+    chat.markRead();
+  }
+
+  const chatOverlay = chatOpen ? (
+    <ChatSheet
+      chat={chat}
+      myRole={game.me.role}
+      onClose={() => setChatOpen(false)}
+    />
+  ) : null;
 
   // Persist active room so the home screen can offer a rejoin card.
   useEffect(() => {
@@ -187,19 +201,22 @@ function RoomInner({
 
   if (!game.ready || !game.controller) {
     return (
-      <Lobby
-        code={code}
-        isHost={game.isHost}
-        mode={game.controller?.snapshot.mode ?? seedMode}
-        difficulty={game.controller?.snapshot.difficulty ?? seedDifficulty}
-        allPlayers={game.allPlayers}
-        canStart={game.canStart}
-        isFull={game.isFull}
-        onStart={game.startGame}
-        onExit={exit}
-        chat={chat}
-        myRole={game.me.role}
-      />
+      <>
+        <Lobby
+          code={code}
+          isHost={game.isHost}
+          mode={game.controller?.snapshot.mode ?? seedMode}
+          difficulty={game.controller?.snapshot.difficulty ?? seedDifficulty}
+          allPlayers={game.allPlayers}
+          canStart={game.canStart}
+          isFull={game.isFull}
+          onStart={game.startGame}
+          onExit={exit}
+          chat={chat}
+          onToggleChat={toggleChat}
+        />
+        {chatOverlay}
+      </>
     );
   }
 
@@ -218,7 +235,8 @@ function RoomInner({
       peers={game.peers}
       analyticsMode="multiplayer"
       onExit={exit}
-      onRematch={game.rematch}
+      onNext={game.returnToLobby}
+      onToggleChat={toggleChat}
       streak={wallet.streak}
       savedBones={wallet.bones}
       chat={chat}
@@ -252,6 +270,7 @@ function RoomInner({
         syncWallet();
       }}
     />
+      {chatOverlay}
     </>
   );
 }
@@ -394,7 +413,7 @@ function Lobby({
   onStart,
   onExit,
   chat,
-  myRole,
+  onToggleChat,
 }: {
   code: string;
   isHost: boolean;
@@ -406,10 +425,9 @@ function Lobby({
   onStart: () => void;
   onExit: () => void;
   chat: ReturnType<typeof useRoomChat>;
-  myRole: PlayerRole | null;
+  onToggleChat: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
 
   async function share() {
     const url =
@@ -451,21 +469,9 @@ function Lobby({
         </div>
         <ChatToggleButton
           unread={chat.unread}
-          onClick={() => {
-            setChatOpen((o) => !o);
-            if (!chatOpen) chat.markRead();
-          }}
+          onClick={onToggleChat}
         />
       </div>
-
-      {/* Chat overlay — animated bottom sheet */}
-      {chatOpen && (
-        <ChatSheet
-          chat={chat}
-          myRole={myRole}
-          onClose={() => setChatOpen(false)}
-        />
-      )}
 
       <div className="flex flex-1 flex-col items-center justify-center gap-5">
         {/* Room code card */}

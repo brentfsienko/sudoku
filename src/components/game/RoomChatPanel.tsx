@@ -24,30 +24,6 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Lock body scroll while chat is open (prevents page jumping on iOS keyboard).
-  // iOS ignores overflow:hidden on body, so we also fix the position.
-  useEffect(() => {
-    const body = document.body;
-    const scrollY = window.scrollY;
-    const prevOverflow = body.style.overflow;
-    const prevPosition = body.style.position;
-    const prevTop = body.style.top;
-    const prevWidth = body.style.width;
-
-    body.style.overflow = "hidden";
-    body.style.position = "fixed";
-    body.style.top = `-${scrollY}px`;
-    body.style.width = "100%";
-
-    return () => {
-      body.style.overflow = prevOverflow;
-      body.style.position = prevPosition;
-      body.style.top = prevTop;
-      body.style.width = prevWidth;
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
   useEffect(() => {
     markRead();
     return () => markRead();
@@ -57,10 +33,6 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
 
   function handleSend() {
     const text = draft.trim();
@@ -93,7 +65,11 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+      <div
+        ref={scrollRef}
+        data-chat-scroll
+        className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 space-y-2"
+      >
         {messages.length === 0 && (
           <p className="text-center text-xs text-[var(--muted)] pt-4">
             No messages yet. Say hi! 👋

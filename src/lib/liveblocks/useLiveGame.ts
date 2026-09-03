@@ -57,6 +57,8 @@ export type LiveGame = {
   canStart: boolean;
   startGame: () => void;
   rematch: () => void;
+  /** Reset the board and return everyone to the waiting room. Keeps chat. */
+  returnToLobby: () => void;
 };
 
 export function useLiveGame(opts: {
@@ -229,6 +231,23 @@ export function useLiveGame(opts: {
       solution: p.solution,
       status: "playing",
       startedAt: Date.now(),
+      finishedAt: null,
+      mistakes: 0,
+      hintsUsed: 0,
+    });
+  }, []);
+
+  const returnToLobbyMutation = useMutation(({ storage }) => {
+    const m = storage.get("meta");
+    if (m.get("status") !== "done") return;
+    const p = generatePuzzle(m.get("difficulty"));
+    const cells = storage.get("cells");
+    for (const k of [...cells.keys()]) cells.delete(k);
+    m.update({
+      puzzle: p.puzzle,
+      solution: p.solution,
+      status: "lobby",
+      startedAt: null,
       finishedAt: null,
       mistakes: 0,
       hintsUsed: 0,
@@ -410,6 +429,9 @@ export function useLiveGame(opts: {
     },
     rematch: () => {
       if (self?.id) rematchMutation(self.id);
+    },
+    returnToLobby: () => {
+      returnToLobbyMutation();
     },
   };
 }

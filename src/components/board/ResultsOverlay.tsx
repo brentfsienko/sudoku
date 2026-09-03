@@ -6,6 +6,7 @@ import { cellContributions } from "@/lib/game/engine";
 import { formatTime } from "@/lib/game/scoring";
 import { BoneIcon } from "@/components/BoneIcon";
 import { DogAvatar } from "@/components/DogAvatar";
+import { ChatToggleButton } from "@/components/game/ChatToggleButton";
 import { playerColor } from "@/lib/theme/dogs";
 
 type Player = { name: string; dogId: string; role: PlayerRole };
@@ -20,6 +21,10 @@ type Props = {
   solved: boolean;
   onRematch?: () => void;
   onHome: () => void;
+  /** Multiplayer: single action that returns everyone to the waiting room. */
+  onNext?: () => void;
+  onToggleChat?: () => void;
+  chatUnread?: boolean;
   bonesFound?: number;
   winBoneBonus?: number;
   /** Total time penalty added (daily only). When set, shows a "Time penalty" row. */
@@ -45,6 +50,9 @@ export function ResultsOverlay({
   solved,
   onRematch,
   onHome,
+  onNext,
+  onToggleChat,
+  chatUnread,
   bonesFound = 0,
   winBoneBonus = 0,
   penaltySeconds,
@@ -83,6 +91,14 @@ export function ResultsOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5 backdrop-blur-sm animate-float-in">
+      {onToggleChat && (
+        <div
+          className="absolute right-5 z-[1]"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+        >
+          <ChatToggleButton unread={Boolean(chatUnread)} onClick={onToggleChat} />
+        </div>
+      )}
       <div className="animate-pop w-full max-w-sm rounded-lg bg-[var(--surface)] p-6 shadow-2xl">
         <div className="flex flex-col items-center gap-2 text-center">
           <DogAvatar dogId={heroDogId} size={88} ringColor={heroRing} />
@@ -138,22 +154,34 @@ export function ResultsOverlay({
         )}
 
         <div className="mt-6 flex flex-col gap-2">
-          {onRematch && (
+          {onNext ? (
             <button
               type="button"
-              onClick={onRematch}
+              onClick={onNext}
               className="font-display rounded-md bg-[var(--primary)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
             >
-              Rematch
+              Next
             </button>
+          ) : (
+            <>
+              {onRematch && (
+                <button
+                  type="button"
+                  onClick={onRematch}
+                  className="font-display rounded-md bg-[var(--primary)] py-3.5 text-lg font-extrabold text-white shadow-md transition active:scale-[0.98]"
+                >
+                  Rematch
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onHome}
+                className="font-display rounded-md bg-white py-3.5 text-lg font-extrabold text-[var(--foreground)] shadow-sm transition active:scale-[0.98]"
+              >
+                Home
+              </button>
+            </>
           )}
-          <button
-            type="button"
-            onClick={onHome}
-            className="font-display rounded-md bg-white py-3.5 text-lg font-extrabold text-[var(--foreground)] shadow-sm transition active:scale-[0.98]"
-          >
-            Home
-          </button>
         </div>
       </div>
     </div>

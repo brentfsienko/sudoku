@@ -12,7 +12,6 @@ import { countCollectedBones } from "@/lib/bones/collect";
 import { useGameBones } from "@/lib/bones/useGameBones";
 import { GAME_WIN_BONE_BONUS } from "@/lib/bones/config";
 import { ChevronLeftIcon, PlayIcon } from "@/components/icons";
-import { ChatSheet } from "@/components/game/ChatSheet";
 import type { RoomChatReturn } from "@/lib/liveblocks/useRoomChat";
 import type { GameController } from "@/lib/game/store";
 import { elapsedSeconds } from "@/lib/game/store";
@@ -51,6 +50,9 @@ type Props = {
   /** End Game from pause — quit without saving progress as active. */
   onAbandon?: () => void;
   onRematch?: () => void;
+  /** Multiplayer: after stats, return everyone to the waiting room. */
+  onNext?: () => void;
+  onToggleChat?: () => void;
   /** Analytics mode for finish metric (solo / daily / multiplayer). */
   analyticsMode?: GameFinishMode;
   /** Called once when the game reaches a finished state. */
@@ -89,13 +91,14 @@ export function GameScreen({
   onExit,
   onAbandon,
   onRematch,
+  onNext,
+  onToggleChat,
   onFinish,
   analyticsMode,
   streak = 0,
   savedBones = 0,
   chat,
 }: Props) {
-  const [chatOpen, setChatOpen] = useState(false);
   const { snapshot } = controller;
   const bonePlay = useGameBones(
     controller,
@@ -257,15 +260,6 @@ export function GameScreen({
         />
       </div>
 
-      {/* Chat overlay (in-game) — animated bottom sheet */}
-      {chat && chatOpen && (
-        <ChatSheet
-          chat={chat}
-          myRole={me.role}
-          onClose={() => setChatOpen(false)}
-        />
-      )}
-
       {/* Players strip (multiplayer) */}
       {isMulti && (
         <div className="flex items-center justify-between gap-1.5 px-4 pb-2">
@@ -370,10 +364,10 @@ export function GameScreen({
           onToggleNotes={controller.toggleNotes}
           onHint={controller.hint}
           onChat={
-            chat
+            onToggleChat
               ? () => {
-                  setChatOpen((o) => !o);
-                  if (!chatOpen) chat.markRead();
+                  onToggleChat();
+                  chat?.markRead();
                 }
               : undefined
           }
@@ -406,6 +400,19 @@ export function GameScreen({
                 }
               : undefined
           }
+          onNext={
+            onNext
+              ? () => {
+                  void persistRef.current
+                    .catch((err) => {
+                      console.warn("[game] persist failed:", err);
+                    })
+                    .then(onNext);
+                }
+              : undefined
+          }
+          onToggleChat={onToggleChat}
+          chatUnread={chat?.unread}
           onHome={() => {
             void persistRef.current
               .catch((err) => {

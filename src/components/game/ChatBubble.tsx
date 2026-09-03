@@ -30,7 +30,7 @@ export function ChatBubble({ text, align = "center" }: Props) {
   return (
     <div className={`pointer-events-none absolute bottom-full mb-1.5 ${POSITION[align]}`}>
       <div className="relative max-w-[160px] rounded-md bg-[var(--surface)] px-3 py-1.5 shadow-md">
-        <p className="font-display whitespace-nowrap text-xs font-semibold text-[var(--foreground)]">
+        <p className="font-display text-xs font-semibold leading-snug break-words text-[var(--foreground)]">
           {display}
         </p>
         {/* Tail */}

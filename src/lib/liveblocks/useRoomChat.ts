@@ -15,7 +15,7 @@ export type RoomChatReturn = {
   sendPreset: (text: string) => void;
   unread: boolean;
   markRead: () => void;
-  /** Latest preset message text keyed by sender role. Includes your own sends. */
+  /** Latest message text keyed by sender role. Includes your own sends. */
   latestByRole: Partial<Record<string, string>>;
 };
 
@@ -93,27 +93,23 @@ export function useRoomChat(myRole: PlayerRole | null, myName: string): RoomChat
     // Mark unread for messages from others
     if (newMsgs.some((m) => m.from !== myRole)) setUnread(true);
 
-    // Show bubbles for ALL preset messages (any sender, including self)
-    const presets = newMsgs.filter((m) => m.preset);
-    if (presets.length > 0) {
-      const updates: Partial<Record<string, string>> = {};
-      for (const msg of presets) {
-        updates[msg.from] = msg.text;
-      }
-      setLatestByRole((prev) => ({ ...prev, ...updates }));
+    // Show a speech bubble on the sender's dog for every new message
+    const updates: Partial<Record<string, string>> = {};
+    for (const msg of newMsgs) {
+      updates[msg.from] = msg.text;
+    }
+    setLatestByRole((prev) => ({ ...prev, ...updates }));
 
-      // Auto-clear each role's bubble independently after 4 s
-      for (const msg of presets) {
-        const existing = bubbleTimersRef.current[msg.from];
-        if (existing) clearTimeout(existing);
-        bubbleTimersRef.current[msg.from] = setTimeout(() => {
-          setLatestByRole((prev) => {
-            const next = { ...prev };
-            delete next[msg.from];
-            return next;
-          });
-        }, BUBBLE_DURATION_MS);
-      }
+    for (const msg of newMsgs) {
+      const existing = bubbleTimersRef.current[msg.from];
+      if (existing) clearTimeout(existing);
+      bubbleTimersRef.current[msg.from] = setTimeout(() => {
+        setLatestByRole((prev) => {
+          const next = { ...prev };
+          delete next[msg.from];
+          return next;
+        });
+      }, BUBBLE_DURATION_MS);
     }
   }, [messages.length, messages, myRole]);
 

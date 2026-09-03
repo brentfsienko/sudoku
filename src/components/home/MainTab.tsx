@@ -345,7 +345,7 @@ export function MainTab({
                 </div>
               </section>
 
-              <DailyDogCard />
+              {userData.user ? <DailyDogCard /> : null}
 
               {statsReady && readyData ? (
                 <GameHistoryList
