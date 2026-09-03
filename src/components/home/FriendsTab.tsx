@@ -15,7 +15,8 @@ import {
 import { AddFriendSheet } from "@/components/home/AddFriendSheet";
 import { TabScreenHeader } from "@/components/home/TabScreenHeader";
 import { DailyLeaderboard } from "@/components/home/DailyLeaderboard";
-import { isTodayComplete } from "@/lib/daily/puzzle";
+import { getPSTDate } from "@/lib/daily/puzzle";
+import { useDailyCompletion } from "@/lib/daily/useDailyCompletion";
 import { SearchIcon, UserPlusIcon } from "@/components/icons";
 import type { DogId } from "@/lib/theme/dogs";
 import { GAME_MODE_LABELS } from "@/lib/game/types";
@@ -62,6 +63,7 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
   const [msg, setMsg] = useState<string | null>(null);
   const [inviteFriend, setInviteFriend] = useState<PublicProfile | null>(null);
   const [addFriendOpen, setAddFriendOpen] = useState(false);
+  const { complete: dailyDone } = useDailyCompletion(getPSTDate());
 
   if (!userData.authConfigured) {
     return (
@@ -175,7 +177,6 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
 
   // Daily leaderboard sub-tab
   if (subTab === "daily") {
-    const dailyDone = isTodayComplete();
     return (
       <div className="flex flex-col gap-5">
         <TabScreenHeader title="Friends" />

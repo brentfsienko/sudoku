@@ -5,6 +5,7 @@ import { fetchLeaderboard, ensureDailyResultSynced, type DailyLeaderboardEntry }
 import { getPSTDate } from "@/lib/daily/puzzle";
 import { loadDailyResultLocal } from "@/lib/daily/local";
 import { formatDurationExact } from "@/lib/stats/progress";
+import { mistakePenaltySeconds } from "@/lib/game/engine";
 import { fetchMyPublicProfile } from "@/lib/friends/api";
 import { DogAvatar } from "@/components/DogAvatar";
 import type { Friend } from "@/lib/friends/types";
@@ -78,6 +79,7 @@ function LeaderboardRow({
         {entry.mistakes > 0 && (
           <p className="text-[11px] text-[var(--muted)]">
             {entry.mistakes} {entry.mistakes === 1 ? "mistake" : "mistakes"}
+            {" · "}+{mistakePenaltySeconds(entry.mistakes)}s
           </p>
         )}
       </div>

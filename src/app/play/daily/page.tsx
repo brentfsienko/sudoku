@@ -21,10 +21,10 @@ import {
   getDailyActiveId,
   getDailyPuzzle,
   getPSTDate,
-  isTodayComplete,
 } from "@/lib/daily/puzzle";
-import { fetchMyDailyResult, submitDailyResult } from "@/lib/daily/api";
+import { submitDailyResult } from "@/lib/daily/api";
 import { saveDailyResultLocal } from "@/lib/daily/local";
+import { useDailyCompletion } from "@/lib/daily/useDailyCompletion";
 import { DailyLeaderboard } from "@/components/home/DailyLeaderboard";
 import { LoadingPaws } from "@/app/play/page";
 import { fetchFriends } from "@/lib/friends/api";
@@ -193,21 +193,13 @@ function DailyInner() {
   const [wallet, setWallet] = useState({ streak: 0, bones: 0 });
   const [userId, setUserId] = useState<string | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [alreadyDone, setAlreadyDone] = useState(false);
+  const { complete, loading: checkingDone } = useDailyCompletion(dateStr);
+  const [gate, setGate] = useState<"wait" | "play" | "done">("wait");
 
   useEffect(() => {
-    if (isTodayComplete()) {
-      setAlreadyDone(true);
-      return;
-    }
-    // Also check Supabase — completed on another device.
-    void fetchMyDailyResult(dateStr).then((r) => {
-      if (r) {
-        setAlreadyDone(true);
-      }
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (gate !== "wait" || checkingDone) return;
+    setGate(complete ? "done" : "play");
+  }, [checkingDone, complete, gate]);
 
   useEffect(() => {
     void loadUserData().then((d) => {
@@ -234,7 +226,11 @@ function DailyInner() {
     return () => window.removeEventListener(STATS_UPDATED_EVENT, onStats);
   }, []);
 
-  if (alreadyDone) {
+  if (gate === "wait") {
+    return <LoadingPaws />;
+  }
+
+  if (gate === "done") {
     return (
       <div className="flex min-h-dvh flex-1 flex-col items-center bg-[var(--background)] p-4 pt-safe">
         <div className="w-full max-w-md pt-8">
