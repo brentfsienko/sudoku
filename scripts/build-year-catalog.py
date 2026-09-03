@@ -68,6 +68,40 @@ SKIP_SUBSTR = (
     "village dog",
 )
 
+SKIP_PHOTO_SUBSTR = (
+    "map",
+    "flag",
+    "coat of arms",
+    "coat variation",
+    "varieties",
+    "collage",
+    "composite",
+    "montage",
+    "comparison",
+    "compiled",
+    "diagram",
+    "chart",
+    "infographic",
+    "anatomy",
+    "skeleton",
+    "heart (",
+    "stamp",
+    "statue",
+    " group",
+    "litter",
+    "puppies",
+    "canis lupus",
+    "terriers.jpg",
+    "zemaitukas",
+    "žemaitukas",
+    "1,50euro",
+    "line art",
+    "engraving",
+    "conformation line",
+    "baculum",
+    "oil on canvas",
+)
+
 ORIGIN_DISPLAY = {
     "people's republic of china": "China",
     "republic of china": "Taiwan",
@@ -457,7 +491,7 @@ def search_commons(query: str) -> str | None:
             "list": "search",
             "srnamespace": "6",
             "srsearch": query,
-            "srlimit": "10",
+            "srlimit": "20",
             "origin": "*",
         }
     )
@@ -467,26 +501,33 @@ def search_commons(query: str) -> str | None:
         low = title.lower()
         if not any(low.endswith(ext) for ext in (".jpg", ".jpeg", ".png")):
             continue
-        if "map" in low or "flag" in low or "coat of arms" in low:
+        if any(s in low for s in SKIP_PHOTO_SUBSTR):
+            continue
+        if re.search(r"\b18\d{2}\b", low):
+            continue
+        if any(s in low for s in ("frog", "glyphoglossus", "molossus molossus")):
+            continue
+        qlow = query.lower()
+        if "german shepherd" in low and "german shepherd" not in qlow:
             continue
         info = imageinfo(title)
         if not info:
             continue
         if info.get("mime") not in ("image/jpeg", "image/png"):
             continue
+        artist = ((info.get("extmetadata") or {}).get("Artist") or {}).get("value", "")
+        if "museum of veterinary" in artist.lower():
+            continue
         return title
     return None
 
 
-def download_photo(slug: str, breed_name: str) -> dict | None:
+def save_photo(slug: str, title: str) -> dict | None:
     out = os.path.join(DEST_PHOTOS, slug + ".jpg")
-    title = search_commons(f"{breed_name} dog")
-    if not title:
-        title = search_commons(breed_name)
-    if not title:
-        return None
     info = imageinfo(title)
     if not info:
+        return None
+    if info.get("mime") not in ("image/jpeg", "image/png"):
         return None
     url = info.get("thumburl") or info.get("url")
     req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -510,6 +551,15 @@ def download_photo(slug: str, breed_name: str) -> dict | None:
         "artist": artist,
         "commons": commons,
     }
+
+
+def download_photo(slug: str, breed_name: str) -> dict | None:
+    title = search_commons(f"{breed_name} dog")
+    if not title:
+        title = search_commons(breed_name)
+    if not title:
+        return None
+    return save_photo(slug, title)
 
 
 def say_name(slug: str, name: str) -> None:

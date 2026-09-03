@@ -9,15 +9,19 @@ export function isStandalonePwa(): boolean {
   );
 }
 
-/** Full visible height for standalone; innerHeight alone leaves a gap on iOS. */
+export function isEditableFocused(): boolean {
+  const el = document.activeElement;
+  if (!el || !(el instanceof HTMLElement)) return false;
+  if (el.isContentEditable) return true;
+  const tag = el.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+}
+
+/**
+ * Layout height for the app shell. Prefer the larger of innerHeight and
+ * clientHeight so the URL bar hide/show is covered, but do not follow the
+ * visual viewport — that shrinks with the iOS keyboard and resizes the app.
+ */
 export function measureAppHeight(): number {
-  const vv = window.visualViewport;
-  if (vv) {
-    return Math.max(
-      window.innerHeight,
-      Math.round(vv.height + vv.offsetTop),
-      document.documentElement.clientHeight,
-    );
-  }
-  return window.innerHeight;
+  return Math.max(window.innerHeight, document.documentElement.clientHeight);
 }

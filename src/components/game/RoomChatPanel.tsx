@@ -39,7 +39,12 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
     if (!text) return;
     send(text);
     setDraft("");
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
+  }
+
+  /** Prevent the control from stealing focus so the iOS keyboard stays put. */
+  function keepKeyboard(e: React.PointerEvent) {
+    e.preventDefault();
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -47,6 +52,11 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
       e.preventDefault();
       handleSend();
     }
+  }
+
+  function onInputFocus() {
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
   }
 
   return (
@@ -68,7 +78,7 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
       <div
         ref={scrollRef}
         data-chat-scroll
-        className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 space-y-2"
+        className="flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-3 space-y-2"
       >
         {messages.length === 0 && (
           <p className="text-center text-xs text-[var(--muted)] pt-4">
@@ -114,7 +124,10 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
           <button
             key={p}
             type="button"
-            onClick={() => sendPreset(p)}
+            onPointerDown={(e) => {
+              keepKeyboard(e);
+              sendPreset(p);
+            }}
             className="font-display shrink-0 rounded-md border border-[var(--border)] bg-[var(--surface-soft)] px-3 py-1 text-xs font-bold text-[var(--foreground)] transition active:scale-95"
           >
             {p}
@@ -127,16 +140,25 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
         <input
           ref={inputRef}
           type="text"
+          inputMode="text"
+          enterKeyHint="send"
+          autoComplete="off"
+          autoCorrect="on"
+          autoCapitalize="sentences"
           value={draft}
           onChange={(e) => setDraft(e.target.value.slice(0, 120))}
           onKeyDown={handleKeyDown}
+          onFocus={onInputFocus}
           placeholder="Type a message…"
           maxLength={120}
           className="flex-1 rounded-md bg-[var(--surface-soft)] px-4 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] outline-none"
         />
         <button
           type="button"
-          onClick={handleSend}
+          onPointerDown={(e) => {
+            keepKeyboard(e);
+            handleSend();
+          }}
           disabled={!draft.trim()}
           aria-label="Send"
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--primary)] text-white transition active:scale-95 disabled:opacity-40"

@@ -15,8 +15,9 @@ type Props = {
 };
 
 /**
- * Full-screen overlay chat. Portaled to document.body so the page behind
- * it cannot scroll — same behavior on mobile and desktop.
+ * Overlay chat, portaled to document.body. Does not lock body position/overflow
+ * (that caused a full-page scroll jump on iOS). Background scroll is blocked
+ * via touchmove on the overlay only.
  */
 export function ChatSheet({ chat, myRole, onClose }: Props) {
   const [closing, setClosing] = useState(false);
@@ -36,25 +37,28 @@ export function ChatSheet({ chat, myRole, onClose }: Props) {
   }
 
   useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
-    const prevHtmlOverscroll = html.style.overscrollBehavior;
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-    html.style.overscrollBehavior = "none";
-
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleClose();
     };
     window.addEventListener("keydown", onKey);
 
+    const resetScroll = () => {
+      if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo(0, 0);
+      }
+      if (document.documentElement.scrollTop) {
+        document.documentElement.scrollTop = 0;
+      }
+      if (document.body.scrollTop) {
+        document.body.scrollTop = 0;
+      }
+    };
+    resetScroll();
+    window.addEventListener("scroll", resetScroll, { passive: true });
+
     return () => {
-      html.style.overflow = prevHtmlOverflow;
-      body.style.overflow = prevBodyOverflow;
-      html.style.overscrollBehavior = prevHtmlOverscroll;
       window.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", resetScroll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -90,7 +94,7 @@ export function ChatSheet({ chat, myRole, onClose }: Props) {
       <div
         className={`absolute inset-x-4 z-10 mx-auto max-w-md overflow-hidden rounded-lg bg-white shadow-xl ${closing ? "animate-sheet-down" : "animate-sheet-up"}`}
         style={{
-          bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)",
+          bottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
         }}
         onClick={(e) => e.stopPropagation()}
       >

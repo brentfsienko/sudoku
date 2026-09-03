@@ -566,14 +566,19 @@ export const CORE_BREEDS: DailyBreed[] = [
   },
 ];
 
-/** UTC calendar date YYYY-MM-DD — same Daily Dog for everyone, new drop at 00:00 UTC. */
+/** Local calendar date YYYY-MM-DD — new Daily Dog at midnight in the user's timezone. */
 export function todayDateKey(now = Date.now()): string {
-  return new Date(now).toISOString().slice(0, 10);
+  const d = new Date(now);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
-export function msUntilNextUtcMidnight(now = Date.now()): number {
+export function msUntilNextLocalMidnight(now = Date.now()): number {
   const d = new Date(now);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1) - now;
+  const next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+  return next.getTime() - now;
 }
 
 export const DAILY_BREEDS: DailyBreed[] = [
@@ -581,7 +586,7 @@ export const DAILY_BREEDS: DailyBreed[] = [
   ...(extraBreeds as DailyBreed[]),
 ];
 
-function utcDayOfYear(key: string): number {
+function dayOfYear(key: string): number {
   const [y, m, d] = key.split("-").map(Number) as [number, number, number];
   const start = Date.UTC(y, 0, 1);
   const cur = Date.UTC(y, m - 1, d);
@@ -590,7 +595,7 @@ function utcDayOfYear(key: string): number {
 
 export function breedForDateKey(key: string): DailyBreed {
   const n = DAILY_BREEDS.length;
-  return DAILY_BREEDS[utcDayOfYear(key) % n]!;
+  return DAILY_BREEDS[dayOfYear(key) % n]!;
 }
 
 export function breedForDay(now = Date.now()): DailyBreed {

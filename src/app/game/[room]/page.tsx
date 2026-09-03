@@ -158,6 +158,11 @@ function RoomInner({
 
   const chat = useRoomChat(game.me.role, profile.username);
   const [chatOpen, setChatOpen] = useState(false);
+  const gameStatus = game.controller?.snapshot.status;
+
+  useEffect(() => {
+    if (gameStatus === "done") setChatOpen(false);
+  }, [gameStatus]);
 
   function toggleChat() {
     setChatOpen((open) => !open);

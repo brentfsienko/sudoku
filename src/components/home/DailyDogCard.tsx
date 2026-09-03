@@ -7,15 +7,18 @@ import { OriginMiniMap } from "@/components/home/OriginMiniMap";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 import {
   breedForDateKey,
-  msUntilNextUtcMidnight,
+  msUntilNextLocalMidnight,
   todayDateKey,
   type BarkKind,
 } from "@/lib/dailyDog/breeds";
 import { hasSeenDailyDog, markDailyDogSeen } from "@/lib/dailyDog/seen";
 
 function useDailyBreed() {
-  const [dayKey, setDayKey] = useState(todayDateKey);
-  const breed = useMemo(() => breedForDateKey(dayKey), [dayKey]);
+  const [dayKey, setDayKey] = useState("");
+  const breed = useMemo(
+    () => (dayKey ? breedForDateKey(dayKey) : null),
+    [dayKey],
+  );
 
   useEffect(() => {
     const tick = () => {
@@ -24,7 +27,7 @@ function useDailyBreed() {
     };
     tick();
     const interval = window.setInterval(tick, 30_000);
-    const midnight = window.setTimeout(tick, msUntilNextUtcMidnight() + 250);
+    const midnight = window.setTimeout(tick, msUntilNextLocalMidnight() + 250);
     return () => {
       window.clearInterval(interval);
       window.clearTimeout(midnight);
@@ -112,6 +115,7 @@ export function DailyDogCard() {
   }, []);
 
   useEffect(() => {
+    if (!dayKey) return;
     setUnseen(!hasSeenDailyDog(dayKey));
     setOpen(false);
   }, [dayKey]);
@@ -131,6 +135,15 @@ export function DailyDogCard() {
     return () => window.removeEventListener("keydown", onKey);
   }, [photoOpen]);
 
+  if (!breed) {
+    return (
+      <section className="mb-5">
+        <h2 className={`${homeSectionTitleClass} mb-2.5`}>Daily Dog</h2>
+        <div className="h-[72px] rounded-md border border-[var(--primary)]/35 bg-[var(--primary-soft)]" />
+      </section>
+    );
+  }
+
   function markSeen() {
     if (!unseen) return;
     markDailyDogSeen(dayKey);
@@ -147,14 +160,14 @@ export function DailyDogCard() {
   }
 
   function onBark() {
-    if (barking) return;
+    if (!breed || barking) return;
     setSaying(false);
     setBarking(true);
     playClip(`/sounds/barks/${breed.bark as BarkKind}.m4a`, audioRef, () => setBarking(false), 2500);
   }
 
   function onSayName() {
-    if (saying) return;
+    if (!breed || saying) return;
     setBarking(false);
     setSaying(true);
     playClip(`/sounds/names/${breed.id}.m4a`, audioRef, () => setSaying(false));

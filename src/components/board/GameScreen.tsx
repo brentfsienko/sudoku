@@ -411,8 +411,6 @@ export function GameScreen({
                 }
               : undefined
           }
-          onToggleChat={onToggleChat}
-          chatUnread={chat?.unread}
           onHome={() => {
             void persistRef.current
               .catch((err) => {

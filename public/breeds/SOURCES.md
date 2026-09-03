@@ -33,7 +33,7 @@ All images from Wikimedia Commons.
 | `newfoundland.jpg` | [Newfoundland_dog_Smoky.jpg](https://commons.wikimedia.org/wiki/File:Newfoundland_dog_Smoky.jpg) | CC BY 2.0 | Flickr user DanDee Shots |
 | `whippet.jpg` | [Fireworks Whippets.jpg](https://commons.wikimedia.org/wiki/File:Fireworks_Whippets.jpg) | CC BY 2.0 | Winky, Vancouver, Canada |
 | `maltese.jpg` | [Maltese_600.jpg](https://commons.wikimedia.org/wiki/File:Maltese_600.jpg) | CC BY-SA 3.0 | Sannse |
-| `saint-bernard.jpg` | [Saint Bernard dog. “Canis lupus familiaris”.jpg](https://commons.wikimedia.org/wiki/File:Saint_Bernard_dog._%E2%80%9CCanis_lupus_familiaris%E2%80%9D.jpg) | CC BY-SA 4.0 | Museum of Veterinary Anatomy FMVZ USP / Wagner Souza e Silva, edited by Rodrigo  |
+| `saint-bernard.jpg` | [St. Bernard dog with barrel.jpg](https://commons.wikimedia.org/wiki/File%3ASt._Bernard_dog_with_barrel.jpg) | CC0 | PxHere |
 | `australian-cattle-dog.jpg` | [Australian Cattle Dog.jpg](https://commons.wikimedia.org/wiki/File:Australian_Cattle_Dog.jpg) | Public domain | Jasperfriendlydog at English Wikipedia |
 | `weimaraner.jpg` | [Weimaraner_wb.jpg](https://commons.wikimedia.org/wiki/File:Weimaraner_wb.jpg) | CC BY-SA 3.0 |  |
 
@@ -44,7 +44,7 @@ All images from Wikimedia Commons.
 | `abruzzo-maremma-sheepdog.jpg` | [Creda-Ovcar-DolenjaVasSenadole.JPG](https://commons.wikimedia.org/wiki/File%3ACreda-Ovcar-DolenjaVasSenadole.JPG) | CC BY 3.0 | Sl-Ziga |
 | `abyssinian-sand-terrier.jpg` | [Africanhairless.jpg](https://commons.wikimedia.org/wiki/File%3AAfricanhairless.jpg) | CC BY-SA 3.0 | Sarah Hartwell |
 | `affenpinscher.jpg` | [2013 Westminster Kennel Club Dog Show- Affenpinscher Joey aka GCH Banana Joe V Tani Kazari (8471258772).jpg](https://commons.wikimedia.org/wiki/File%3A2013_Westminster_Kennel_Club_Dog_Show-_Affenpinscher_Joey_aka_GCH_Banana_Joe_V_Tani_Kazari_%288471258772%29.jpg) | CC BY 2.0 | Kristy May for Pets Advisor www.petful.com - Uploaded at Petful |
-| `afghan-hound.jpg` | [Dog heart (Afghan Hound).jpg](https://commons.wikimedia.org/wiki/File%3ADog_heart_%28Afghan_Hound%29.jpg) | CC BY-SA 4.0 | Museum of Veterinary Anatomy FMVZ USP / Wagner Souza e Silva |
+| `afghan-hound.jpg` | [AKC Helena Fall Dog Show 2011.jpg](https://commons.wikimedia.org/wiki/File%3AAKC_Helena_Fall_Dog_Show_2011.jpg) | CC BY 2.0 | SheltieBoy |
 | `africanis.jpg` | ["Vanya" pure africanis Africanis dog breed.jpg](https://commons.wikimedia.org/wiki/File%3A%22Vanya%22_pure_africanis_Africanis_dog_breed.jpg) | CC BY-SA 4.0 | Aquarius Monk |
 | `aidi.jpg` | [Aidi.jpg](https://commons.wikimedia.org/wiki/File%3AAidi.jpg) | CC BY-SA 3.0 | Unknown authorUnknown author |
 | `airedale-terrier.jpg` | [Airedale terrier head, Josselin 01.jpg](https://commons.wikimedia.org/wiki/File%3AAiredale_terrier_head%2C_Josselin_01.jpg) | CC BY-SA 4.0 | Amélie Tsaag Valren |
@@ -64,7 +64,7 @@ All images from Wikimedia Commons.
 | `american-foxhound.jpg` | [BIR Grupp 6- AMERICAN FOXHOUND, Jääräpää Flikka (23607404123).2.jpg](https://commons.wikimedia.org/wiki/File%3ABIR_Grupp_6-_AMERICAN_FOXHOUND%2C_J%C3%A4%C3%A4r%C3%A4p%C3%A4%C3%A4_Flikka_%2823607404123%29.2.jpg) | CC BY 2.0 | Svenska Mässan from Sweden |
 | `american-hairless-terrier.jpg` | [Helli the american hairless terrier says "Dog trimming? You have got to be joking.".jpg](https://commons.wikimedia.org/wiki/File%3AHelli_the_american_hairless_terrier_says_%22Dog_trimming%3F_You_have_got_to_be_joking.%22.jpg) | CC BY-SA 2.0 | Mace Ojala |
 | `american-leopard-hound.jpg` | [Lep2.jpg](https://commons.wikimedia.org/wiki/File%3ALep2.jpg) | CC0 | DTabCam |
-| `american-pit-bull-terrier.jpg` | [American Pit Bull Terrier dog conformation line art 20191217.jpg](https://commons.wikimedia.org/wiki/File%3AAmerican_Pit_Bull_Terrier_dog_conformation_line_art_20191217.jpg) | CC BY-SA 4.0 | Adventurous36 |
+| `american-pit-bull-terrier.jpg` | [000 American Pit Bull Terrier.jpg](https://commons.wikimedia.org/wiki/File%3A000_American_Pit_Bull_Terrier.jpg) | CC BY 2.0 | https://www.flickr.com/people/geoggirl/ |
 | `american-staffordshire-terrier.jpg` | [Shar Pei × American Staffordshire Terrier dog in Parc naturel régional des Ardennes (DSC05741).jpg](https://commons.wikimedia.org/wiki/File%3AShar_Pei_%C3%97_American_Staffordshire_Terrier_dog_in_Parc_naturel_r%C3%A9gional_des_Ardennes_%28DSC05741%29.jpg) | CC BY 4.0 | Trougnouf (Benoit Brummer) |
 | `american-staghound.jpg` | [Staghound.jpg](https://commons.wikimedia.org/wiki/File%3AStaghound.jpg) | Attribution | Nelsonismyhero |
 | `american-water-spaniel.jpg` | [American water spaniel 02.jpg](https://commons.wikimedia.org/wiki/File%3AAmerican_water_spaniel_02.jpg) | CC BY 2.5 | The original uploader was Wcrowe at English Wikipedia. |
@@ -100,10 +100,10 @@ All images from Wikimedia Commons.
 | `beagle-harrier.jpg` | [Beagle-Harrier-fr.jpg](https://commons.wikimedia.org/wiki/File%3ABeagle-Harrier-fr.jpg) | CC BY 2.0 | K. Kendall |
 | `bearded-collie.jpg` | [Bearded Collie 600.jpg](https://commons.wikimedia.org/wiki/File%3ABearded_Collie_600.jpg) | CC BY-SA 3.0 |  |
 | `beauceron.jpg` | [BeauceronStand.jpg](https://commons.wikimedia.org/wiki/File%3ABeauceronStand.jpg) | CC BY-SA 3.0 de | Stefan Schmitz |
-| `bedlington-terrier.jpg` | [Bedlington Terriers.jpg](https://commons.wikimedia.org/wiki/File%3ABedlington_Terriers.jpg) | CC BY-SA 3.0 | Elf at English Wikipedia |
+| `bedlington-terrier.jpg` | [Bedlington Terrier Dog Show.jpg](https://commons.wikimedia.org/wiki/File%3ABedlington_Terrier_Dog_Show.jpg) | CC BY 2.0 | NatalieMaynor |
 | `belgian-malinois.jpg` | [Malinois Obedience Dog Show Ooty May26 A7CR 10734.jpg](https://commons.wikimedia.org/wiki/File%3AMalinois_Obedience_Dog_Show_Ooty_May26_A7CR_10734.jpg) | CC BY-SA 4.0 | This Photo was taken by Timothy A. Gonsalves.  Feel free to use my photos, but p |
 | `belgian-mastiff.jpg` | [Belgian dogs trained to draw quick-firing guns.JPG](https://commons.wikimedia.org/wiki/File%3ABelgian_dogs_trained_to_draw_quick-firing_guns.JPG) | Public domain | W. E. Mason |
-| `belgian-shepherd.jpg` | [04 - Belgian shepherd dog varieties - Groenendael,Tervuren, Malinois, Laekenois.jpg](https://commons.wikimedia.org/wiki/File%3A04_-_Belgian_shepherd_dog_varieties_-_Groenendael%2CTervuren%2C_Malinois%2C_Laekenois.jpg) | CC BY-SA 4.0 | Various, see description. Compiled by User:Adventurous36 |
+| `belgian-shepherd.jpg` | [European Groenendael male.jpg](https://commons.wikimedia.org/wiki/File%3AEuropean_Groenendael_male.jpg) | CC BY-SA 4.0 | Nachoferreyra |
 | `bergamasco-shepherd.jpg` | [Bergamasco 600.jpg](https://commons.wikimedia.org/wiki/File%3ABergamasco_600.jpg) | CC BY-SA 3.0 |  |
 | `berner-laufhund.jpg` | [Wystawa w Częstochowie zwycięzcy 09.10.10 3p.jpg](https://commons.wikimedia.org/wiki/File%3AWystawa_w_Cz%C4%99stochowie_zwyci%C4%99zcy_09.10.10_3p.jpg) | CC BY-SA 3.0 | Przykuta |
 | `bichon-fris.jpg` | [Bichon Frisé puppy head.jpg](https://commons.wikimedia.org/wiki/File%3ABichon_Fris%C3%A9_puppy_head.jpg) | CC BY-SA 4.0 | Iúile |
@@ -200,11 +200,11 @@ All images from Wikimedia Commons.
 | `danish-spitz.jpg` | [Danish spitz.jpg](https://commons.wikimedia.org/wiki/File%3ADanish_spitz.jpg) | CC BY-SA 4.0 | Charliecatnip |
 | `danish-swedish-farmdog.jpg` | [Danish Farm Dog1604fxcr wb.jpg](https://commons.wikimedia.org/wiki/File%3ADanish_Farm_Dog1604fxcr_wb.jpg) | CC BY-SA 3.0 | Ellen Levy Finch (User:Elf) |
 | `deutsche-bracke.jpg` | [DeutscheBracke.jpg](https://commons.wikimedia.org/wiki/File%3ADeutscheBracke.jpg) | CC BY-SA 2.0 | Rumo |
-| `dobermann.jpg` | [Dobermann dog. “Canis lupus familiaris”.jpg](https://commons.wikimedia.org/wiki/File%3ADobermann_dog._%E2%80%9CCanis_lupus_familiaris%E2%80%9D.jpg) | CC BY-SA 4.0 | Museum of Veterinary Anatomy FMVZ USP / Wagner Souza e Silva, edited by Rodrigo  |
+| `dobermann.jpg` | [Dobermann Dog Show 2026 Ooty May26 A7CR 10792.jpg](https://commons.wikimedia.org/wiki/File%3ADobermann_Dog_Show_2026_Ooty_May26_A7CR_10792.jpg) | CC BY-SA 4.0 | This Photo was taken by Timothy A. Gonsalves.  Feel free to use my photos, but p |
 | `dogo-argentino.jpg` | [0Dogo-argentino-22122251920.jpg](https://commons.wikimedia.org/wiki/File%3A0Dogo-argentino-22122251920.jpg) | CC0 | joseltr |
 | `dogo-sardesco.jpg` | [Lagotto im Winter.JPG](https://commons.wikimedia.org/wiki/File%3ALagotto_im_Winter.JPG) | Public domain | Hofec |
 | `dogue-brasileiro.jpg` | [Dogue Brasileiro Orelha Cortada.jpg](https://commons.wikimedia.org/wiki/File%3ADogue_Brasileiro_Orelha_Cortada.jpg) | CC BY-SA 4.0 | CS1982 |
-| `dogue-de-bordeaux.jpg` | [Dog heart (Dogue de Bordeaux).jpg](https://commons.wikimedia.org/wiki/File%3ADog_heart_%28Dogue_de_Bordeaux%29.jpg) | CC BY-SA 4.0 | Museum of Veterinary Anatomy FMVZ USP / Wagner Souza e Silva |
+| `dogue-de-bordeaux.jpg` | [Dogue de Bordeaux serious.jpg](https://commons.wikimedia.org/wiki/File%3ADogue_de_Bordeaux_serious.jpg) | CC BY 2.0 | spaceodissey |
 | `double-nosed-andean-tiger-hound.jpg` | [Peruvian Hairless Dog 1.jpg](https://commons.wikimedia.org/wiki/File%3APeruvian_Hairless_Dog_1.jpg) | CC BY-SA 3.0 | Hookery=Yuri Hooker |
 | `drentse-patrijshond.jpg` | [Drentse Patrijshond.jpg](https://commons.wikimedia.org/wiki/File%3ADrentse_Patrijshond.jpg) | CC BY-SA 3.0 | Eric Broeksma |
 | `drever.jpg` | [Drever NUCh Tanjo.jpg](https://commons.wikimedia.org/wiki/File%3ADrever_NUCh_Tanjo.jpg) | CC BY-SA 3.0 | Per Killingmo. Norway (dog owner) |
@@ -219,9 +219,9 @@ All images from Wikimedia Commons.
 | `english-cocker-spaniel.jpg` | [Cocker spaniel angielski zlotyy.jpg](https://commons.wikimedia.org/wiki/File%3ACocker_spaniel_angielski_zlotyy.jpg) | CC BY-SA 3.0 | Pleple2000 |
 | `english-foxhound.jpg` | [English foxhound.jpg](https://commons.wikimedia.org/wiki/File%3AEnglish_foxhound.jpg) | CC BY-SA 4.0 | Canarian |
 | `english-mastiff.jpg` | [English Mastiff at Cow Palace Dog Show (4320429281).jpg](https://commons.wikimedia.org/wiki/File%3AEnglish_Mastiff_at_Cow_Palace_Dog_Show_%284320429281%29.jpg) | CC BY-SA 2.0 | Fido Factor from USA |
-| `english-pointer.jpg` | [Dog heart (Pointer).jpg](https://commons.wikimedia.org/wiki/File%3ADog_heart_%28Pointer%29.jpg) | CC BY-SA 4.0 | Museum of Veterinary Anatomy FMVZ USP / Wagner Souza e Silva |
+| `english-pointer.jpg` | [English Pointer in Riga 1.JPG](https://commons.wikimedia.org/wiki/File%3AEnglish_Pointer_in_Riga_1.JPG) | CC BY-SA 3.0 | Томасина |
 | `english-setter.jpg` | [Count Noble.jpg](https://commons.wikimedia.org/wiki/File%3ACount_Noble.jpg) | Public domain | Unknown authorUnknown author |
-| `english-shepherd.jpg` | [German Shepherd dog. “Canis lupus familiaris”.jpg](https://commons.wikimedia.org/wiki/File%3AGerman_Shepherd_dog._%E2%80%9CCanis_lupus_familiaris%E2%80%9D.jpg) | CC BY-SA 4.0 | Museum of Veterinary Anatomy FMVZ USP / Wagner Souza e Silva edited by Rodrigo T |
+| `english-shepherd.jpg` | [Black and Tan English Shepherd, 3 Year Old Female.jpg](https://commons.wikimedia.org/wiki/File%3ABlack_and_Tan_English_Shepherd%2C_3_Year_Old_Female.jpg) | CC BY-SA 4.0 | Tony Bierman |
 | `english-springer-spaniel.jpg` | [Lexi the English Springer Spaniel.png](https://commons.wikimedia.org/wiki/File%3ALexi_the_English_Springer_Spaniel.png) | CC0 | Unknown authorUnknown author |
 | `english-toy-terrier.jpg` | [English Toy Terrier 600 01.jpg](https://commons.wikimedia.org/wiki/File%3AEnglish_Toy_Terrier_600_01.jpg) | CC BY-SA 3.0 | sannse (contrast by Pleple2000) |
 | `english-water-spaniel.jpg` | [113. Water Spaniel.JPG](https://commons.wikimedia.org/wiki/File%3A113._Water_Spaniel.JPG) | Public domain | Stonehenge (John Henry Walsh) |
@@ -234,9 +234,9 @@ All images from Wikimedia Commons.
 | `field-spaniel.jpg` | [Field spaniel 581.jpg](https://commons.wikimedia.org/wiki/File%3AField_spaniel_581.jpg) | CC BY-SA 3.0 | Pleple2000 |
 | `fila-brasileiro.jpg` | [Cão Original Fila Brasileiro - Dragão.jpg](https://commons.wikimedia.org/wiki/File%3AC%C3%A3o_Original_Fila_Brasileiro_-_Drag%C3%A3o.jpg) | CC BY-SA 4.0 | AJorgeSC |
 | `finnish-hound.jpg` | [Finnish Hound from 1915.JPG](https://commons.wikimedia.org/wiki/File%3AFinnish_Hound_from_1915.JPG) | Public domain | not specified (except those with signature on image) |
-| `finnish-lapphund.jpg` | [Finnish Lapphund group.jpg](https://commons.wikimedia.org/wiki/File%3AFinnish_Lapphund_group.jpg) | CC BY-SA 4.0 | Canarian |
+| `finnish-lapphund.jpg` | [Finnish Lapphund Kyky.jpg](https://commons.wikimedia.org/wiki/File%3AFinnish_Lapphund_Kyky.jpg) | Public domain | Apdevries at English Wikipedia |
 | `finnish-spitz.jpg` | [Finnish Spitz 600.jpg](https://commons.wikimedia.org/wiki/File%3AFinnish_Spitz_600.jpg) | CC BY-SA 3.0 |  |
-| `flat-coated-retriever.jpg` | [Flat-Coated Retriever in 1881.jpg](https://commons.wikimedia.org/wiki/File%3AFlat-Coated_Retriever_in_1881.jpg) | Public domain | Artist unknown, black and white engraving published in 'The Illustrated Book of  |
+| `flat-coated-retriever.jpg` | [Flat-Coated Retriever large.jpg](https://commons.wikimedia.org/wiki/File%3AFlat-Coated_Retriever_large.jpg) | CC BY-SA 3.0 |  |
 | `formosan-mountain-dog.jpg` | [Formosan nina.jpg](https://commons.wikimedia.org/wiki/File%3AFormosan_nina.jpg) | CC BY-SA 3.0 | Aechris at English Wikipedia |
 | `fox-terrier.jpg` | [A fox terrier in San Francisco dog park.jpg](https://commons.wikimedia.org/wiki/File%3AA_fox_terrier_in_San_Francisco_dog_park.jpg) | CC BY-SA 4.0 | Nancy Wong |
 | `fran-ais-blanc-et-orange.jpg` | [Grand Anglo-Français Blanc Et Orange.jpg](https://commons.wikimedia.org/wiki/File%3AGrand_Anglo-Fran%C3%A7ais_Blanc_Et_Orange.jpg) | CC BY-SA 3.0 | Desaix83, d'après le travail de Alephalpha |
@@ -256,9 +256,9 @@ not specified (except those with signature on image) |
 | `german-spitz.jpg` | [German Spitz 01.jpg](https://commons.wikimedia.org/wiki/File%3AGerman_Spitz_01.jpg) | CC BY-SA 4.0 | Sinikka Halme |
 | `german-spitz-mittel.jpg` | [GSMittel.jpg](https://commons.wikimedia.org/wiki/File%3AGSMittel.jpg) | Public domain | Original uploader was PJLHowell at en.wikipedia |
 | `german-wirehaired-pointer.jpg` | [AKC German Wirehaired Pointer Dog Show 2013.jpg](https://commons.wikimedia.org/wiki/File%3AAKC_German_Wirehaired_Pointer_Dog_Show_2013.jpg) | CC BY 2.0 | SheltieBoy |
-| `giant-schnauzer.jpg` | [Dog coat variation.png](https://commons.wikimedia.org/wiki/File%3ADog_coat_variation.png) | CC0 | Mary Bloom, American Kennel Club |
+| `giant-schnauzer.jpg` | [Stablemaster's NORTHERN HOPE(Poznan2006).jpg](https://commons.wikimedia.org/wiki/File%3AStablemaster%27s_NORTHERN_HOPE%28Poznan2006%29.jpg) | CC BY-SA 3.0 | No machine-readable author provided. Kkrzysiu o2 assumed (based on copyright cla |
 | `glen-of-imaal-terrier.jpg` | [Irish glen of imaal terrier pl.jpg](https://commons.wikimedia.org/wiki/File%3AIrish_glen_of_imaal_terrier_pl.jpg) | CC BY-SA 4.0 | Pleple2000 |
-| `gordon-setter.jpg` | [Gordon Setter puppies.JPG](https://commons.wikimedia.org/wiki/File%3AGordon_Setter_puppies.JPG) | Public domain | SJYoung1970 |
+| `gordon-setter.jpg` | [Gordon Setter Teef.jpg](https://commons.wikimedia.org/wiki/File%3AGordon_Setter_Teef.jpg) | CC BY 3.0 | R. Arkesteyn |
 | `gos-rater-valenci.jpg` | [Ratonero valenciano dunkel.jpg](https://commons.wikimedia.org/wiki/File%3ARatonero_valenciano_dunkel.jpg) | Public domain | Monimex |
 | `grand-griffon-vend-en.jpg` | [G Basset Griffon Vendeen 600.jpg](https://commons.wikimedia.org/wiki/File%3AG_Basset_Griffon_Vendeen_600.jpg) | CC BY-SA 3.0 | Original uploader was Sannse at en.wikipedia |
 | `great-anglo-french-tricolour-hound.jpg` | [Grand anglo francais tricol mod.jpg](https://commons.wikimedia.org/wiki/File%3AGrand_anglo_francais_tricol_mod.jpg) | CC BY-SA 3.0 | derivative work: Caronna (talk)
@@ -271,10 +271,10 @@ Grand_anglo_francais_tricol.jpg: Alephalpha |
 derivative work: Ank |
 | `greek-shepherd.jpg` | [Greek shepherd male.jpg](https://commons.wikimedia.org/wiki/File%3AGreek_shepherd_male.jpg) | CC BY-SA 4.0 | Gzac2016 |
 | `greenland-dog.jpg` | [Greenland 467 (35130903436).jpg](https://commons.wikimedia.org/wiki/File%3AGreenland_467_%2835130903436%29.jpg) | CC BY-SA 2.0 | Markus Trienke |
-| `griffon.jpg` | [Bather with a Griffon Dog, Lise on the Bank of the Seine, by Pierre-Auguste Renoir, 1870, oil on canvas - Museu de Arte de São Paulo - DSC07239.jpg](https://commons.wikimedia.org/wiki/File%3ABather_with_a_Griffon_Dog%2C_Lise_on_the_Bank_of_the_Seine%2C_by_Pierre-Auguste_Renoir%2C_1870%2C_oil_on_canvas_-_Museu_de_Arte_de_S%C3%A3o_Paulo_-_DSC07239.jpg) | Public domain | Pierre-Auguste Renoir |
+| `griffon.jpg` | [Wirehaired Pointing Griffon - GCH Glacier's Gertie Queen Of Spades (16418078089).jpg](https://commons.wikimedia.org/wiki/File%3AWirehaired_Pointing_Griffon_-_GCH_Glacier%27s_Gertie_Queen_Of_Spades_%2816418078089%29.jpg) | CC BY 2.0 | Pets Adviser from Brooklyn, USA |
 | `griffon-bruxellois.jpg` | [Petit-brabancon-gaystock-le-pas-de-tout.jpg](https://commons.wikimedia.org/wiki/File%3APetit-brabancon-gaystock-le-pas-de-tout.jpg) | CC BY-SA 3.0 | Hans Bleeker |
 | `griffon-nivernais.jpg` | [Griffon nivernais.jpg](https://commons.wikimedia.org/wiki/File%3AGriffon_nivernais.jpg) | CC BY-SA 3.0 | Alephalpha |
-| `groenendael.jpg` | [04 - Belgian shepherd dog varieties - Groenendael,Tervuren, Malinois, Laekenois.jpg](https://commons.wikimedia.org/wiki/File%3A04_-_Belgian_shepherd_dog_varieties_-_Groenendael%2CTervuren%2C_Malinois%2C_Laekenois.jpg) | CC BY-SA 4.0 | Various, see description. Compiled by User:Adventurous36 |
+| `groenendael.jpg` | [Belgian Shepherd Groenendael portrait.jpg](https://commons.wikimedia.org/wiki/File%3ABelgian_Shepherd_Groenendael_portrait.jpg) | CC BY-SA 2.0 | Philco Ford |
 | `gull-dong.jpg` | [13 months old Male Bully Kutta.jpg](https://commons.wikimedia.org/wiki/File%3A13_months_old_Male_Bully_Kutta.jpg) | CC BY-SA 3.0 | Stephany Ruso |
 | `gull-terr.jpg` | [GULL TERR (PAKISTANI BULL TERRIER).jpg](https://commons.wikimedia.org/wiki/File%3AGULL_TERR_%28PAKISTANI_BULL_TERRIER%29.jpg) | CC BY-SA 4.0 | M Waqas Warsi |
 | `hairless-dog.jpg` | [11-Peruvian Hairless Dog-nX-1.jpg](https://commons.wikimedia.org/wiki/File%3A11-Peruvian_Hairless_Dog-nX-1.jpg) | CC BY-SA 4.0 | PsamatheM |
@@ -322,7 +322,7 @@ derivative work: Ank |
 | `karelian-bear-dog.jpg` | [Karelian Bear Dog heterochromia.jpg](https://commons.wikimedia.org/wiki/File%3AKarelian_Bear_Dog_heterochromia.jpg) | CC BY-SA 3.0 | BoffoHijinx |
 | `karelo-finnish-laika.jpg` | [Karelo Finnish Laika.jpg](https://commons.wikimedia.org/wiki/File%3AKarelo_Finnish_Laika.jpg) | CC BY 2.5 | Павел Трофимов (Pavel Trofimov) |
 | `karst-shepherd.jpg` | [Karst Shepherd.jpg](https://commons.wikimedia.org/wiki/File%3AKarst_Shepherd.jpg) | CC BY-SA 4.0 | Canarian |
-| `kazakh-tazy.jpg` | [Statue of Kazakh Tazy dogs.jpg](https://commons.wikimedia.org/wiki/File%3AStatue_of_Kazakh_Tazy_dogs.jpg) | CC BY 4.0 | Graphique38 |
+| `kazakh-tazy.jpg` | [Kazakintazitjarekvisiitta.jpg](https://commons.wikimedia.org/wiki/File%3AKazakintazitjarekvisiitta.jpg) | CC BY 4.0 | Canarian |
 | `keeshond.jpg` | [Keeshond dog (8109958931).jpg](https://commons.wikimedia.org/wiki/File%3AKeeshond_dog_%288109958931%29.jpg) | CC BY 2.0 | Pets Adviser from Brooklyn, USA |
 | `kerry-beagle.jpg` | [Kerry Beagle.jpg](https://commons.wikimedia.org/wiki/File%3AKerry_Beagle.jpg) | CC BY-SA 3.0 de | Martina Dominick |
 | `kerry-blue-terrier.jpg` | [Kerry blue terrier pl.jpg](https://commons.wikimedia.org/wiki/File%3AKerry_blue_terrier_pl.jpg) | CC BY-SA 4.0 | Pleple2000 |
@@ -339,7 +339,7 @@ derivative work: Ank |
 | `kromfohrl-nder.jpg` | [Kromfohrlaender glatt.jpg](https://commons.wikimedia.org/wiki/File%3AKromfohrlaender_glatt.jpg) | CC BY-SA 3.0 |  |
 | `kuvasz.jpg` | [2-kuvasz.jpg](https://commons.wikimedia.org/wiki/File%3A2-kuvasz.jpg) | CC BY-SA 3.0 | Czimbalmos.de |
 | `k-nigsberger-paukenhund.jpg` | [Paukenhund.JPG](https://commons.wikimedia.org/wiki/File%3APaukenhund.JPG) | Public domain | Postkarte |
-| `laekenois.jpg` | [04 - Belgian shepherd dog varieties - Groenendael,Tervuren, Malinois, Laekenois.jpg](https://commons.wikimedia.org/wiki/File%3A04_-_Belgian_shepherd_dog_varieties_-_Groenendael%2CTervuren%2C_Malinois%2C_Laekenois.jpg) | CC BY-SA 4.0 | Various, see description. Compiled by User:Adventurous36 |
+| `laekenois.jpg` | [Belgian Laekenois 600.jpg](https://commons.wikimedia.org/wiki/File%3ABelgian_Laekenois_600.jpg) | CC BY-SA 3.0 |  |
 | `lagotto-romagnolo.jpg` | [Lagotto Romagnolo.jpg](https://commons.wikimedia.org/wiki/File%3ALagotto_Romagnolo.jpg) | CC BY-SA 3.0 |  |
 | `lancashire-heeler.jpg` | [Grupp 1, LANCASHIRE HEELER, NO UCH NO V-14 NO V-15 SE UCH Ståhlskyttens Longed For Antony (24284065606).jpg](https://commons.wikimedia.org/wiki/File%3AGrupp_1%2C_LANCASHIRE_HEELER%2C_NO_UCH_NO_V-14_NO_V-15_SE_UCH_St%C3%A5hlskyttens_Longed_For_Antony_%2824284065606%29.jpg) | CC BY 2.0 | Svenska Mässan from Sweden |
 | `landseer.jpg` | [Landseer.jpg](https://commons.wikimedia.org/wiki/File%3ALandseer.jpg) | CC BY-SA 3.0 |  |
@@ -365,7 +365,7 @@ derivative work: Ank |
 | `miniature-pinscher.jpg` | [Miniature Pinscher male.jpg](https://commons.wikimedia.org/wiki/File%3AMiniature_Pinscher_male.jpg) | CC BY-SA 4.0 | Matthew T Rader |
 | `miniature-schnauzer.jpg` | [AKC Miniature Schnauzer Dog Show 2013.jpg](https://commons.wikimedia.org/wiki/File%3AAKC_Miniature_Schnauzer_Dog_Show_2013.jpg) | CC BY 2.0 | SheltieBoy |
 | `mioritic.jpg` | [Mioritic.jpg](https://commons.wikimedia.org/wiki/File%3AMioritic.jpg) | CC BY-SA 3.0 | Summer06 |
-| `molossus-of-epirus.jpg` | [Molossus molossus molossus 1847.jpg](https://commons.wikimedia.org/wiki/File%3AMolossus_molossus_molossus_1847.jpg) | Public domain | in Alcide Dessalines d'Orbigny |
+| `molossus-of-epirus.jpg` | [Greek shepherd male.jpg](https://commons.wikimedia.org/wiki/File%3AGreek_shepherd_male.jpg) | CC BY-SA 4.0 | Gzac2016 |
 | `mongrel.jpg` | [Dog hybrid from Venezuela.jpg](https://commons.wikimedia.org/wiki/File%3ADog_hybrid_from_Venezuela.jpg) | CC BY-SA 3.0 | Wilfredor |
 | `montenegrin-mountain-hound.jpg` | [Montenegrin Mountain Hound 2.jpg](https://commons.wikimedia.org/wiki/File%3AMontenegrin_Mountain_Hound_2.jpg) | CC BY-SA 4.0 | Canarian |
 | `morkie.jpg` | [Niki-morkie-designer-dog.jpg](https://commons.wikimedia.org/wiki/File%3ANiki-morkie-designer-dog.jpg) | CC BY-SA 3.0 | Ilmionome (Satyricon86 (talk)) |
@@ -375,7 +375,7 @@ derivative work: Ank |
 | `neapolitan-mastiff.jpg` | [Neapolitan Mastiff Male Head.JPG](https://commons.wikimedia.org/wiki/File%3ANeapolitan_Mastiff_Male_Head.JPG) | CC BY-SA 3.0 | Philip Thompson |
 | `nenets-herding-laika.jpg` | [Ненецкая лайка кобель2.jpg](https://commons.wikimedia.org/wiki/File%3A%D0%9D%D0%B5%D0%BD%D0%B5%D1%86%D0%BA%D0%B0%D1%8F_%D0%BB%D0%B0%D0%B9%D0%BA%D0%B0_%D0%BA%D0%BE%D0%B1%D0%B5%D0%BB%D1%8C2.jpg) | CC BY-SA 4.0 | Sergey.vlad.popov |
 | `new-guinea-singing-dog.jpg` | [New Guinea Singing Dog on trail-Cropped.jpg](https://commons.wikimedia.org/wiki/File%3ANew_Guinea_Singing_Dog_on_trail-Cropped.jpg) | CC BY 2.0 | Patti McNeal |
-| `newfoundland-dog.jpg` | [Armand de Montlezun (1841-1914) Baculum terre-neuve.jpg](https://commons.wikimedia.org/wiki/File%3AArmand_de_Montlezun_%281841-1914%29_Baculum_terre-neuve.jpg) | CC BY-SA 4.0 | Didier Descouens |
+| `newfoundland-dog.jpg` | [Newfoundland dog Smoky.jpg](https://commons.wikimedia.org/wiki/File%3ANewfoundland_dog_Smoky.jpg) | CC BY 2.0 | Flickr user DanDee Shots |
 | `norfolk-terrier.jpg` | [Charmonty Norfolkterrier.jpg](https://commons.wikimedia.org/wiki/File%3ACharmonty_Norfolkterrier.jpg) | Public domain | Robin Wellmann |
 | `norrbottenspets.jpg` | [Nordic Spitz.jpg](https://commons.wikimedia.org/wiki/File%3ANordic_Spitz.jpg) | CC BY-SA 3.0 |  |
 | `northern-inuit-dog.jpg` | [Northern Inuit Dog.jpg](https://commons.wikimedia.org/wiki/File%3ANorthern_Inuit_Dog.jpg) | CC BY-SA 3.0 | Malfuros |
