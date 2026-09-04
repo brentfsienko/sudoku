@@ -63,7 +63,7 @@ export function IosInstallCoach({ ready, accountSeenPlatforms, onFinished }: Pro
     if (open) return;
 
     const p = getInstallPlatform();
-    if (!p) {
+    if (!p || p === "desktop-chrome") {
       finish();
       return;
     }

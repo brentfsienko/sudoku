@@ -48,7 +48,9 @@ export function getInstallPlatform(): InstallPlatform | null {
     return /CriOS/.test(ua()) ? "ios-chrome" : "ios-safari";
   }
   if (!isChrome()) return null;
-  return isAndroid() ? "android-chrome" : "desktop-chrome";
+  // Desktop web: never prompt to download / install. Phones still get the coach.
+  if (!isAndroid()) return null;
+  return "android-chrome";
 }
 
 export function hasInstallCoachCompleted(
