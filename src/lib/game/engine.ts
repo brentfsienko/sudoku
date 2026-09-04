@@ -58,6 +58,26 @@ export function relatedCells(index: number): number[] {
   return RELATED[index];
 }
 
+/** Remove `digit` from notes in every cell that shares a row, column, or box. */
+export function stripNoteFromPeers(
+  cells: BoardCells,
+  index: number,
+  digit: number,
+): BoardCells {
+  let next = cells;
+  for (const peer of relatedCells(index)) {
+    const peerCell = next[peer];
+    if (peerCell && peerCell.notes.includes(digit)) {
+      if (next === cells) next = { ...cells };
+      next[peer] = {
+        ...peerCell,
+        notes: peerCell.notes.filter((n) => n !== digit),
+      };
+    }
+  }
+  return next;
+}
+
 export function isGiven(puzzle: string, index: number): boolean {
   const ch = puzzle[index];
   return ch !== "." && ch !== "0";

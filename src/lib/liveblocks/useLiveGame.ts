@@ -195,12 +195,22 @@ export function useLiveGame(opts: {
       const target = pickHintCell(puzzle, solution, board, preferred);
       if (target == null) return null;
       const prev = cells.get(String(target));
+      const digit = solutionDigit(solution, target);
       cells.set(String(target), {
-        value: solutionDigit(solution, target),
+        value: digit,
         notes: [],
         owner: role,
         correct: true,
       });
+      for (const peer of relatedCells(target)) {
+        const peerCell = cells.get(String(peer));
+        if (peerCell && peerCell.notes.includes(digit)) {
+          cells.set(String(peer), {
+            ...peerCell,
+            notes: peerCell.notes.filter((n) => n !== digit),
+          });
+        }
+      }
       m.set("hintsUsed", m.get("hintsUsed") + 1);
       const board2 = readBoard(cells);
       if (isSolved(puzzle, solution, board2)) {

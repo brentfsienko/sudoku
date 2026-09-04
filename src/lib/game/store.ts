@@ -15,7 +15,7 @@ import {
   isGiven,
   isSolved,
   pickHintCell,
-  relatedCells,
+  stripNoteFromPeers,
   solutionDigit,
 } from "./engine";
 
@@ -144,18 +144,10 @@ function reducer(state: State, action: Action): State {
       const entry: CellEntry = { value: digit, notes: [], owner: role, correct };
       const frame = frameFor(s, index);
 
-      const updatedCells: BoardCells = { ...s.cells, [index]: entry };
+      let updatedCells: BoardCells = { ...s.cells, [index]: entry };
       // Only clear matching notes in the same row/col/box when the fill is correct.
       if (correct) {
-        for (const peer of relatedCells(index)) {
-          const peerCell = updatedCells[peer];
-          if (peerCell && peerCell.notes.includes(digit)) {
-            updatedCells[peer] = {
-              ...peerCell,
-              notes: peerCell.notes.filter((n) => n !== digit),
-            };
-          }
-        }
+        updatedCells = stripNoteFromPeers(updatedCells, index, digit);
       }
 
       let next: GameSnapshot = {
@@ -185,15 +177,16 @@ function reducer(state: State, action: Action): State {
       const target = pickHintCell(s.puzzle, s.solution, s.cells, action.preferred);
       if (target == null) return state;
       const frame = frameFor(s, target);
+      const digit = solutionDigit(s.solution, target);
       const entry: CellEntry = {
-        value: solutionDigit(s.solution, target),
+        value: digit,
         notes: [],
         owner: action.role,
         correct: true,
       };
       let next: GameSnapshot = {
         ...s,
-        cells: { ...s.cells, [target]: entry },
+        cells: stripNoteFromPeers({ ...s.cells, [target]: entry }, target, digit),
         hintsUsed: s.hintsUsed + 1,
       };
       next = checkFinished(next);
