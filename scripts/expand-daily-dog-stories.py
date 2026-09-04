@@ -582,6 +582,9 @@ def overlaps(fact: str, opener: str) -> bool:
 
 
 def two_paragraphs(name: str, origin: str, extract: str) -> str:
+    raise SystemExit(
+        "job-category templates are retired; run scripts/unique-daily-dog-stories.py"
+    )
     job = detect_job(name, origin, extract)
     place = place_name(origin)
     opener = pick(OPENERS[job], name).format(name=name, place=place)
