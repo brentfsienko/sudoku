@@ -12,15 +12,31 @@ export type GameFinishEvent = {
   mistakes: number;
 };
 
+export type GameStartEvent = {
+  mode: GameFinishMode;
+  difficulty: string;
+};
+
+/**
+ * Fire-and-forget game-start metric → `/api/metrics/game-start`.
+ * Shows up in Vercel Runtime Logs (search `[metric] game_start`).
+ */
+export function trackGameStart(event: GameStartEvent): void {
+  void sendMetric("/api/metrics/game-start", event);
+}
+
 /**
  * Fire-and-forget game-finish metric → `/api/metrics/game-finish`.
  * Shows up in Vercel Runtime Logs on Hobby (search `[metric] game_finish`).
  */
 export function trackGameFinish(event: GameFinishEvent): void {
-  void sendGameFinish(event);
+  void sendMetric("/api/metrics/game-finish", event);
 }
 
-async function sendGameFinish(event: GameFinishEvent): Promise<void> {
+async function sendMetric(
+  path: string,
+  event: GameStartEvent | GameFinishEvent,
+): Promise<void> {
   try {
     const sb = getSupabase();
     const session = (await sb?.auth.getSession())?.data.session ?? null;
@@ -32,7 +48,7 @@ async function sendGameFinish(event: GameFinishEvent): Promise<void> {
       headers.Authorization = `Bearer ${session.access_token}`;
     }
 
-    await fetch("/api/metrics/game-finish", {
+    await fetch(path, {
       method: "POST",
       headers,
       body: JSON.stringify({ ...event, userId }),

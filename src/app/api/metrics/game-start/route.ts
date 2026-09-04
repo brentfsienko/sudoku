@@ -5,15 +5,12 @@ import { GAME_MODES, metricUserId } from "../shared";
 type Body = {
   userId?: string;
   mode?: string;
-  solved?: boolean;
   difficulty?: string;
-  elapsedSeconds?: number;
-  mistakes?: number;
 };
 
 /**
- * Logs a game-finish event for Vercel Runtime Logs (Hobby-compatible).
- * Also best-effort tracks via Web Analytics custom events (Pro dashboard only).
+ * Logs a game-start event for Vercel Runtime Logs (Hobby-compatible).
+ * Search `[metric] game_start`.
  */
 export async function POST(request: Request) {
   let body: Body = {};
@@ -29,33 +26,19 @@ export async function POST(request: Request) {
   }
 
   const userId = await metricUserId(request, body.userId);
-  const solved = Boolean(body.solved);
   const difficulty = String(body.difficulty ?? "unknown").slice(0, 32);
-  const elapsedSeconds = Math.max(
-    0,
-    Math.floor(Number(body.elapsedSeconds) || 0),
-  );
-  const mistakes = Math.max(0, Math.floor(Number(body.mistakes) || 0));
 
   const payload = {
-    event: "game_finish",
+    event: "game_start",
     userId,
     mode,
-    solved,
     difficulty,
-    elapsedSeconds,
-    mistakes,
   };
 
-  // Searchable in Vercel → Project → Logs (all plans, including Hobby).
-  console.log("[metric] game_finish", JSON.stringify(payload));
+  console.log("[metric] game_start", JSON.stringify(payload));
 
-  // Custom events only appear in the Analytics UI on Pro+. Safe no-op on Hobby.
   try {
-    await track("GameFinish", {
-      userId,
-      mode,
-    });
+    await track("GameStart", { userId, mode });
   } catch {
     // Ignore Analytics failures.
   }

@@ -33,6 +33,7 @@ import {
 import { playerColor } from "@/lib/theme/dogs";
 import {
   trackGameFinish,
+  trackGameStart,
   type GameFinishMode,
 } from "@/lib/analytics/gameFinish";
 
@@ -179,13 +180,31 @@ export function GameScreen({
   }, [solved, mode, opponent, contrib, me.role]);
 
   const finishReported = useRef(false);
+  const startReported = useRef(false);
   const persistRef = useRef<Promise<void>>(Promise.resolve());
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
 
   useEffect(() => {
     finishReported.current = false;
+    startReported.current = false;
   }, [snapshot.puzzle, snapshot.startedAt]);
+
+  useEffect(() => {
+    if (startReported.current) return;
+    if (snapshot.status === "waiting" || snapshot.status === "done") return;
+    startReported.current = true;
+    trackGameStart({
+      mode: finishAnalyticsMode,
+      difficulty: snapshot.difficulty,
+    });
+  }, [
+    snapshot.puzzle,
+    snapshot.startedAt,
+    snapshot.status,
+    snapshot.difficulty,
+    finishAnalyticsMode,
+  ]);
 
   useLayoutEffect(() => {
     if (!done || finishReported.current) return;
