@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { RoomChatPanel } from "./RoomChatPanel";
+import { useKeyboardInset } from "@/lib/layout/useKeyboardInset";
 import type { RoomChatReturn } from "@/lib/liveblocks/useRoomChat";
 import type { PlayerRole } from "@/lib/game/types";
 
@@ -25,6 +26,7 @@ export function ChatSheet({ chat, myRole, onClose }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const keyboardInset = useKeyboardInset();
 
   useEffect(() => {
     setMounted(true);
@@ -92,9 +94,18 @@ export function ChatSheet({ chat, myRole, onClose }: Props) {
       />
 
       <div
-        className={`absolute inset-x-4 z-10 mx-auto max-w-md overflow-hidden rounded-lg bg-white shadow-xl ${closing ? "animate-sheet-down" : "animate-sheet-up"}`}
+        className={`absolute inset-x-4 z-10 mx-auto flex max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-xl ${closing ? "animate-sheet-down" : "animate-sheet-up"}`}
         style={{
-          bottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
+          bottom:
+            keyboardInset > 0
+              ? keyboardInset + 8
+              : "max(1rem, env(safe-area-inset-bottom, 0px))",
+          height: 360,
+          maxHeight:
+            keyboardInset > 0
+              ? `calc(100% - ${keyboardInset + 16}px)`
+              : 360,
+          transition: "bottom 0.22s ease-out, max-height 0.22s ease-out",
         }}
         onClick={(e) => e.stopPropagation()}
       >

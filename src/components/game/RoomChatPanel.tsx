@@ -60,7 +60,7 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 360 }}>
+    <div className="flex h-full min-h-0 flex-col">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--surface-soft)] px-4 py-3">
         <span className="font-display text-sm font-extrabold text-[var(--foreground)]">Chat</span>
