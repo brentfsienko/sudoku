@@ -192,7 +192,7 @@ export function GameScreen({
 
   useEffect(() => {
     if (startReported.current) return;
-    if (snapshot.status === "waiting" || snapshot.status === "done") return;
+    if (snapshot.status === "lobby" || snapshot.status === "done") return;
     startReported.current = true;
     trackGameStart({
       mode: finishAnalyticsMode,
