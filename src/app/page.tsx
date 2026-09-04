@@ -339,8 +339,47 @@ function MeTab({
   coachmarkStep?: import("@/lib/onboarding").CoachmarkStep | null;
   onCoachmarkDismiss?: () => void;
 }) {
+  const online = useOnline();
   const { profile, solo, multi, history } = data;
   const [statsTab, setStatsTab] = useState<"solo" | "multi">("solo");
+
+  if (!userData.authConfigured) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
+        <p className="text-sm text-[var(--muted)]">
+          Profiles need Supabase to be configured on this deployment.
+        </p>
+      </div>
+    );
+  }
+
+  if (!userData.user) {
+    return (
+      <div className="flex flex-1 flex-col gap-6">
+        <TabScreenHeader title="Me" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-2 text-center">
+          <p className="font-serif-title text-lg text-[var(--foreground)]">
+            {online
+              ? "Sign in or create an account to customize your puzzle pup profile"
+              : "Profile needs a connection"}
+          </p>
+          {!online ? (
+            <p className="max-w-xs text-sm text-[var(--muted)]">
+              You can still play solo or daily offline. Sign in when you&apos;re back online.
+            </p>
+          ) : null}
+          <button
+            type="button"
+            onClick={onSignIn}
+            disabled={!online}
+            className="ui-button rounded-md bg-[var(--foreground)] px-6 py-3 text-sm font-bold text-white disabled:opacity-45"
+          >
+            {online ? "Sign in" : "Offline"}
+          </button>
+        </div>
+      </div>
+    );
+  }
   const coop = coopWinLoss(multi);
   const versus = compWinLoss(multi);
   const lifetime = lifetimeSquares({
