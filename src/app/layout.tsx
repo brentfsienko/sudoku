@@ -4,6 +4,7 @@ import { Lora, Nunito, Press_Start_2P } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ViewportHeightSync } from "@/components/layout/ViewportHeightSync";
+import { GoogleAdsTag } from "@/components/analytics/GoogleAdsTag";
 import { RedditPixel } from "@/components/analytics/RedditPixel";
 import {
   ROOT_METADATA,
@@ -74,6 +75,7 @@ export default function RootLayout({
           }}
         />
         <ViewportHeightSync />
+        <GoogleAdsTag />
         <RedditPixel />
         <SerwistProvider>
           <OfflineBanner />
