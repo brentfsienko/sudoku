@@ -22,11 +22,16 @@ export const metadata: Metadata = buildPageMetadata({
 export default function MultiplayerSudokuPage() {
   return (
     <SeoLandingPage
-      h1="Multiplayer Sudoku — co-op and competitive"
+      h1="Multiplayer Sudoku on Sudogku"
       intro="Sudogku is one of the few places to play real-time multiplayer Sudoku online. Send a friend a room code, pick a difficulty, and solve together — or battle to fill the most cells before the puzzle is complete."
       ctaHref="/"
       ctaLabel="Start multiplayer game"
       related={[
+        {
+          href: "/about",
+          label: "What is Sudogku?",
+          blurb: "The dog-themed Sudoku this multiplayer lives in.",
+        },
         {
           href: "/free-sudoku",
           label: "Free Sudoku",

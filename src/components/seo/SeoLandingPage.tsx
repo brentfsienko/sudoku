@@ -32,6 +32,11 @@ export function SeoLandingPage({
 }: Props) {
   const relatedDefaults: RelatedLink[] = [
     {
+      href: "/about",
+      label: "What is Sudogku?",
+      blurb: "Why it is spelled that way, and what makes the game different.",
+    },
+    {
       href: "/free-sudoku",
       label: "Free Sudoku",
       blurb: "Unlimited puzzles, five difficulties, no sign-up required.",
@@ -51,7 +56,7 @@ export function SeoLandingPage({
   const links = related.length > 0 ? related : relatedDefaults;
 
   return (
-    <div className="min-h-dvh bg-[var(--background)] text-[var(--foreground)]">
+    <div className="h-full min-h-0 overflow-y-auto bg-[var(--background)] text-[var(--foreground)]">
       <JsonLd data={faqJsonLd(LANDING_FAQ)} />
       <header className="border-b border-[var(--border)] bg-[var(--accent)] px-4 py-6 text-white">
         <div className="mx-auto flex max-w-3xl items-center gap-4">
@@ -143,6 +148,10 @@ export function SeoLandingPage({
       <footer className="border-t border-[var(--border)] px-4 py-6 text-center text-xs text-[var(--muted)]">
         <Link href="/" className="font-semibold text-[var(--foreground)] hover:underline">
           {SITE_NAME}
+        </Link>
+        <span className="mx-2">·</span>
+        <Link href="/about" className="hover:underline">
+          About Sudogku
         </Link>
         <span className="mx-2">·</span>
         <Link href="/play" className="hover:underline">

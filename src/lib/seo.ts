@@ -6,15 +6,18 @@ export const SITE_NAME = APP_NAME;
 
 /** Primary value prop — used in titles, OG, and JSON-LD. */
 export const SITE_TAGLINE =
-  "Free online Sudoku — play solo or multiplayer with friends";
+  "dog-themed Sudoku you play free in the browser";
 
 export const DEFAULT_DESCRIPTION =
-  "Play free Sudoku online at Sudogku — a fast, dog-themed Sudoku puzzle game. " +
-  "Five difficulty levels, notes, hints, and undo. Play solo or challenge a friend " +
-  "in real-time co-op and competitive multiplayer. No download required — works in your browser and as a PWA.";
+  "Sudogku is a free, dog-themed Sudoku game. The name is Sudoku plus dog, " +
+  "spelled Sudogku on purpose. Play solo or with friends in your browser: " +
+  "five difficulties, notes, hints, undo, daily puzzles, and real-time multiplayer. No download.";
 
 /** High-intent search phrases — surfaced in metadata and landing copy. */
 export const SEO_KEYWORDS = [
+  "sudogku",
+  "sudogku sudoku",
+  "dog sudoku",
   "sudoku",
   "sudoku online",
   "free sudoku",
@@ -29,8 +32,6 @@ export const SEO_KEYWORDS = [
   "competitive sudoku",
   "sudoku easy medium hard",
   "sudoku notes hints",
-  "sudogku",
-  "dog sudoku",
   "browser sudoku",
   "mobile sudoku",
   "daily sudoku",
@@ -39,6 +40,7 @@ export const SEO_KEYWORDS = [
 
 export const SEO_ROUTES = [
   { path: "/", changeFrequency: "weekly" as const, priority: 1 },
+  { path: "/about", changeFrequency: "monthly" as const, priority: 0.98 },
   { path: "/free-sudoku", changeFrequency: "monthly" as const, priority: 0.95 },
   { path: "/sudoku-online", changeFrequency: "monthly" as const, priority: 0.95 },
   {
@@ -149,7 +151,7 @@ export function webApplicationJsonLd() {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     name: SITE_NAME,
-    alternateName: ["Sudogku Sudoku", "Free Sudoku Online", "Multiplayer Sudoku"],
+    alternateName: ["Sudogku Sudoku", "SuDogKu", "dog Sudoku"],
     url,
     description: DEFAULT_DESCRIPTION,
     applicationCategory: "GameApplication",
@@ -178,9 +180,30 @@ export function organizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
+    legalName: SITE_NAME,
+    alternateName: ["Sudogku Sudoku", "SuDogKu"],
     url: absoluteUrl(),
     logo: absoluteUrl("/dogs/golden.png"),
-    sameAs: [],
+    description:
+      "Sudogku is an independent dog-themed Sudoku game. The name combines Sudoku and dog.",
+    sameAs: ["https://www.brentsienko.com/"],
+  };
+}
+
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    alternateName: ["Sudogku Sudoku"],
+    url: absoluteUrl(),
+    description: DEFAULT_DESCRIPTION,
+    inLanguage: "en",
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: absoluteUrl(),
+    },
   };
 }
 
@@ -202,6 +225,11 @@ export function faqJsonLd(
 }
 
 export const LANDING_FAQ = [
+  {
+    question: "What is Sudogku?",
+    answer:
+      "Sudogku is a free, dog-themed Sudoku game you play in the browser. The name is Sudoku plus dog, spelled Sudogku on purpose.",
+  },
   {
     question: "Is Sudogku free to play?",
     answer:

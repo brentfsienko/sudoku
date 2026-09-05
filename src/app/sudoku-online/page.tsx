@@ -21,11 +21,16 @@ export const metadata: Metadata = buildPageMetadata({
 export default function SudokuOnlinePage() {
   return (
     <SeoLandingPage
-      h1="Sudoku online — play anywhere, instantly"
+      h1="Play Sudoku online at Sudogku"
       intro="Sudogku brings classic 9×9 Sudoku to the web with a modern, touch-friendly interface. No app store, no plug-ins — just open the site and play Sudoku online from your phone or computer."
       ctaHref="/play?difficulty=easy"
       ctaLabel="Play Sudoku online"
       related={[
+        {
+          href: "/about",
+          label: "What is Sudogku?",
+          blurb: "Why this game is called Sudogku.",
+        },
         {
           href: "/free-sudoku",
           label: "Free Sudoku",

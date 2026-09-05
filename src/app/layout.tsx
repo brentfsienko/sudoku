@@ -10,6 +10,7 @@ import {
   ROOT_METADATA,
   organizationJsonLd,
   webApplicationJsonLd,
+  websiteJsonLd,
 } from "@/lib/seo";
 import { SerwistProvider } from "@/components/pwa/SerwistProvider";
 import { OfflineBanner } from "@/components/pwa/OfflineBanner";
@@ -67,7 +68,7 @@ export default function RootLayout({
       className={`${nunito.variable} ${lora.variable} ${specialElite.variable} ${pressStart.variable} h-full antialiased`}
     >
       <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh max-md:h-[var(--app-height,100dvh)] max-md:max-h-[var(--app-height,100dvh)]">
-        <JsonLd data={[webApplicationJsonLd(), organizationJsonLd()]} />
+        <JsonLd data={[websiteJsonLd(), webApplicationJsonLd(), organizationJsonLd()]} />
         <script
           dangerouslySetInnerHTML={{
             __html:
