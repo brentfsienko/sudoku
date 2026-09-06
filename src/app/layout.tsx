@@ -67,6 +67,9 @@ export default function RootLayout({
       lang="en"
       className={`${nunito.variable} ${lora.variable} ${specialElite.variable} ${pressStart.variable} h-full antialiased`}
     >
+      <head>
+        <GoogleAdsTag />
+      </head>
       <body className="flex min-h-0 flex-col overflow-hidden md:h-dvh md:max-h-dvh max-md:h-[var(--app-height,100dvh)] max-md:max-h-[var(--app-height,100dvh)]">
         <JsonLd data={[websiteJsonLd(), webApplicationJsonLd(), organizationJsonLd()]} />
         <script
@@ -76,7 +79,6 @@ export default function RootLayout({
           }}
         />
         <ViewportHeightSync />
-        <GoogleAdsTag />
         <RedditPixel />
         <SerwistProvider>
           <OfflineBanner />
