@@ -586,6 +586,60 @@ export const DAILY_BREEDS: DailyBreed[] = [
   ...(extraBreeds as DailyBreed[]),
 ];
 
+function mulberry32(seed: number) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(s ^ (s >>> 15), s | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle<T>(items: T[], seed: number): T[] {
+  const next = items.slice();
+  const rand = mulberry32(seed);
+  for (let i = next.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const a = next[i]!;
+    next[i] = next[j]!;
+    next[j] = a;
+  }
+  return next;
+}
+
+function initialOf(name: string) {
+  return name[0]?.toLocaleLowerCase() ?? "";
+}
+
+/** Break leftover A–Z clumps after the shuffle (same first letter in a row). */
+function spreadInitials<T extends { name: string }>(items: T[]): T[] {
+  const next = items.slice();
+  for (let i = 1; i < next.length; i++) {
+    const prev = initialOf(next[i - 1]!.name);
+    if (initialOf(next[i]!.name) !== prev) continue;
+    for (let j = i + 1; j < next.length; j++) {
+      const cand = initialOf(next[j]!.name);
+      const after = next[i + 1] ? initialOf(next[i + 1]!.name) : "";
+      if (cand !== prev && cand !== after) {
+        const swap = next[i]!;
+        next[i] = next[j]!;
+        next[j] = swap;
+        break;
+      }
+    }
+  }
+  return next;
+}
+
+const extraList = extraBreeds as DailyBreed[];
+const decksByYear = new Map<number, DailyBreed[]>();
+
+/** Keep a specific breed on a calendar day without duplicating it later. */
+const PINNED_DATES: Record<string, string> = {
+  "2026-09-08": "great-anglo-french-tricolour-hound",
+};
+
 function dayOfYear(key: string): number {
   const [y, m, d] = key.split("-").map(Number) as [number, number, number];
   const start = Date.UTC(y, 0, 1);
@@ -593,9 +647,33 @@ function dayOfYear(key: string): number {
   return Math.floor((cur - start) / 86_400_000);
 }
 
+function pinDates(deck: DailyBreed[], year: number) {
+  for (const [dateKey, breedId] of Object.entries(PINNED_DATES)) {
+    if (!dateKey.startsWith(`${year}-`)) continue;
+    const want = dayOfYear(dateKey) % deck.length;
+    const have = deck.findIndex((b) => b.id === breedId);
+    if (have < 0 || have === want) continue;
+    const swap = deck[want]!;
+    deck[want] = deck[have]!;
+    deck[have] = swap;
+  }
+}
+
+/** Core breeds stay Jan 1–N; extras are shuffled per year so days are not A–Z. */
+function breedsForYear(year: number): DailyBreed[] {
+  const cached = decksByYear.get(year);
+  if (cached) return cached;
+  const extras = spreadInitials(seededShuffle(extraList, year ^ 0x51d05));
+  const deck = [...CORE_BREEDS, ...extras];
+  pinDates(deck, year);
+  decksByYear.set(year, deck);
+  return deck;
+}
+
 export function breedForDateKey(key: string): DailyBreed {
-  const n = DAILY_BREEDS.length;
-  return DAILY_BREEDS[dayOfYear(key) % n]!;
+  const year = Number(key.slice(0, 4));
+  const deck = breedsForYear(Number.isFinite(year) ? year : 2026);
+  return deck[dayOfYear(key) % deck.length]!;
 }
 
 export function breedForDay(now = Date.now()): DailyBreed {
