@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DogAvatar } from "@/components/DogAvatar";
 import {
@@ -57,6 +57,10 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
   const profile = userData.data?.profile ?? null;
   const friends = useFriends(userData.user, profile);
   const [subTab, setSubTab] = useState<SubTab>(initialSubTab ?? "friends");
+
+  useEffect(() => {
+    if (initialSubTab) setSubTab(initialSubTab);
+  }, [initialSubTab]);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PublicProfile[]>([]);
   const [searching, setSearching] = useState(false);
@@ -309,11 +313,11 @@ export function FriendsTab({ userData, onSignIn, initialSubTab, onlineIds = new 
       <FriendListPanel
         title="Your friends"
         empty={
-          friends.loading
-            ? "Loading…"
-            : friends.friends.length === 0
-              ? "No friends yet — search above to add someone."
-              : undefined
+          friends.friends.length === 0
+            ? friends.loading
+              ? "Loading…"
+              : "No friends yet — search above to add someone."
+            : undefined
         }
       >
         {sortedFriends.map((f) => {

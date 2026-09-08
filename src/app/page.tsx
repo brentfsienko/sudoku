@@ -73,8 +73,7 @@ import {
 export default function Home() {
   const router = useRouter();
   const [tab, setTab] = useState<HomeTab>("main");
-  // Desired sub-tab when switching to the Friends tab from elsewhere.
-  // FriendsTab remounts on tab switch, so it reads this as initialSubTab.
+  // Which Friends sub-tab to show. Nav resets to "friends"; daily CTA sets "daily".
   const [friendsInitSubTab, setFriendsInitSubTab] = useState<"friends" | "daily">("friends");
   const [coachmarkStep, setCoachmarkStep] = useState<CoachmarkStep | null>(null);
   const [playReady, setPlayReady] = useState(false);
@@ -102,6 +101,7 @@ export default function Home() {
       advanceCoachmarkToAvatar();
       setCoachmarkStep("avatar");
     }
+    if (next === "friends") setFriendsInitSubTab("friends");
     setTab(next);
   }
 
@@ -227,7 +227,7 @@ export default function Home() {
     <MobileAppRoot>
       <AppFrame variant={tab === "main" ? "accent" : "background"}>
         <main
-          className={`flex min-h-0 flex-1 flex-col overflow-hidden ${
+          className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${
             tab === "main" ? "bg-[var(--accent)]" : "bg-[var(--background)]"
           }`}
         >
@@ -253,10 +253,19 @@ export default function Home() {
             </div>
           )}
 
-          {tab === "friends" && (
+          {(tab === "friends" || playReady) && (
             <div
-              className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
-              style={{ paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }}
+              className={
+                tab === "friends"
+                  ? "flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-[var(--background)] px-5 pb-6"
+                  : "pointer-events-none invisible absolute inset-0"
+              }
+              style={
+                tab === "friends"
+                  ? { paddingTop: "calc(env(safe-area-inset-top) + 1.25rem)" }
+                  : undefined
+              }
+              aria-hidden={tab !== "friends"}
             >
               <FriendsTab
                 userData={userData}

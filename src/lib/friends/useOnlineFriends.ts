@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 
+function sameIds(a: Set<string>, b: Set<string>) {
+  if (a.size !== b.size) return false;
+  for (const id of b) if (!a.has(id)) return false;
+  return true;
+}
+
 /**
  * Tracks which user IDs are currently online using Supabase Realtime Presence.
  * Presence key must equal the tracked user_id payload (rejects mismatched spoofs).
@@ -24,6 +30,11 @@ export function useOnlineFriends(myUserId: string | null): Set<string> {
       config: { presence: { key: myUserId } },
     });
     channelRef.current = channel;
+    let emptyTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const apply = (ids: Set<string>) => {
+      setOnlineIds((prev) => (sameIds(prev, ids) ? prev : ids));
+    };
 
     channel
       .on("presence", { event: "sync" }, () => {
@@ -38,7 +49,16 @@ export function useOnlineFriends(myUserId: string | null): Set<string> {
             ids.add(key);
           }
         }
-        setOnlineIds(ids);
+        if (emptyTimer) {
+          clearTimeout(emptyTimer);
+          emptyTimer = null;
+        }
+        // Reconnects briefly report nobody home; wait before dropping greens.
+        if (ids.size === 0) {
+          emptyTimer = setTimeout(() => apply(ids), 450);
+          return;
+        }
+        apply(ids);
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
@@ -47,6 +67,7 @@ export function useOnlineFriends(myUserId: string | null): Set<string> {
       });
 
     return () => {
+      if (emptyTimer) clearTimeout(emptyTimer);
       void supabase.removeChannel(channel);
       channelRef.current = null;
     };
