@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Rewrite extra Daily Dog stories from Wikipedia facts only — no job templates."""
+"""Rewrite extra Daily Dog stories from Wikipedia facts only — no job templates.
+
+Skip rows already sourced from the American Kennel Club (see akc-daily-dog-stories.py).
+"""
 
 from __future__ import annotations
 
@@ -727,6 +730,8 @@ def main() -> None:
 
     used: set[str] = set()
     for i, row in enumerate(rows, 1):
+        if row.get("sourceLabel") == "American Kennel Club":
+            continue
         title = wiki_title(row.get("sourceUrl") or "")
         extract = cache.get(title, "")
         if title and (len(extract) < 280):

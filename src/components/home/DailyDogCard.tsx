@@ -356,14 +356,34 @@ export function DailyDogCard() {
               <OriginMiniMap lat={breed.lat} lng={breed.lng} label={breed.origin} />
             </div>
 
-            <a
-              href={breed.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-block text-xs font-bold text-[var(--primary)] underline underline-offset-2"
-            >
-              Story sources · {breed.sourceLabel}
-            </a>
+            <p className="mt-3 text-xs text-[var(--muted)]">
+              Overview based on{" "}
+              <a
+                href={breed.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-[var(--primary)] underline underline-offset-2"
+              >
+                {breed.sourceLabel}
+              </a>
+              {breed.sourceLabel === "American Kennel Club" ? (
+                <>
+                  {" "}
+                  (
+                  <a
+                    href="https://www.akc.org/dog-breeds/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-[var(--primary)] underline underline-offset-2"
+                  >
+                    akc.org/dog-breeds
+                  </a>
+                  ).
+                </>
+              ) : (
+                "."
+              )}
+            </p>
           </div>
         )}
       </div>

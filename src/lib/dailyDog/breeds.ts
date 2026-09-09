@@ -14,6 +14,7 @@ export type DailyBreed = {
   pronunciation: string;
   lat: number;
   lng: number;
+  /** Primary overview source. Prefer the AKC breed page when one exists. */
   sourceUrl: string;
   sourceLabel: string;
   bark: BarkKind;
@@ -31,11 +32,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 57.5,
     lng: -4.2,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Golden_Retriever",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/golden-retriever/",
+    sourceLabel: "American Kennel Club",
     intro: "Coming all the way from the Scottish Highlands, is the Golden Retriever.",
     story:
-      "In the Scottish Highlands of the 1800s, Lord Tweedmouth wanted a dog that could fetch waterfowl from icy lakes without leaving a mark on the bird. At Guisachan he spent decades on a yellow retriever whose water-repellent coat still dries in a hurry after a swim, and whose mouth is gentle enough for a duck \u2014 or a tennis ball.\n\nThat same eager brain later made goldens favorite guide and therapy dogs, the kind that will work a whole afternoon if you give them a job. They still want a person and a purpose more than a quiet kennel, and they will happily carry both your bird and your day if you ask."
+      "They are an exuberant Scottish gundog of great beauty. They stand among America’s most popular dog breeds. They are serious workers at hunting and field work, as guides for the blind, and in search-and-rescue, enjoy obedience and other competitive events, and have an endearing love of life when not at work.\n\nThey are a sturdy, muscular dog of medium size, famous for the dense, lustrous coat of gold that gives the breed its name. The broad head, with its friendly and intelligent eyes, short ears, and straight muzzle, is a breed hallmark."
   },
   {
     id: "shiba-inu",
@@ -48,11 +49,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 36.2,
     lng: 138.2,
     bark: "yap",
-    sourceUrl: "https://en.wikipedia.org/wiki/Shiba_Inu",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/shiba-inu/",
+    sourceLabel: "American Kennel Club",
     intro: "Hello pups, today’s daily dog is the Shiba Inu.",
     story:
-      "High in Japan\u2019s mountains, the Shiba once hunted small game with a bold, catlike independence that never really left the breed. They still lick themselves clean, keep a cool distance from strangers, and wear the name like a map: shiba means brushwood, the terrain they worked.\n\nThey are one of Japan\u2019s oldest native dogs, and they nearly vanished in the twentieth century before fanciers pulled them back. Cross a Shiba and you may hear the famous scream \u2014 a protest as dramatic as it is loud \u2014 because this is a dog that would rather argue than obey for the sake of it."
+      "Brought to America from Japan as recently as 60 years ago, Shibas are growing in popularity in the West and are already the most popular breed in their homeland. Their white markings combined with their coloring and their alert expression and smooth stride makes them almost foxlike.\n\nThey're sturdy, muscular dogs with a bold, confident personality to match. The first documented Shiba to enter the United States was imported by a military family in 1954."
   },
   {
     id: "pug",
@@ -65,11 +66,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 34.8,
     lng: 113.6,
     bark: "yap",
-    sourceUrl: "https://en.wikipedia.org/wiki/Pug",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/pug/",
+    sourceLabel: "American Kennel Club",
     intro: "And today we have the Pug — tiny, wrinkled, and very sure of itself.",
     story:
-      "For centuries, imperial Chinese courts kept pugs as living lap ornaments. Those deep facial folds were a point of pride; a wrinkle on the forehead was even called a prince mark, as if the dog had been stamped for palace life.\n\nDutch traders carried them west, and European parlors soon learned the snorts, sneezes, and single-minded quest for a lap. The trade-off is a short snout that makes hot days hard work. A pug would rather share a sofa than a long run in the sun, and it will remind you of that with every snuffling sigh."
+      "Once the mischievous companion of Chinese emperors, and later the mascot of Holland’s royal House of Orange, the small but solid Pug is today adored by his millions of fans around the world. Pugs live to love and to be loved in return.\n\nTheir motto is the Latin phrase 'multum in parvo' —an apt description of this small but muscular breed. They come in three colors: silver or apricot-fawn with a black face mask, or all black."
   },
   {
     id: "beagle",
@@ -82,11 +83,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 52.2,
     lng: -1.2,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Beagle",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/beagle/",
+    sourceLabel: "American Kennel Club",
     intro: "Rolling in from the English hedgerows: the Beagle.",
     story:
-      "English packs once followed beagles through hedgerows by sound as much as sight. Their bay is a rolling howl that says the trail is live, and a beagle\u2019s nose can pick up a scent days old \u2014 which is why they still work at airports, quietly checking bags while looking like they only came for the snacks.\n\nThey were bred to work in a chorus, so a lonely beagle can sound like a one-dog choir. Snoopy did not hurt the fame, but the real beagle is less philosopher than detective: a counter of unattended food never stands a chance, and a walk without a sniff is barely a walk at all."
+      "There are two Beagle varieties: those standing under 13 inches at the shoulder, and those between 13 and 15 inches. Both varieties are sturdy, solid, and 'big for their inches,' as dog folks say.\n\nThey come in such pleasing colors as lemon, red and white, and tricolor. Their fortune is in his adorable face, with its big brown or hazel eyes set off by long, houndy ears set low on a broad head."
   },
   {
     id: "poodle",
@@ -99,11 +100,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 48.8,
     lng: 2.3,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Poodle",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/poodle-standard/",
+    sourceLabel: "American Kennel Club",
     intro: "Please welcome a splash of pomp and brains, the Poodle.",
     story:
-      "That fancy clip began as workwear. Hunters left hair on the joints so a water retriever would not freeze, and the name likely comes from the German pudel, to splash. Under the pom-poms is still a dog built to swim out and bring a bird back.\n\nWhether toy, miniature, or standard, the poodle is one of the sharpest students in dog sport, and a low-shedding coat that allergy-conscious families still seek out. They would rather learn a trick than sit still, and all three sizes share that same busy, splash-ready mind."
+      "Poodles come in three size varieties: Standards should be more than 15 inches tall at the shoulder; Miniatures are 15 inches or under; Toys stand no more than 10 inches. All three varieties have the same build and proportions.\n\nAt dog shows, Poodles are usually seen in the elaborate Continental clip. Most pet owners prefer the simpler Sporting clip, in which the coat is shorn to follow the outline of the squarely built, smoothly muscled body."
   },
   {
     id: "pomeranian",
@@ -116,11 +117,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 54.4,
     lng: 18.4,
     bark: "yap",
-    sourceUrl: "https://en.wikipedia.org/wiki/Pomeranian_dog",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/pomeranian/",
+    sourceLabel: "American Kennel Club",
     intro: "Coming all the way from old Pomerania, is the Pomeranian.",
     story:
-      "Pomeranians once looked more like small sled dogs, spitz cousins with a job in the cold. Queen Victoria\u2019s tiny companions helped shrink the breed into the fox-faced puffball we know, complete with a ruff of double coat and a plume tail curled over the back.\n\nWhat did not shrink was the watchdog instinct. A Pom will announce the mail carrier as if the house were under siege, and they will remind you they are still northern dogs every time a leaf moves outside. Tiny frame, full-size opinions."
+      "—The Pomeranian combines a tiny body and a commanding big-dog demeanor. The abundant double coat, with its frill extending over the chest and shoulders, comes in almost two dozen colors, and various patterns and markings, but is most commonly seen in orange or red.\n\nAlert and intelligent, Pomeranians are easily trained and make fine watchdogs and perky pets for families with children old enough to know the difference between a toy dog and a toy. Poms are active but can be exercised with indoor play and short walks, so they are content in both the city and suburbs."
   },
   {
     id: "siberian-husky",
@@ -133,11 +134,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 66.0,
     lng: 170.0,
     bark: "howl",
-    sourceUrl: "https://en.wikipedia.org/wiki/Siberian_Husky",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/siberian-husky/",
+    sourceLabel: "American Kennel Club",
     intro: "Straight off the ice, today’s guest is the Siberian Husky.",
     story:
-      "The Chukchi people of Siberia needed a dog that could pull light loads across endless ice without burning out. Huskies still carry that endurance, often with ice-blue eyes \u2014 or one of each color \u2014 and they would rather howl and \u201ctalk\u201d than bark, a leftover conversation from the trail.\n\nThey are famous escape artists. A bored husky will cheerfully redesign the yard into a new sled route, then look innocent about the hole in the fence. This is a dog that was built for miles with a team, not for an empty afternoon on a couch."
+      "The graceful, medium-sized Siberian Husky's almond-shaped eyes can be either brown or blue—and sometimes one of each—and convey a keen but amiable and even mischievous expression. Quick and nimble-footed, Siberians are known for their powerful but seemingly effortless gait.\n\nTipping the scales at no more than 60 pounds, they are noticeably smaller and lighter than their burly cousin, the Alaskan Malamute. As born pack dogs, they enjoy family life and get on well with other dogs."
   },
   {
     id: "pembroke-welsh-corgi",
@@ -150,11 +151,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 51.8,
     lng: -4.8,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Pembroke_Welsh_Corgi",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/pembroke-welsh-corgi/",
+    sourceLabel: "American Kennel Club",
     intro: "From the farms of Wales, please say hi to the Pembroke Welsh Corgi.",
     story:
-      "On Welsh farms, a corgi\u2019s job was to nip cattle heels while staying under the kick line \u2014 hence those famous short legs. Folklore says the dogs were gifts from woodland fairies, which is a charming way to explain a dog that thinks it runs the pasture.\n\nQueen Elizabeth II kept more than thirty Pembrokes, which turned a herding dog into a royal icon. Pembroke and Cardigan corgis are actually separate breeds, and that heel-nipping instinct still shows up on ankles in the hallway. A tired corgi is a pleasant housemate; an idle one has opinions about your feet."
+      "At 10 to 12 inches at the shoulder and 27 to 30 pounds, a well-built male Pembroke presents a big dog in a small package. Short but powerful legs, muscular thighs, and a deep chest equip him for a hard day's work.\n\nBuilt long and low, Pembrokes are surprisingly quick and agile. They can be red, sable, fawn, and black and tan, with or without white markings."
   },
   {
     id: "dalmatian",
@@ -167,11 +168,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 44.1,
     lng: 16.2,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Dalmatian_dog",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/dalmatian/",
+    sourceLabel: "American Kennel Club",
     intro: "Spots, coaches, and a whole lot of trot — meet the Dalmatian.",
     story:
-      "Dalmatian puppies arrive as blank white canvases. The spots bloom in the first weeks, each coat as unique as a fingerprint, a slow-developing map of the dog they will be.\n\nThey once ran beside horse-drawn fire coaches, clearing the road and guarding the horses at the scene. That partnership is why they still live in firehouses in people\u2019s imaginations \u2014 and sometimes in real ones. They were built for miles at a trot, so a short walk around the block rarely feels like a full day\u2019s work."
+      "Their delightful, eye-catching spots of black or liver adorn one of the most distinctive coats in the animal kingdom. Beneath the spots is a graceful, elegantly proportioned trotting dog standing between 19 and 23 inches at the shoulder.\n\nDals are muscular, built to go the distance; the powerful hindquarters provide the drive behind the smooth, effortless gait. The Dal was originally bred to guard horses and coaches, and some of the old protective instinct remains."
   },
   {
     id: "greyhound",
@@ -184,11 +185,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 52.5,
     lng: -1.9,
     bark: "howl",
-    sourceUrl: "https://en.wikipedia.org/wiki/Greyhound",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/greyhound/",
+    sourceLabel: "American Kennel Club",
     intro: "And today we have the Greyhound, built like a rocket and napping like a cat.",
     story:
-      "A greyhound\u2019s deep chest and springy spine can push them past forty miles an hour, among the fastest of land mammals. They hunt by sight, not scent, which is why a flash of motion can still light the afterburners even in a quiet suburb.\n\nThe surprise is what happens after the sprint: they are legendary couch potatoes. Give them a burst of speed, then a soft blanket, and they have had a perfect day. That is why retired racers often make such quiet house pets \u2014 the rocket is real, and so is the nap."
+      "Greyhounds are the essence of the dog breeder's credo 'Form follows function.' From the narrow, aerodynamic skull to the shock-absorbing pads of the feet, Greyhounds are perfectly constructed for high-speed pursuit. The lean beauty of the Greyhound 'inverted S' shape, created by the deep chest curving gently into a tightly tucked waist, has been an object of fascination for artists, poets, and kings for as long as human beings have called themselves civilized.\n\nGreyhounds are the template from which other coursing hounds have been struck. Prehistoric art depicts doglike creatures and men chasing game, but the Greyhound story begins properly in Egypt some 5,000 years ago."
   },
   {
     id: "basenji",
@@ -201,11 +202,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 1.0,
     lng: 22.0,
     bark: "howl",
-    sourceUrl: "https://en.wikipedia.org/wiki/Basenji",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/basenji/",
+    sourceLabel: "American Kennel Club",
     intro: "Hello pups, today’s daily dog is the Basenji — the one that yodels.",
     story:
-      "In Central Africa the Basenji hunted in silence, and an unusual larynx still makes them yodel instead of bark. They groom like cats, carry almost no doggy smell, and typically come into season only once a year, leftovers from a hunting past that never fully left the breed.\n\nLook at ancient Egyptian art and you will see dogs that could walk off the wall into a modern Basenji ring. Even a devoted Basenji keeps a streak of independence. They will love you, and they will still decide whether your plan is interesting enough to join."
+      "Basenjis are small, graceful hounds standing 16 or 17 inches at the shoulder. They are recognizable by their glistening short coat, tightly curled tail, and wrinkled forehead and expressive almond-shaped eyes that convey a variety of subtle, humanlike emotions.\n\nBasenjis are a lovely sight at a standstill but more impressive yet at a fast trot, when they exhibit the long, smooth strides of a mini-racehorse. And yes, it's true, they don't bark, but they make their feelings known with an odd sound described as something between a chortle and a yodel."
   },
   {
     id: "border-collie",
@@ -218,11 +219,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 55.4,
     lng: -2.8,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Border_Collie",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/border-collie/",
+    sourceLabel: "American Kennel Club",
     intro: "From the English–Scottish border, here comes the Border Collie.",
     story:
-      "Along the English\u2013Scottish border, shepherds needed a dog that could move a flock with a stare. That intense \u201ceye\u201d still makes Border Collies the world\u2019s top sheepdogs, a living remote control for wool on the hillside.\n\nOne famous collie named Chaser learned more than a thousand toy names \u2014 proof that this breed needs a job, not just a backyard. Without sheep they will herd children, bicycles, and vacuum cleaners. A tired Border Collie is a pleasant one, and an idle one invents chaos."
+      "Borders are athletic, medium-sized herders standing 18 to 22 inches at the shoulder. The overall look is that of a muscular but nimble worker unspoiled by passing fads.\n\nBoth the rough coat and the smooth coat come in a variety of colors and patterns. The almond eyes are the focus of an intelligent expression—an intense gaze, the Border's famous 'herding eye', is a breed hallmark."
   },
   {
     id: "german-shepherd",
@@ -235,11 +236,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 51.2,
     lng: 10.4,
     bark: "deep",
-    sourceUrl: "https://en.wikipedia.org/wiki/German_Shepherd",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/german-shepherd-dog/",
+    sourceLabel: "American Kennel Club",
     intro: "Reporting for duty: the German Shepherd.",
     story:
-      "Captain Max von Stephanitz set out to build one versatile German working dog, and the shepherd that resulted still leads police and rescue lines. Loyalty and a serious work ethic were never a costume; they were the design.\n\nA World War I stray named Rin Tin Tin then carried the breed onto Hollywood screens, but the real dog still needs a task with a point \u2014 training, tracking, or a long purposeful walk. Leave them without one and they may invent a job of their own, usually involving the garden or the curtains."
+      "Generally considered dogkind’s finest all-purpose worker, the German Shepherd Dog is a large, agile, muscular dog of noble character and high intelligence. Loyal, confident, courageous, and steady, the German Shepherd is truly a dog lover’s delight.\n\nGerman Shepherd Dogs can stand as high as 26 inches at the shoulder and, when viewed in outline, presents a picture of smooth, graceful curves rather than angles. The natural gait is a free-and-easy trot, but they can turn it up a notch or two and reach great speeds."
   },
   {
     id: "labrador-retriever",
@@ -252,11 +253,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 48.6,
     lng: -56.3,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Labrador_Retriever",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/labrador-retriever/",
+    sourceLabel: "American Kennel Club",
     intro: "Coming all the way from the harbors of Newfoundland, is the Labrador Retriever.",
     story:
-      "Off the coast of Newfoundland, fishermen needed a dog that could haul nets and grab fish that wriggled free. The Labrador\u2019s otter tail still steers like a rudder in cold water, and the webbed feet and soft mouth were tools long before they were cute.\n\nBack on land they became America\u2019s most registered breed, a family dog that never quite forgot the harbor. Yellow, black, and chocolate are all the same dog in different coats. Give them water, a retrieve, or a person with a ball, and the old fishing partner shows up in the living room."
+      "The sweet-faced, lovable Labrador Retriever is America’s most popular dog breed. Labs are friendly, outgoing, and high-spirited companions who have more than enough affection to go around for a family looking for a medium-to-large dog.\n\nThe sturdy, well-balanced Labrador Retriever can, depending on the sex, stand from 21.5 to 24.5 inches at the shoulder and weigh between 55 to 80 pounds. The dense, hard coat comes in yellow, black, and a luscious chocolate."
   },
   {
     id: "french-bulldog",
@@ -269,11 +270,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 48.9,
     lng: 2.3,
     bark: "yap",
-    sourceUrl: "https://en.wikipedia.org/wiki/French_Bulldog",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/french-bulldog/",
+    sourceLabel: "American Kennel Club",
     intro: "And today we have the French Bulldog, bat ears and all.",
     story:
-      "Lace workers leaving England for France tucked small bulldogs into their luggage, and those dogs grew the bat ears that now define the Frenchie. Those ears were once a fault and became the hallmark, a city dog\u2019s silhouette.\n\nThe compact, front-heavy body is charming on a couch and clumsy in a pool. Most would rather snore beside you than swim a lap, and they overheat quickly, so August is for air-conditioning, not park sprints. A Frenchie is a companion with a soundtrack of snorts, not a weekend athlete."
+      "They are resembles a Bulldog in miniature, except for the large, erect 'bat ears' that are the breed's trademark feature. The head is large and square, with heavy wrinkles rolled above the extremely short nose.\n\nThe body beneath the smooth, brilliant coat is compact and muscular. The bright, affectionate Frenchie is a charmer."
   },
   {
     id: "dachshund",
@@ -286,11 +287,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 50.1,
     lng: 8.7,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Dachshund",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/dachshund/",
+    sourceLabel: "American Kennel Club",
     intro: "Hello pups, today’s daily dog is the Dachshund — a badger hunter in a loaf.",
     story:
-      "The name means \u201cbadger dog,\u201d and the long, low body was built to follow prey down a burrow. Smooth, longhaired, or wirehaired, in two sizes, the dachshund still thinks it is bigger than the badger.\n\nThat same spine is strong in the tunnel and fragile on the sofa \u2014 jumping off furniture is a real risk. A dachshund on a scent will cheerfully forget that it was supposed to come when called. They were never a lapdog that happens to be short. They are a hunter that happens to fit under a chair."
+      "The word 'icon' is terribly overworked, but the Dachshund—with his unmistakable long-backed body, little legs, and big personality—is truly an icon of purebred dogdom. Dachshunds can be standard-sized or miniature , and come in one of three coat types: smooth, wirehaired, or longhaired.\n\nDachshunds aren't built for distance running, leaping, or strenuous swimming, but otherwise these tireless hounds are game for anything. Smart and vigilant, with a big-dog bark, they make fine watchdogs."
   },
   {
     id: "australian-shepherd",
@@ -303,11 +304,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 39.8,
     lng: -98.6,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Australian_Shepherd",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/australian-shepherd/",
+    sourceLabel: "American Kennel Club",
     intro: "Despite the name, this one grew up in America: the Australian Shepherd.",
     story:
-      "Despite the name, the modern Aussie grew up on American ranches, not Australian stations. Basque shepherds in the American West helped shape the dog we have now: a herding partner with a merle coat that can pair with two different eye colors, and many born with a naturally bobbed tail.\n\nPut them on cattle \u2014 or a frisbee \u2014 and the herding brain lights up. A quiet house all day is usually not enough of a job. They will invent work from the mail slot, the cat, and your running shoes, because the ranch never really left their heads."
+      "They are the cowboy's herding dog of choice, is a medium-sized worker with a keen, penetrating gaze in the eye. Aussie coats offer different looks, including merle .\n\nIn all ways, they're the picture of rugged and agile movers of stock. Aussies exhibit an irresistible impulse to herd, anything: birds, dogs, kids."
   },
   {
     id: "boxer",
@@ -320,11 +321,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 50.9,
     lng: 6.9,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Boxer_(dog)",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/boxer/",
+    sourceLabel: "American Kennel Club",
     intro: "Please welcome a clown with biceps, the Boxer.",
     story:
-      "Watch a boxer play and you may see the namesake move: they rise and bat with their front paws. German police and army kennels were among the first to put that athletic build to work, a clown with biceps on a serious chassis.\n\nA wrinkled brow and undershot jaw give them an almost human look, as if they are always about to tell a joke. They stay puppyish for years, and a boxer looping the yard is simply using the engine they were given. They want a person in the game, not a backyard they patrol alone."
+      "A well-made Boxer in peak condition is an awesome sight. A male can stand as high as 25 inches at the shoulder; females run smaller.\n\nTheir muscles ripple beneath a short, tight-fitting coat. The dark brown eyes and wrinkled forehead give the face an alert, curious look."
   },
   {
     id: "chihuahua",
@@ -337,11 +338,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 28.6,
     lng: -106.1,
     bark: "yap",
-    sourceUrl: "https://en.wikipedia.org/wiki/Chihuahua_(dog)",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/chihuahua/",
+    sourceLabel: "American Kennel Club",
     intro: "Coming all the way from Mexico, is the Chihuahua.",
     story:
-      "Named for the Mexican state where travelers first fell for them in the 1800s, Chihuahuas are the smallest recognized breed and among the surest they are large. The apple-shaped skull is a hallmark, and some puppies are even born with a soft spot called a molera.\n\nThey come in smooth and long coats, both with oversized views on the world. What they lack in pounds they spend in watchdog opinions, and a sweater in winter is practical: that tiny body loses heat fast. They will love you fiercely and still scold the universe from the arm of the couch."
+      "They are a balanced, graceful dog of terrier-like demeanor, weighing no more than 6 pounds. The rounded \\\"apple\\\" head is a breed hallmark.\n\nThe erect ears and full, luminous eyes are acutely expressive. Coats come in many colors and patterns, and can be long or short."
   },
   {
     id: "great-dane",
@@ -354,11 +355,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 51.3,
     lng: 9.5,
     bark: "deep",
-    sourceUrl: "https://en.wikipedia.org/wiki/Great_Dane",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/great-dane/",
+    sourceLabel: "American Kennel Club",
     intro: "And today we have the Great Dane, a gentle giant in a very tall coat.",
     story:
-      "Some Great Danes stand more than three feet at the shoulder, a size once aimed at wild boar and later at estate gates. They were once called Deutsche Dogge \u2014 German mastiff \u2014 and they grow up in a hurry, giant hearts included.\n\nOff duty they are gentle giants who think they are lapdogs. Scooby-Doo did not hurt: a cartoon Dane taught the world to expect a goofy heart in a towering frame. Expect them to lean, to snore, and to believe your sofa was measured for them."
+      "As tall as 32 inches at the shoulder, Danes tower over most other dogs and when standing on their hind legs, they are taller than most people. These powerful giants are the picture of elegance and balance, with the smooth and easy stride of born noblemen.\n\nThe coat comes in different colors and patterns, perhaps the best-known being the black-and-white patchwork pattern known as \\\"harlequin.\\\" Despite their sweet nature, Danes are alert home guardians. Just the sight of these gentle giants is usually enough to make intruders think twice."
   },
   {
     id: "rottweiler",
@@ -371,11 +372,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 48.2,
     lng: 9.2,
     bark: "deep",
-    sourceUrl: "https://en.wikipedia.org/wiki/Rottweiler",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/rottweiler/",
+    sourceLabel: "American Kennel Club",
     intro: "From the German town of Rottweil, meet the Rottweiler.",
     story:
-      "Roman drover dogs marched with the legions, and in the German town of Rottweil their descendants pulled butchers\u2019 carts and guarded the day\u2019s coins. When railways replaced cattle drives the breed nearly vanished before fanciers rebuilt it.\n\nA proper Rottweiler is calm and confident, not a constant barker. The story is work first, reputation second. A well-raised Rottweiler is still a steady shadow, not a show of teeth \u2014 a dog that would rather stand beside you than perform for a crowd."
+      "A male Rottweiler will stand anywhere from 24 to 27 muscular inches at the shoulder; females run a bit smaller and lighter. The glistening, short black coat with smart rust markings add to the picture of imposing strength.\n\nA thickly muscled hindquarters powers the Rottie's effortless trotting gait. A well-bred and properly raised Rottie will be calm and confident, courageous but not unduly aggressive."
   },
   {
     id: "yorkshire-terrier",
@@ -388,11 +389,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 53.8,
     lng: -1.5,
     bark: "yap",
-    sourceUrl: "https://en.wikipedia.org/wiki/Yorkshire_Terrier",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/yorkshire-terrier/",
+    sourceLabel: "American Kennel Club",
     intro: "Hello pups, today’s daily dog is the Yorkshire Terrier.",
     story:
-      "In Yorkshire mill towns they earned their keep as ratters, then slipped into Victorian parlors as fashion. The floor-length coat is hair, not fur, often wrapped so it can keep growing. Puppies start black and tan; the steel-blue adult color arrives like a slow costume change.\n\nUnder the bow is still a terrier. Many pet Yorkies wear a shorter cut and would chase a rat if you offered one. They are small enough for a handbag and stubborn enough for a barn, which is the whole joke and the whole charm."
+      "They are a compact, toy-size terrier of no more than seven pounds whose crowning glory is a floor-length, silky coat of steel blue and a rich golden tan. Don't let the Yorkie's daintiness fool you.\n\nTenacious, feisty, brave, and sometimes bossy, the Yorkie exhibits all the traits of a true terrier. Often named the most popular dog breed in various American cities, Yorkies pack lots of big-town attitude into a small but self-important package."
   },
   {
     id: "boston-terrier",
@@ -405,11 +406,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 42.4,
     lng: -71.1,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Boston_Terrier",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/boston-terrier/",
+    sourceLabel: "American Kennel Club",
     intro: "Born in Boston and dressed for dinner: the Boston Terrier.",
     story:
-      "One of the first American-born breeds, the Boston Terrier earned the nickname American Gentleman for its tuxedo markings \u2014 white blaze, chest, and socks. They were built to be companions in a growing city, not hunters on a moor.\n\nThat short muzzle means plenty of snoring and snuffling. Massachusetts named them the state dog in 1979, and they still suit apartments, provided you do not mind the soundtrack. A Boston wants to be in the room with you, dressed for dinner, breathing like a little engine."
+      "Boston Terriers are compact, short-tailed, well-balanced little dogs weighing no more than 25 pounds. The stylish 'tuxedo' coat can be white and either black, brindle, or seal .\n\nThe head is square, the muzzle is short, and the large, round eyes can shine with kindness, curiosity, or mischief. Ever alert to their surroundings, Bostons move with a jaunty, rhythmic step."
   },
   {
     id: "akita",
@@ -422,11 +423,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 39.7,
     lng: 140.1,
     bark: "deep",
-    sourceUrl: "https://en.wikipedia.org/wiki/Akita_(dog)",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/akita/",
+    sourceLabel: "American Kennel Club",
     intro: "Coming all the way from Japan, is the Akita.",
     story:
-      "Once reserved for Japanese nobility and large game, the Akita carries a thick double coat and a curled tail like other northern spitz dogs. They remain reserved with strangers and devoted at home, a palace dog that never quite became a party dog.\n\nThe most famous of them, Hachik\u014d, waited at a Tokyo station for his person long after the last train. Helen Keller later helped introduce Akitas to the United States. Loyalty is not a slogan for this breed; it is the plot, and they will write it quietly at the door."
+      "Akitas are burly, heavy-boned spitz-type dogs of imposing stature. Standing 24 to 28 inches at the shoulder, Akitas have a dense coat that comes in several colors, including white.\n\nThe head is broad and massive, and is balanced in the rear by a full, curled-over tail. The erect ears and dark, shining eyes contribute to an expression of alertness, a hallmark of the breed."
   },
   {
     id: "samoyed",
@@ -439,11 +440,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 67.5,
     lng: 86.0,
     bark: "howl",
-    sourceUrl: "https://en.wikipedia.org/wiki/Samoyed_dog",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/samoyed/",
+    sourceLabel: "American Kennel Club",
     intro: "Straight from the Siberian tents, today’s fluffy guest is the Samoyed.",
     story:
-      "The Samoyede people of Siberia used these white dogs to herd reindeer, pull sleds, and sleep as living heaters. They lived in the tents, not out in a yard, and the upturned \u201cSammy smile\u201d kept drool from freezing on the trail.\n\nTheir coat is so dense that shed fur is sometimes spun into yarn \u2014 a sweater from a snow cloud. A lonely Sammy will invent a song the neighbors will learn by heart, because this is a dog that was bred to stay close to people in the cold, not to wait outside it."
+      "Samoyeds, the smiling sled dogs, were bred for hard work in the world's coldest locales. In the Siberian town of Oymyakon, for instance, temperatures of minus-60 degrees are common.\n\nThe Sammy's famous white coat is thick enough to protect against such brutal conditions. Powerful, agile, tireless, impervious to cold, Sammies are drop-dead gorgeous but highly functional."
   },
   {
     id: "bernese-mountain-dog",
@@ -456,11 +457,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 46.9,
     lng: 7.5,
     bark: "deep",
-    sourceUrl: "https://en.wikipedia.org/wiki/Bernese_Mountain_Dog",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/bernese-mountain-dog/",
+    sourceLabel: "American Kennel Club",
     intro: "From the Swiss Alps, please welcome the Bernese Mountain Dog.",
     story:
-      "In the Swiss canton of Bern, these tri-color farm dogs drafted carts of milk and cheese between alpine villages. Black, rust, and white is not just pretty \u2014 it is the breed\u2019s uniform, and they are one of four Swiss mountain dogs.\n\nThey are gentle giants who would rather a cool morning than a hot afternoon. They are not a long-lived breed, which makes those calm years feel even more precious. A Berner wants to be near the work and near the people, preferably both at once, on a road that smells like grass."
+      "They are a large, sturdy worker who can stand over 27 inches at the shoulder. The thick, silky, and moderately long coat is tricolored: jet black, clear white, and rust.\n\nThe distinctive markings on the coat and face are breed hallmarks and, combined with the intelligent gleam in the dark eyes, add to the Berner's aura of majestic nobility. A hardy dog who thrives in cold weather, the Berner's brain and brawn helped him multitask on the farms and pastures of Switzerland."
   },
   {
     id: "newfoundland",
@@ -473,11 +474,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 49.2,
     lng: -56.0,
     bark: "deep",
-    sourceUrl: "https://en.wikipedia.org/wiki/Newfoundland_dog",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/newfoundland/",
+    sourceLabel: "American Kennel Club",
     intro: "Coming all the way from Canada, is the Newfoundland.",
     story:
-      "Webbed feet, a waterproof coat, and huge lungs made the Newfoundland a born lifeguard in icy Atlantic water. Fishermen used them as living tow-lines, and they still swim with a kind of breaststroke that looks almost human from the shore.\n\nJ.M. Barrie\u2019s dog Luath inspired Nana in Peter Pan, the nanny who thought in woofs. Calm rescue instinct is still the breed\u2019s quiet superpower. Expect drool, wet floors, and a dog that treats every puddle like a drill \u2014 then leans on you as if you were the one who needed saving."
+      "A male Newfoundland can weigh up to 150 pounds and stand 28 inches at the shoulder; females typically go 100 to 120 pounds. The Newf head is majestic, the expression soft and soulful.\n\nColors are gray, brown, black, and a black-and-white coat named for artist Sir Edwin Landseer, who popularized the look in his paintings. The Newfie breed standard says that a sweet temperament is the \\\"most important single characteristic of the breed.\\\" The Newf's sterling character is expressed in their affinity for kids."
   },
   {
     id: "whippet",
@@ -490,11 +491,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 54.9,
     lng: -1.6,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Whippet",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/whippet/",
+    sourceLabel: "American Kennel Club",
     intro: "And today we have the Whippet, a pocket racehorse with a blanket habit.",
     story:
-      "English mill towns once called the whippet the poor man\u2019s racehorse: a sighthound in miniature that could hit about 35 miles an hour. Families also kept them as hearth companions, a pocket sprinter who came inside when the mill whistle blew.\n\nAfter the burst they want a blanket, because thin skin and low fat make them chilly. Speed, then snuggle, is the whole personality. A squirrel can still make a whippet forget its own name for twenty seconds, and then it will steal your spot on the sofa as if nothing happened."
+      "At somewhere between 18 and 22 inches at the shoulder, the Whippet looks like a Greyhound, but smaller. They are exhibits the classic 'inverted S' lines of the sighthound.\n\nThe deep chest and trim waist; a lean head supported by a long, arched neck; and slim but sturdy legs combine in a picture of an agile, fleet-footed athlete. Between bursts of intense pursuit, Whippets love to stretch out and relax for long hours, enjoying the role of a loving, and loved, companion."
   },
   {
     id: "maltese",
@@ -507,11 +508,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 35.9,
     lng: 14.4,
     bark: "yap",
-    sourceUrl: "https://en.wikipedia.org/wiki/Maltese_dog",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/maltese/",
+    sourceLabel: "American Kennel Club",
     intro: "Hello pups, today’s daily dog is the Maltese — a little white cloud with a very old passport.",
     story:
-      "Greek and Roman writers already described small white dogs from Mediterranean islands. The Maltese coat has little undercoat, so it hardly sheds and can grow to the floor \u2014 single-layered hair that can also be kept in a short pet trim.\n\nEuropean nobles kept them as living jewelry, lap warmers for people who could afford not to hunt. They have a very old passport and a very current job: sit close, look like a cloud, and announce visitors as if the palace still had a gate."
+      "Maltese are affectionate toy dogs weighing less than seven pounds, covered by a long, straight, silky coat. Beneath the all-white mantle is a compact body moving with a smooth and effortless gait.\n\nThe overall picture depicts free-flowing elegance and balance. The irresistible Maltese face' with its big, dark eyes and black gumdrop nose' can conquer the most jaded sensibility."
   },
   {
     id: "saint-bernard",
@@ -524,11 +525,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 45.9,
     lng: 7.2,
     bark: "deep",
-    sourceUrl: "https://en.wikipedia.org/wiki/St._Bernard_(dog)",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/st-bernard/",
+    sourceLabel: "American Kennel Club",
     intro: "From the mountain hospices, here comes the Saint Bernard.",
     story:
-      "Hospice monks in the Alps sent these dogs into blizzards to find lost travelers. The brandy barrel is a painter\u2019s myth, not a packing list. A nineteenth-century Saint named Barry is still credited with dozens of mountain rescues \u2014 a reminder that the real tool was a nose, not a cask.\n\nThe original hospice dogs were smaller and shorter-haired than the Saints in paintings, and avalanche work has mostly passed to machines. The drooly giant remains, a dog whose story is still about finding someone in the weather, even if the weather is just your front hall after a walk."
+      "Not ranked particularly high in AKC registrations, this genial giant is nonetheless among the world's most famous and beloved breeds. The Saint's written standard abounds with phrases like \\\"very powerful,\\\" \\\"extraordinarily muscular,\\\" \\\"imposing,\\\" and \\\"massive.\\\" A male stands a minimum 27.5 inches at the shoulder; females will be smaller and more delicately built.\n\nThe huge head features a wrinkled brow, a short muzzle, and dark eyes, combining to give Saints the intelligent, friendly expression that was such a welcome sight to stranded Alpine travelers. In the year 1050, at a snowy pass within the Alps, a monk named Bernard of Menthon established a hospice to aid pilgrims journeying to Rome."
   },
   {
     id: "australian-cattle-dog",
@@ -541,11 +542,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: -25.3,
     lng: 133.8,
     bark: "woof",
-    sourceUrl: "https://en.wikipedia.org/wiki/Australian_Cattle_Dog",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/australian-cattle-dog/",
+    sourceLabel: "American Kennel Club",
     intro: "Coming all the way from Australian cattle country, is the Australian Cattle Dog.",
     story:
-      "On huge Australian stations, these dogs drove cattle by nipping heels across distances that would melt a softer breed. They were mixed with dingoes and collies to handle wild cattle, and puppies are born white; the blue or red speckle fills in like a developing photograph.\n\nOne cattle dog named Bluey is often listed among the longest-lived dogs ever recorded, which fits a breed built for years of hard miles. A cattle dog without a job will invent one \u2014 usually involving your ankles. They want a herd, and if you do not have cattle, you will do."
+      "Standing between 17 to 20 inches at the shoulder, the Australian Cattle Dog is a sturdy, hard-muscled herder of strength and agility. The ACD is born with a white coat that turns blue-gray or red.\n\nBoth coat varieties feature distinctive mottling or specking patterns. ACDs have immense work drive and excel at hunting, chasing, and, of course, moving livestock."
   },
   {
     id: "weimaraner",
@@ -558,11 +559,11 @@ export const CORE_BREEDS: DailyBreed[] = [
     lat: 50.98,
     lng: 11.33,
     bark: "deep",
-    sourceUrl: "https://en.wikipedia.org/wiki/Weimaraner",
-    sourceLabel: "Wikipedia",
+    sourceUrl: "https://www.akc.org/dog-breeds/weimaraner/",
+    sourceLabel: "American Kennel Club",
     intro: "And today we have the Weimaraner, the Grey Ghost of Weimar.",
     story:
-      "Nobles in Weimar kept this silver hunting dog to themselves for big game, and the nickname Grey Ghost still fits the coat and the light eyes. They were once so closely held that leaving Weimar with one was almost a scandal.\n\nPhotographer William Wegman later posed Weimaraners like people, and the world fell for the deadpan stare. Under the art-school fame is still a dog that wants to range, and they still suffer if left alone. The Grey Ghost wants a person, not a kennel, and a day with something to hunt \u2014 even if the quarry is a tennis ball in tall grass."
+      "Instantly recognized by a distinctive silvery-gray coat, male Weimaraners stand 25 to 27 inches at the shoulder, and females 23 to 25 inches. A properly bred Weimaraner will be solid colored, with maybe a small white spot on the chest.\n\nThe face, with its amber or blue-gray eyes framed by long velvety ears, is amiable and intelligent. Overall, the breed presents a picture of streamlined grace and balance."
   },
 ];
 

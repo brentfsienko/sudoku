@@ -383,3 +383,68 @@ derivative work: Ank |
 | `norwegian-elkhound.jpg` | [Norwegian Elkhound.jpg](https://commons.wikimedia.org/wiki/File%3ANorwegian_Elkhound.jpg) | CC BY-SA 3.0 | Sannse |
 | `norwich-terrier.jpg` | [Norwich Terrier dans un trou creusé.jpg](https://commons.wikimedia.org/wiki/File%3ANorwich_Terrier_dans_un_trou_creus%C3%A9.jpg) | CC BY-SA 4.0 | Gamma Corvi |
 | `nova-scotia-duck-tolling-retriever.jpg` | [Nova Scotia Duck-Tolling Retriever headshot.JPG](https://commons.wikimedia.org/wiki/File%3ANova_Scotia_Duck-Tolling_Retriever_headshot.JPG) | CC BY-SA 3.0 | kallerna |
+
+## AKC catalog fill
+
+| File | Commons title | License | Author |
+|---|---|---|---|
+| `anatolian-shepherd-dog.jpg` | [Anatolian Shepherd Dog Laying.jpg](https://commons.wikimedia.org/wiki/File%3AAnatolian_Shepherd_Dog_Laying.jpg) | CC0 | Cheetyuh |
+| `bavarian-mountain-scent-hound.jpg` | [BayerischerGebirgsSchweisshund.jpg](https://commons.wikimedia.org/wiki/File%3ABayerischerGebirgsSchweisshund.jpg) | CC BY-SA 3.0 |  |
+| `bouvier-de-ardennes.jpg` | [Bouvier des Ardennes aka Ardennes Cattle Dog 1.JPG](https://commons.wikimedia.org/wiki/File%3ABouvier_des_Ardennes_aka_Ardennes_Cattle_Dog_1.JPG) | CC BY-SA 3.0 | Canarian |
+| `russell-terrier.jpg` | [Jack Russell Jolly Dogs Smartie.jpg](https://commons.wikimedia.org/wiki/File%3AJack_Russell_Jolly_Dogs_Smartie.jpg) | CC BY-SA 3.0 | JOLLY-DOGS-JACK-RUSSELL |
+| `russian-toy.jpg` | [RusskiyToyWelpe9Mon.JPG](https://commons.wikimedia.org/wiki/File%3ARusskiyToyWelpe9Mon.JPG) | Public domain |  |
+| `russian-tsvetnaya-bolonka.jpg` | [Bolonka-champagne profile.jpg](https://commons.wikimedia.org/wiki/File%3ABolonka-champagne_profile.jpg) | CC BY-SA 4.0 | Canarian |
+| `saarloos-wolfhond.jpg` | [Saarlooswolfhond.jpg](https://commons.wikimedia.org/wiki/File%3ASaarlooswolfhond.jpg) | CC BY-SA 3.0 |  |
+| `saluki.jpg` | [Head Right Saluki Dog Show 2026 Ooty May26 A7CR 10800.jpg](https://commons.wikimedia.org/wiki/File%3AHead_Right_Saluki_Dog_Show_2026_Ooty_May26_A7CR_10800.jpg) | CC BY-SA 4.0 | This Photo was taken by Timothy A. Gonsalves.  Feel free to use my photos, but p |
+| `schapendoes.jpg` | [Schapendoes.jpg](https://commons.wikimedia.org/wiki/File%3ASchapendoes.jpg) | CC BY-SA 3.0 |  |
+| `schipperke.jpg` | [Schipperke circa 1904.jpg](https://commons.wikimedia.org/wiki/File%3ASchipperke_circa_1904.jpg) | Public domain | Unknown author |
+| `scottish-deerhound.jpg` | [A deerhound quartet by the Kyle of Durness - geograph.org.uk - 2414216.jpg](https://commons.wikimedia.org/wiki/File%3AA_deerhound_quartet_by_the_Kyle_of_Durness_-_geograph.org.uk_-_2414216.jpg) | CC BY-SA 2.0 | Des Colhoun |
+| `scottish-terrier.jpg` | [Scottish Terrier-Ch-Peabar Goodness Gracious (16584798615).jpg](https://commons.wikimedia.org/wiki/File%3AScottish_Terrier-Ch-Peabar_Goodness_Gracious_%2816584798615%29.jpg) | CC BY 2.0 | Pets Adviser from Brooklyn, USA |
+| `sealyham-terrier.jpg` | [Sealyham terrier y7.jpg](https://commons.wikimedia.org/wiki/File%3ASealyham_terrier_y7.jpg) | CC BY-SA 3.0 | Pleple2000 |
+| `segugio-italiano.jpg` | [Segugioitalianopelorasofulvo.JPG](https://commons.wikimedia.org/wiki/File%3ASegugioitalianopelorasofulvo.JPG) | Public domain | Cyberjobe |
+| `shetland-sheepdog.jpg` | [A Shetland sheep dog.jpg](https://commons.wikimedia.org/wiki/File%3AA_Shetland_sheep_dog.jpg) | CC BY-SA 4.0 | Liasmith93 |
+| `shih-tzu.jpg` | [Shih Tzu portrait show dog.jpg](https://commons.wikimedia.org/wiki/File%3AShih_Tzu_portrait_show_dog.jpg) | CC BY 2.0 | danny O. |
+| `shikoku-ken.jpg` | [Shikoku Ken 1.jpg](https://commons.wikimedia.org/wiki/File%3AShikoku_Ken_1.jpg) | CC BY-SA 4.0 | Canarian |
+| `silken-windhound.jpg` | [Silken Windhound and Borzoi (Kal tyler).jpg](https://commons.wikimedia.org/wiki/File%3ASilken_Windhound_and_Borzoi_%28Kal_tyler%29.jpg) | CC BY-SA 3.0 | Talismanhound |
+| `skye-terrier.jpg` | [Skye terrier 800.jpg](https://commons.wikimedia.org/wiki/File%3ASkye_terrier_800.jpg) | CC BY-SA 3.0 | Pleple2000 |
+| `sloughi.jpg` | [Palestine, Wadi Qelt, Landscape with the dog Sloughi (2).jpg](https://commons.wikimedia.org/wiki/File%3APalestine%2C_Wadi_Qelt%2C_Landscape_with_the_dog_Sloughi_%282%29.jpg) | CC BY-SA 4.0 | Britchi Mirela |
+| `slovakian-wirehaired-pointer.jpg` | [Bella z Milhostovskych poli.jpg](https://commons.wikimedia.org/wiki/File%3ABella_z_Milhostovskych_poli.jpg) | Public domain | Martina Vernerová (breeders HP (Ing. Urban Michal)) |
+| `slovensky-cuvac.jpg` | [Cuvac 1.jpg](https://commons.wikimedia.org/wiki/File%3ACuvac_1.jpg) | CC BY-SA 3.0 |  |
+| `slovensky-kopov.jpg` | [BIR Grupp 6- SLOVENSKÝ KOPOV, Rantafejs Cezary Av Fileddy (24234227795).jpg](https://commons.wikimedia.org/wiki/File%3ABIR_Grupp_6-_SLOVENSK%C3%9D_KOPOV%2C_Rantafejs_Cezary_Av_Fileddy_%2824234227795%29.jpg) | CC BY 2.0 | Svenska Mässan from Sweden |
+| `small-munsterlander.jpg` | [Kleiner Münsterländer aka Small Munsterlander 1.jpg](https://commons.wikimedia.org/wiki/File%3AKleiner_M%C3%BCnsterl%C3%A4nder_aka_Small_Munsterlander_1.jpg) | CC BY-SA 3.0 | Canarian |
+| `smooth-fox-terrier.jpg` | [Patrick the Smooth Fox Terrier.jpg](https://commons.wikimedia.org/wiki/File%3APatrick_the_Smooth_Fox_Terrier.jpg) | CC BY-SA 3.0 | Tialin at English Wikipedia |
+| `soft-coated-wheaten-terrier.jpg` | [Soft Coated Wheaten Terrier 600.jpg](https://commons.wikimedia.org/wiki/File%3ASoft_Coated_Wheaten_Terrier_600.jpg) | CC BY-SA 3.0 | sannse |
+| `spanish-mastiff.jpg` | [Mastín español, línea original de trabajo. 04.jpg](https://commons.wikimedia.org/wiki/File%3AMast%C3%ADn_espa%C3%B1ol%2C_l%C3%ADnea_original_de_trabajo._04.jpg) | CC BY-SA 4.0 | Mondarruego2011 |
+| `spanish-water-dog.jpg` | [Perro agua.jpg](https://commons.wikimedia.org/wiki/File%3APerro_agua.jpg) | Public domain | No machine-readable author provided. Brindis320~commonswiki assumed (based on co |
+| `spinone-italiano.jpg` | [Spinone italiano szorstkowlosy pl.jpg](https://commons.wikimedia.org/wiki/File%3ASpinone_italiano_szorstkowlosy_pl.jpg) | CC BY-SA 4.0 | Pleple2000 |
+| `stabyhoun.jpg` | [Crossbred dog Stabyhoun Labrador.png](https://commons.wikimedia.org/wiki/File%3ACrossbred_dog_Stabyhoun_Labrador.png) | CC BY-SA 4.0 | Marijke De Belder |
+| `staffordshire-bull-terrier.jpg` | [First Staffordshire Bull Terrier show, 1935.jpg](https://commons.wikimedia.org/wiki/File%3AFirst_Staffordshire_Bull_Terrier_show%2C_1935.jpg) | Public domain | Unknown authorUnknown author |
+| `standard-schnauzer.jpg` | [Schnauzer moyen Bilbo.JPG](https://commons.wikimedia.org/wiki/File%3ASchnauzer_moyen_Bilbo.JPG) | CC BY-SA 3.0 | Arthur Pons |
+| `sussex-spaniel.jpg` | [Sussex spaniels at dog show.jpg](https://commons.wikimedia.org/wiki/File%3ASussex_spaniels_at_dog_show.jpg) | CC BY 2.0 | Dan Bennett |
+| `swedish-lapphund.jpg` | [Swedish lapphund 01.JPG](https://commons.wikimedia.org/wiki/File%3ASwedish_lapphund_01.JPG) | Public domain | Ljhumbix at en.wikipedia |
+| `swedish-vallhund.jpg` | [SwedishVallhundAgility wb.jpg](https://commons.wikimedia.org/wiki/File%3ASwedishVallhundAgility_wb.jpg) | CC BY-SA 3.0 |  |
+| `taiwan-dog.jpg` | [Taiwan Dog (cropped).jpeg](https://commons.wikimedia.org/wiki/File%3ATaiwan_Dog_%28cropped%29.jpeg) | CC BY 3.0 | Cho Hsun Lu |
+| `teddy-roosevelt-terrier.jpg` | [Theodore Roosevelt and Family - 24 August 1907.jpg](https://commons.wikimedia.org/wiki/File%3ATheodore_Roosevelt_and_Family_-_24_August_1907.jpg) | Public domain | Pach Brothers |
+| `thai-bangkaew.jpg` | [Thai Bangkaew Dog 2.jpg](https://commons.wikimedia.org/wiki/File%3AThai_Bangkaew_Dog_2.jpg) | CC BY-SA 4.0 | Canarian |
+| `thai-ridgeback.jpg` | [Thai ridgeback t444.jpg](https://commons.wikimedia.org/wiki/File%3AThai_ridgeback_t444.jpg) | CC BY-SA 3.0 | Pleple2000 |
+| `tibetan-mastiff.jpg` | [2013 Westminster Kennel Club Dog Show- Tibetan Mastiff GCH Sierras'Sasha-Yakone Nanuk (8469240739) (cropped).jpg](https://commons.wikimedia.org/wiki/File%3A2013_Westminster_Kennel_Club_Dog_Show-_Tibetan_Mastiff_GCH_Sierras%27Sasha-Yakone_Nanuk_%288469240739%29_%28cropped%29.jpg) | CC BY 2.0 | Pets Adviser from Brooklyn, USA |
+| `tibetan-spaniel.jpg` | [Forest fleurs Evita Tiara.jpg](https://commons.wikimedia.org/wiki/File%3AForest_fleurs_Evita_Tiara.jpg) | CC BY-SA 3.0 | MBOE3 |
+| `tibetan-terrier.jpg` | [Tibetan terrier dog running outdoors with tongue sticking out.jpg](https://commons.wikimedia.org/wiki/File%3ATibetan_terrier_dog_running_outdoors_with_tongue_sticking_out.jpg) | CC BY-SA 4.0 | Slavica Stajic |
+| `tornjak.jpg` | [Tornjak big PL.jpg](https://commons.wikimedia.org/wiki/File%3ATornjak_big_PL.jpg) | CC BY-SA 4.0 | Tomasz Waśko |
+| `tosa.jpg` | [Tosa Inu - Boss.jpg](https://commons.wikimedia.org/wiki/File%3ATosa_Inu_-_Boss.jpg) | CC BY-SA 4.0 | Academician.NYAS |
+| `toy-fox-terrier.jpg` | [Toy Fox Terrier 2.jpg](https://commons.wikimedia.org/wiki/File%3AToy_Fox_Terrier_2.jpg) | CC BY-SA 3.0 | Terry Best |
+| `transylvanian-hound.jpg` | [Erdelyi kopo VadaszNimrodSzeder01.jpg](https://commons.wikimedia.org/wiki/File%3AErdelyi_kopo_VadaszNimrodSzeder01.jpg) | CC BY-SA 3.0 | Lnko2323 |
+| `treeing-tennessee-brindle.jpg` | [Tennessee treeing brindle hound dog.jpg](https://commons.wikimedia.org/wiki/File%3ATennessee_treeing_brindle_hound_dog.jpg) | CC BY-SA 3.0 | Samhelper |
+| `treeing-walker-coonhound.jpg` | [Treeing Walker Coonhound-16-Ch-Bolt Action Rowdy 03 (16584772685).jpg](https://commons.wikimedia.org/wiki/File%3ATreeing_Walker_Coonhound-16-Ch-Bolt_Action_Rowdy_03_%2816584772685%29.jpg) | CC BY 2.0 | Pets Adviser from Brooklyn, USA |
+| `vizsla.jpg` | [Magyar Vizsla male 1 year old dog in forest.jpg](https://commons.wikimedia.org/wiki/File%3AMagyar_Vizsla_male_1_year_old_dog_in_forest.jpg) | CC BY-SA 4.0 | Markgraf1508 |
+| `volpino-italiano.jpg` | [Volpino04.jpg](https://commons.wikimedia.org/wiki/File%3AVolpino04.jpg) | CC BY-SA 3.0 |  |
+| `welsh-springer-spaniel.jpg` | [Welsh Springer Spaniel Dog.jpg](https://commons.wikimedia.org/wiki/File%3AWelsh_Springer_Spaniel_Dog.jpg) | CC BY-SA 2.0 | Siri |
+| `welsh-terrier.jpg` | [Welsh Terrier portrait.jpg](https://commons.wikimedia.org/wiki/File%3AWelsh_Terrier_portrait.jpg) | CC BY 2.0 | Brian chee |
+| `west-highland-white-terrier.jpg` | [West Highland White Terrier lying on lawn May 2023.jpg](https://commons.wikimedia.org/wiki/File%3AWest_Highland_White_Terrier_lying_on_lawn_May_2023.jpg) | CC BY-SA 4.0 | Dominic Nelson |
+| `wetterhoun.jpg` | [Frisian water dog.jpg](https://commons.wikimedia.org/wiki/File%3AFrisian_water_dog.jpg) | CC BY-SA 4.0 | Canarian |
+| `wire-fox-terrier.jpg` | [Asta in After the Thin Man trailer.jpg](https://commons.wikimedia.org/wiki/File%3AAsta_in_After_the_Thin_Man_trailer.jpg) | Public domain | Trailer screenshot Licencing information :https://web.archive.org/web/2008032103 |
+| `wirehaired-pointing-griffon.jpg` | [Wirehaired Pointing Griffon - GCH Glacier's Gertie Queen Of Spades (16418078089).jpg](https://commons.wikimedia.org/wiki/File%3AWirehaired_Pointing_Griffon_-_GCH_Glacier%27s_Gertie_Queen_Of_Spades_%2816418078089%29.jpg) | CC BY 2.0 | Pets Adviser from Brooklyn, USA |
+| `wirehaired-vizsla.jpg` | [Wirehaired Vizsla - GCH Solaris Smokin' Hot Habenera (16577937546).jpg](https://commons.wikimedia.org/wiki/File%3AWirehaired_Vizsla_-_GCH_Solaris_Smokin%27_Hot_Habenera_%2816577937546%29.jpg) | CC BY 2.0 | Pets Adviser from Brooklyn, USA |
+| `working-kelpie.jpg` | [Working kelpie au travail.jpg](https://commons.wikimedia.org/wiki/File%3AWorking_kelpie_au_travail.jpg) | CC BY-SA 4.0 | Aliénor Wayne |
+| `xoloitzcuintli.jpg` | [Xoloitzcuintli - GCH Bayshore Georgio Armani 09 (16397731930).jpg](https://commons.wikimedia.org/wiki/File%3AXoloitzcuintli_-_GCH_Bayshore_Georgio_Armani_09_%2816397731930%29.jpg) | CC BY 2.0 | Pets Adviser from Brooklyn, USA |
+| `yakutian-laika.jpg` | [Yl0101.jpg](https://commons.wikimedia.org/wiki/File%3AYl0101.jpg) | CC BY-SA 4.0 | Yras |
