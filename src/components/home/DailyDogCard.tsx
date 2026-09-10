@@ -182,12 +182,12 @@ export function DailyDogCard() {
     portalReady && photoOpen
       ? createPortal(
           <div
-            className="fixed inset-0 z-[200] flex items-center justify-center p-6"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/55 p-6"
             onClick={() => setPhotoOpen(false)}
             role="presentation"
           >
             <div
-              className="relative max-h-[85dvh] max-w-[min(28rem,92vw)]"
+              className="relative flex max-h-[85dvh] max-w-[min(28rem,92vw)] items-center justify-center"
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-modal="true"
@@ -197,7 +197,7 @@ export function DailyDogCard() {
               <img
                 src={breed.image}
                 alt={breed.name}
-                className="max-h-[85dvh] w-full rounded-md object-contain shadow-xl"
+                className="max-h-[85dvh] max-w-full rounded-md object-contain shadow-xl"
               />
               <button
                 type="button"
@@ -235,14 +235,14 @@ export function DailyDogCard() {
             aria-expanded={false}
             className="flex w-full items-center gap-3 px-4 py-3 text-left transition active:scale-[0.99]"
           >
-            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md">
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--background)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={breed.image}
                 alt=""
                 width={48}
                 height={48}
-                className={`h-12 w-12 object-cover ${unseen ? "scale-110 blur-[6px]" : ""}`}
+                className={`h-full w-full object-contain ${unseen ? "blur-[6px]" : ""}`}
               />
               {unseen && <SparkleCover />}
             </span>
@@ -300,14 +300,14 @@ export function DailyDogCard() {
               <button
                 type="button"
                 onClick={openPhoto}
-                className="w-1/2 shrink-0"
+                className="relative aspect-square w-1/2 shrink-0 overflow-hidden rounded-md bg-[var(--background)]"
                 aria-label={`View larger photo of ${breed.name}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={breed.image}
                   alt={breed.name}
-                  className="aspect-square w-full rounded-md object-cover"
+                  className="absolute inset-0 h-full w-full object-contain"
                 />
               </button>
               <div className="flex min-w-0 flex-1 flex-col">
