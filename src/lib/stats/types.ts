@@ -476,6 +476,17 @@ export function emptyUserData(profile?: Partial<Profile> & { name?: string }): U
   };
 }
 
+/** True after at least one recorded game (solo, daily, or multi). */
+export function hasCompletedFirstGame(data: UserData | null | undefined): boolean {
+  if (!data) return false;
+  return (
+    data.solo.played > 0 ||
+    data.history.length > 0 ||
+    data.multi.coopPlayed > 0 ||
+    data.multi.compPlayed > 0
+  );
+}
+
 function normalizeTriviaGuesses(
   raw: Record<string, TriviaUserGuess> | undefined,
 ): Record<string, TriviaUserGuess> {

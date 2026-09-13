@@ -54,6 +54,7 @@ import {
 } from "@/lib/stats/multi";
 import {
   emptyUserData,
+  hasCompletedFirstGame,
   lifetimeSquares,
   type GameLog,
   type MultiStats,
@@ -142,6 +143,7 @@ export default function Home() {
   const statsForMe = data ?? emptyUserData();
   const [signInGateOpen, setSignInGateOpen] = useState(false);
   const statsReady = !userData.loading && !!data;
+  const hasPlayed = hasCompletedFirstGame(data);
 
   // If we land on a non-play tab first, dismiss splash once stats are ready
   // (Play tab reports readiness itself via onReady).
@@ -169,7 +171,11 @@ export default function Home() {
       setSignInGateOpen(false);
       return;
     }
+    // First visit: skip the gate so they can play. Prompt only after a
+    // finished game, once they're back on home with the splash gone.
     if (
+      playReady &&
+      hasPlayed &&
       !userData.loading &&
       userData.authConfigured &&
       !userData.user &&
@@ -177,7 +183,14 @@ export default function Home() {
     ) {
       setSignInGateOpen(true);
     }
-  }, [userData.loading, userData.authConfigured, userData.user, online]);
+  }, [
+    playReady,
+    hasPlayed,
+    userData.loading,
+    userData.authConfigured,
+    userData.user,
+    online,
+  ]);
 
   useEffect(() => {
     if (!playReady || signInGateOpen || coachmarkStep || userData.loading) return;
@@ -219,7 +232,13 @@ export default function Home() {
         />
       )}
       <IosInstallCoach
-        ready={playReady && !signInGateOpen && !coachmarkStep && !userData.loading}
+        ready={
+          playReady &&
+          hasPlayed &&
+          !signInGateOpen &&
+          !coachmarkStep &&
+          !userData.loading
+        }
         accountSeenPlatforms={userData.data?.installCoachSeenByPlatform}
         onFinished={() => setInstallCoachFinished(true)}
       />
