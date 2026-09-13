@@ -3,6 +3,9 @@
 
 After adding Wikipedia-backed extras, run scripts/fill-missing-akc-breeds.py
 then scripts/akc-daily-dog-stories.py so AKC-listed breeds (the club
+list) get AKC overviews. Height and weight for those breeds come from
+the AKC page (scripts/akc-daily-dog-stories.py --sizes-only), not
+Wikipedia infobox guesses.
 recognizes about 200, plus FSS/Miscellaneous pages) use the AKC overview
 as the primary cited source.
 """

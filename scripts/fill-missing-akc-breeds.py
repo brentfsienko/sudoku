@@ -202,7 +202,17 @@ def main() -> None:
         origin = yearcat.display_origin(origin)
         if origin.lower() in {"a faraway kennel", ""}:
             origin = "Unknown"
-        height, weight, bark = yearcat.size_and_bark(name, extract)
+        height, weight = "", ""
+        bark = yearcat.size_and_bark(name, "")[2]
+        try:
+            page = akc.fetch(f"https://www.akc.org/dog-breeds/{slug}/")
+            height, weight = akc.extract_akc_size(page)
+        except Exception as err:
+            print("  size fail", err)
+        if not height or not weight:
+            h2, w2, bark = yearcat.size_and_bark(name, extract)
+            height = height or h2
+            weight = weight or w2
         lat, lng = yearcat.coords_for(origin, name)
         try:
             photo = yearcat.download_photo(slug, name)

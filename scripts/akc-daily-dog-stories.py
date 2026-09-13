@@ -20,6 +20,7 @@ ROOT = Path("/Users/brentsienko/code/sudoku")
 EXTRA = ROOT / "src/lib/dailyDog/extraBreeds.json"
 BREEDS_TS = ROOT / "src/lib/dailyDog/breeds.ts"
 CACHE = Path("/tmp/sudoku-akc-extracts.json")
+SIZE_CACHE = Path("/tmp/sudoku-akc-sizes.json")
 INDEX = "https://www.akc.org/dog-breeds/"
 UA = "SudogkuDailyDog/1.0 (https://sudogku.com; AKC overview source)"
 CTX = ssl.create_default_context()
@@ -171,6 +172,98 @@ def jsonld_description(page: str) -> str:
     if not m:
         return ""
     return tidy_text(m.group(1).replace("&nbsp;", " "))
+
+
+def wp_string(page: str, key: str) -> str:
+    m = re.search(rf"{re.escape(key)}&quot;:&quot;(.*?)&quot;", page)
+    if not m:
+        return ""
+    return tidy_text(m.group(1))
+
+
+def wp_number(page: str, key: str) -> float | None:
+    m = re.search(rf"{re.escape(key)}&quot;:([0-9]+(?:\.[0-9]+)?)", page)
+    if m:
+        return float(m.group(1))
+    raw = wp_string(page, key)
+    try:
+        return float(raw) if raw else None
+    except ValueError:
+        return None
+
+
+def fmt_num(x: float) -> str:
+    if x == int(x):
+        return str(int(x))
+    return f"{x:.1f}".rstrip("0").rstrip(".")
+
+
+def range_str(lo: float | None, hi: float | None, unit: str) -> str | None:
+    if lo is None and hi is None:
+        return None
+    if lo is None:
+        return f"{fmt_num(hi)} {unit}"
+    if hi is None or abs(lo - hi) < 0.05:
+        return f"{fmt_num(lo)} {unit}"
+    if lo > hi:
+        lo, hi = hi, lo
+    if hi > 400:
+        return f"{fmt_num(lo)} {unit}"
+    return f"{fmt_num(lo)}–{fmt_num(hi)} {unit}"
+
+
+def compact_size_display(raw: str, long_unit: str, short_unit: str) -> str:
+    s = tidy_text(raw)
+    s = re.sub(r"(\d+)\s*1\\?/2", r"\1.5", s)
+    s = s.replace("\\/", "-").replace("\\", "")
+    s = re.sub(r"\binches\b", "in", s, flags=re.I)
+    s = re.sub(r"\bpounds?\b", "lb", s, flags=re.I)
+    s = re.sub(r"\blbs\b", "lb", s, flags=re.I)
+    s = re.sub(rf"\b{long_unit}\b", short_unit, s, flags=re.I)
+    s = s.replace(" - ", "–").replace("-", "–")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def pick_size(
+    numeric: str | None,
+    lo: float | None,
+    hi: float | None,
+    display: str,
+    long_unit: str,
+    short_unit: str,
+) -> str:
+    disp = compact_size_display(display, long_unit, short_unit) if display else ""
+    junk = bool(
+        re.search(r"proportion|n/?a|see standard", disp, re.I)
+    ) if disp else True
+    if disp and len(disp) <= 56 and not junk:
+        return disp
+    return numeric or disp
+
+
+def extract_akc_size(page: str) -> tuple[str, str]:
+    """Height/weight from the AKC breed page (numeric range, else display copy)."""
+    hmin = wp_number(page, "height_min")
+    hmax = wp_number(page, "height_max")
+    wmin = wp_number(page, "weight_min")
+    wmax = wp_number(page, "weight_max")
+    height = pick_size(
+        range_str(hmin, hmax, "in"),
+        hmin,
+        hmax,
+        wp_string(page, "height_display"),
+        "inches",
+        "in",
+    )
+    weight = pick_size(
+        range_str(wmin, wmax, "lb"),
+        wmin,
+        wmax,
+        wp_string(page, "weight_display"),
+        "pounds",
+        "lb",
+    )
+    return height or "", weight or ""
 
 
 def extract_akc(page: str) -> str:
@@ -377,7 +470,96 @@ def save_cache(cache: dict[str, str]) -> None:
     CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2))
 
 
+def load_size_cache() -> dict[str, dict[str, str]]:
+    if SIZE_CACHE.exists():
+        return json.loads(SIZE_CACHE.read_text())
+    return {}
+
+
+def save_size_cache(cache: dict[str, dict[str, str]]) -> None:
+    SIZE_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2))
+
+
+def size_from_page_or_cache(
+    url: str, sizes: dict[str, dict[str, str]]
+) -> tuple[str, str] | None:
+    cached = sizes.get(url) or {}
+    if cached.get("height") and cached.get("weight"):
+        return cached["height"], cached["weight"]
+    try:
+        page = fetch(url)
+    except Exception as err:
+        print("fail", url, err)
+        return None
+    time.sleep(0.25)
+    height, weight = extract_akc_size(page)
+    if not height and not weight:
+        return None
+    sizes[url] = {"height": height, "weight": weight}
+    save_size_cache(sizes)
+    return height, weight
+
+
+def apply_akc_sizes() -> None:
+    """Overwrite height/weight from AKC pages. Wikipedia-only rows are left alone."""
+    slugs = akc_slugs()
+    extra = json.loads(EXTRA.read_text())
+    sizes = load_size_cache()
+    ts = BREEDS_TS.read_text()
+    names = dict(re.findall(r'id: "([^"]+)"[\s\S]*?name: "([^"]+)"', ts))
+    updated = 0
+    skipped = 0
+
+    for breed_id in CORE_IDS:
+        name = names.get(breed_id, breed_id)
+        slug = match_slug(breed_id, name, slugs)
+        if not slug:
+            skipped += 1
+            print("core miss", breed_id)
+            continue
+        url = f"https://www.akc.org/dog-breeds/{slug}/"
+        pair = size_from_page_or_cache(url, sizes)
+        if not pair:
+            skipped += 1
+            print("core no size", breed_id)
+            continue
+        height, weight = pair
+        if height:
+            ts = patch_ts_field(ts, breed_id, "height", height)
+        if weight:
+            ts = patch_ts_field(ts, breed_id, "weight", weight)
+        updated += 1
+        print("core", breed_id, height, weight)
+
+    BREEDS_TS.write_text(ts)
+
+    for row in extra:
+        slug = match_slug(row["id"], row["name"], slugs)
+        if not slug:
+            skipped += 1
+            continue
+        url = f"https://www.akc.org/dog-breeds/{slug}/"
+        pair = size_from_page_or_cache(url, sizes)
+        if not pair:
+            skipped += 1
+            print("extra no size", row["id"])
+            continue
+        height, weight = pair
+        if height:
+            row["height"] = height
+        if weight:
+            row["weight"] = weight
+        updated += 1
+        print("extra", row["id"], height, weight)
+
+    EXTRA.write_text(json.dumps(extra, indent=2, ensure_ascii=False) + "\n")
+    print("sized", updated, "skipped", skipped)
+
+
 def main() -> None:
+    if "--sizes-only" in __import__("sys").argv:
+        apply_akc_sizes()
+        return
     extras_only = "--extras-only" in __import__("sys").argv
     slugs = akc_slugs()
     extra = json.loads(EXTRA.read_text())
