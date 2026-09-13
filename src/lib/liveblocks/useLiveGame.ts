@@ -27,6 +27,7 @@ import type {
   PlayerRole,
 } from "@/lib/game/types";
 import { MAX_PLAYERS } from "@/lib/game/types";
+import { countdownStartAt } from "@/lib/game/countdown";
 import { generatePuzzle } from "@/lib/sudoku/generator";
 
 type UndoFrame = { index: number; prev: CellEntry | undefined };
@@ -112,7 +113,7 @@ export function useLiveGame(opts: {
     if (m.get("hostId") !== hostUserId) return;
     if (m.get("status") !== "lobby") return;
     if (!m.get("puzzle")) return;
-    m.update({ status: "playing", startedAt: Date.now() });
+    m.update({ status: "playing", startedAt: countdownStartAt() });
   }, []);
 
   const place = useMutation(
@@ -240,7 +241,7 @@ export function useLiveGame(opts: {
       puzzle: p.puzzle,
       solution: p.solution,
       status: "playing",
-      startedAt: Date.now(),
+      startedAt: countdownStartAt(),
       finishedAt: null,
       mistakes: 0,
       hintsUsed: 0,

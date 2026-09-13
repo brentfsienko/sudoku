@@ -6,6 +6,7 @@ import { NumberPad } from "./NumberPad";
 import { ActionBar } from "./ActionBar";
 import { StatsBar } from "./StatsBar";
 import { ResultsOverlay } from "./ResultsOverlay";
+import { GameCountdown } from "./GameCountdown";
 import { PlayerBadge } from "@/components/PlayerBadge";
 import { StreakBonePill } from "@/components/home/StreakBonePill";
 import { countCollectedBones } from "@/lib/bones/collect";
@@ -15,6 +16,7 @@ import { ChevronLeftIcon, PlayIcon } from "@/components/icons";
 import type { RoomChatReturn } from "@/lib/liveblocks/useRoomChat";
 import type { GameController } from "@/lib/game/store";
 import { elapsedSeconds } from "@/lib/game/store";
+import { useCountdownPhase } from "@/lib/game/countdown";
 import {
   cellContributions,
   digitCounts,
@@ -115,6 +117,11 @@ export function GameScreen({
     analyticsMode ?? (mode === "single" ? "solo" : "multiplayer");
 
   const now = useNow(snapshot.status === "playing");
+  const countPhase = useCountdownPhase(
+    snapshot.status === "playing" ? snapshot.startedAt : null,
+  );
+  const countingDown = countPhase !== null;
+  const locked = paused || countingDown;
   const rawElapsed = elapsedSeconds(snapshot, now);
 
   // Daily penalty mode: no heart limit, add exponential time per mistake.
@@ -193,6 +200,12 @@ export function GameScreen({
   useEffect(() => {
     if (startReported.current) return;
     if (snapshot.status === "lobby" || snapshot.status === "done") return;
+    if (
+      snapshot.startedAt != null &&
+      snapshot.startedAt > Date.now()
+    ) {
+      return;
+    }
     startReported.current = true;
     trackGameStart({
       mode: finishAnalyticsMode,
@@ -204,6 +217,7 @@ export function GameScreen({
     snapshot.status,
     snapshot.difficulty,
     finishAnalyticsMode,
+    countingDown,
   ]);
 
   useLayoutEffect(() => {
@@ -241,6 +255,7 @@ export function GameScreen({
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (snapshot.status !== "playing") return;
+      if (snapshot.startedAt != null && snapshot.startedAt > Date.now()) return;
       if (e.key >= "1" && e.key <= "9") controller.inputDigit(Number(e.key));
       else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
@@ -326,14 +341,17 @@ export function GameScreen({
           penaltyFlash={penaltyFlash}
           score={score}
           paused={paused}
-          showPause={!isMulti}
-          onTogglePause={() => controller.setPaused(!paused)}
+          showPause={!isMulti && !countingDown}
+          onTogglePause={() => {
+            if (countingDown) return;
+            controller.setPaused(!paused);
+          }}
         />
       </div>
 
       {/* Board */}
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-3 py-3 [container-type:size]">
-        <div className="aspect-square h-[min(100%,100cqmin)] w-[min(100%,100cqmin)]">
+        <div className="relative aspect-square h-[min(100%,100cqmin)] w-[min(100%,100cqmin)]">
           <Board
             snapshot={snapshot}
             selectedCell={controller.selectedCell}
@@ -341,10 +359,11 @@ export function GameScreen({
             boneCells={bonePlay.boneCells}
             collectedBones={bonePlay.collectedBones}
             popCell={bonePlay.popCell}
-            onSelect={controller.select}
+            onSelect={locked ? () => {} : controller.select}
           />
+          <GameCountdown phase={countPhase} />
         </div>
-        {paused && (
+        {paused && !countingDown && (
           <div className="absolute inset-3 flex flex-col items-center justify-center gap-5 rounded-md bg-[var(--background)]/95">
             <span className="text-[var(--primary)]">
               <PlayIcon width={52} height={52} />
@@ -378,7 +397,7 @@ export function GameScreen({
           notesMode={controller.notesMode}
           hintsRemaining={controller.hintsRemaining}
           canUndo={controller.canUndo}
-          disabled={done || paused}
+          disabled={done || locked}
           onUndo={controller.undo}
           onToggleNotes={controller.toggleNotes}
           onHint={controller.hint}
@@ -394,7 +413,7 @@ export function GameScreen({
         />
         <NumberPad
           counts={counts}
-          disabled={done || paused}
+          disabled={done || locked}
           onInput={controller.inputDigit}
         />
       </div>

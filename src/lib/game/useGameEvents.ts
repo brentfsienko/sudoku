@@ -26,6 +26,7 @@ export function useGameEvents({ myRole, mode, playing }: Props) {
   const others = useOthers();
   const cells = useStorage((root) => root.cells);
   const status = useStorage((root) => root.meta?.status);
+  const startedAt = useStorage((root) => root.meta?.startedAt);
 
   // ── Player join / leave ────────────────────────────────────────────────────
   const prevOtherIds = useRef<Set<string>>(new Set());
@@ -55,15 +56,15 @@ export function useGameEvents({ myRole, mode, playing }: Props) {
 
   // ── Game started ──────────────────────────────────────────────────────────
   useEffect(() => {
-    if (status === "playing" && !hasFiredStart.current) {
+    if (status !== "playing" || hasFiredStart.current) return;
+    if (startedAt == null) return;
+    const delay = Math.max(200, startedAt - Date.now() + 150);
+    const id = setTimeout(() => {
       hasFiredStart.current = true;
-      // Small delay so the board has animated in
-      const id = setTimeout(() => {
-        toast("🧩 puzzle started — good luck!", { duration: 3000 });
-      }, 600);
-      return () => clearTimeout(id);
-    }
-  }, [status]);
+      toast("🧩 puzzle started — good luck!", { duration: 3000 });
+    }, delay);
+    return () => clearTimeout(id);
+  }, [status, startedAt]);
 
   // ── Opponent ahead (competitive only) ────────────────────────────────────
   const prevMyCount = useRef(0);

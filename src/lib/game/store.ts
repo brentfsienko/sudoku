@@ -18,6 +18,7 @@ import {
   stripNoteFromPeers,
   solutionDigit,
 } from "./engine";
+import { countdownStartAt } from "./countdown";
 
 export type GameSnapshot = {
   puzzle: string;
@@ -82,7 +83,7 @@ export function createSnapshot(args: {
     difficulty: args.difficulty,
     mode: args.mode,
     status: "playing",
-    startedAt: Date.now(),
+    startedAt: countdownStartAt(),
     finishedAt: null,
     pausedMs: 0,
     pauseStartedAt: null,
