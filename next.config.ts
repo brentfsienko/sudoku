@@ -3,6 +3,14 @@ import { withSerwist } from "@serwist/turbopack";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async redirects() {
+    return [
+      { source: "/about", destination: "/", permanent: true },
+      { source: "/free-sudoku", destination: "/play", permanent: true },
+      { source: "/sudoku-online", destination: "/play", permanent: true },
+      { source: "/multiplayer-sudoku", destination: "/", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

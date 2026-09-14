@@ -40,14 +40,6 @@ export const SEO_KEYWORDS = [
 
 export const SEO_ROUTES = [
   { path: "/", changeFrequency: "weekly" as const, priority: 1 },
-  { path: "/about", changeFrequency: "monthly" as const, priority: 0.98 },
-  { path: "/free-sudoku", changeFrequency: "monthly" as const, priority: 0.95 },
-  { path: "/sudoku-online", changeFrequency: "monthly" as const, priority: 0.95 },
-  {
-    path: "/multiplayer-sudoku",
-    changeFrequency: "monthly" as const,
-    priority: 0.95,
-  },
   { path: "/play", changeFrequency: "weekly" as const, priority: 0.9 },
 ] as const;
 
