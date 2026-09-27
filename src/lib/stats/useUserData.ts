@@ -110,7 +110,7 @@ export function useUserData(): UseUserData {
           const u = sessionData.session?.user;
           authUser = u ? { id: u.id, email: u.email ?? null } : null;
           userRef.current = authUser;
-          setStorageScopeUserId(authUser?.id ?? null);
+          if (authUser?.id) setStorageScopeUserId(authUser.id);
           if (active) setUser(authUser);
         }
         let d = withOwnerProfile(await loadUserData(), authUser?.email);
@@ -151,14 +151,22 @@ export function useUserData(): UseUserData {
       if (!active) return;
       const u = session?.user;
       const authUser = u ? { id: u.id, email: u.email ?? null } : null;
-      userRef.current = authUser;
-      setStorageScopeUserId(authUser?.id ?? null);
-      setUser(authUser);
+      // iOS Safari often emits INITIAL_SESSION with no user before the
+      // persisted session hydrates. Do not treat that as signed-out.
+      if (authUser) {
+        userRef.current = authUser;
+        setStorageScopeUserId(authUser.id);
+        setUser(authUser);
+      } else if (event === "SIGNED_OUT") {
+        userRef.current = null;
+        setStorageScopeUserId(null);
+        setUser(null);
+      }
 
       // Never await heavy I/O in the auth listener — it can block updateUser().
       void (async () => {
         try {
-          if (event === "SIGNED_OUT" || !u) {
+          if (event === "SIGNED_OUT") {
             setStorageScopeUserId(null);
             clearUnscopedUserStorage();
             if (active) {
@@ -167,6 +175,7 @@ export function useUserData(): UseUserData {
             }
             return;
           }
+          if (!u) return;
           if (event === "PASSWORD_RECOVERY" || event === "USER_UPDATED") {
             return;
           }

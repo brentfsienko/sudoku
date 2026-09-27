@@ -17,6 +17,7 @@ import {
   STATS_UPDATED_EVENT,
 } from "@/lib/stats/store";
 import { loadLocal } from "@/lib/stats/local";
+import { liveStreak } from "@/lib/stats/types";
 import {
   getDailyActiveId,
   getDailyPuzzle,
@@ -203,7 +204,7 @@ function DailyInner() {
 
   useEffect(() => {
     void loadUserData().then((d) => {
-      setWallet({ streak: d.solo.streak, bones: d.bones ?? 0 });
+      setWallet({ streak: liveStreak(d.solo), bones: d.bones ?? 0 });
     });
 
     void (async () => {
@@ -220,7 +221,7 @@ function DailyInner() {
   useEffect(() => {
     const onStats = () => {
       const d = loadLocal();
-      setWallet({ streak: d.solo.streak, bones: d.bones ?? 0 });
+      setWallet({ streak: liveStreak(d.solo), bones: d.bones ?? 0 });
     };
     window.addEventListener(STATS_UPDATED_EVENT, onStats);
     return () => window.removeEventListener(STATS_UPDATED_EVENT, onStats);

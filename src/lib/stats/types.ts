@@ -205,31 +205,7 @@ function mergeSoloStats(a: SoloStats, b: SoloStats): SoloStats {
       b.playsByDifficulty[d] ?? 0,
     );
   }
-  const lastA = a.lastPlayedDate;
-  const lastB = b.lastPlayedDate;
-  let streak: number;
-  let lastPlayedDate: string | null;
-  if (lastA && lastB) {
-    if (lastA === lastB) {
-      streak = Math.max(a.streak, b.streak);
-      lastPlayedDate = lastA;
-    } else if (lastA > lastB) {
-      streak = a.streak;
-      lastPlayedDate = lastA;
-    } else {
-      streak = b.streak;
-      lastPlayedDate = lastB;
-    }
-  } else if (lastA) {
-    streak = a.streak;
-    lastPlayedDate = lastA;
-  } else if (lastB) {
-    streak = b.streak;
-    lastPlayedDate = lastB;
-  } else {
-    streak = Math.max(a.streak, b.streak);
-    lastPlayedDate = null;
-  }
+  const { streak, lastPlayedDate } = mergePlayStreaks(a, b);
   const bestStreak = Math.max(a.bestStreak, b.bestStreak, streak);
 
   return {
@@ -540,11 +516,17 @@ function normalizeOpponents(
 export function normalizeUserData(raw: Partial<UserData> | null | undefined): UserData {
   const base = emptyUserData();
   if (!raw) return base;
-  const solo = { ...base.solo, ...raw.solo, totalSquares: raw.solo?.totalSquares ?? 0 };
+  const recordedHistory = normalizeHistory(raw.history);
+  const soloIn = {
+    ...base.solo,
+    ...raw.solo,
+    totalSquares: raw.solo?.totalSquares ?? 0,
+  };
+  const solo = repairSoloStreak(soloIn, recordedHistory);
   const multi = normalizeMulti(raw.multi);
   const history = backfillSoloHistory(
     backfillHistoryOpponents(
-      backfillHistorySquares(normalizeHistory(raw.history), solo, multi),
+      backfillHistorySquares(recordedHistory, solo, multi),
       multi.opponents,
     ),
     solo,
@@ -832,24 +814,209 @@ export function multiBoneAward(r: MultiResult): number {
   return Math.max(0, r.bonesFound) + winBonus;
 }
 
-function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
+/** Local calendar YYYY-MM-DD — streak days match the player's midnight, not UTC. */
+function localDateKey(now = Date.now()): string {
+  const d = new Date(now);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
-function isYesterday(dateStr: string): boolean {
-  const d = new Date(dateStr + "T00:00:00");
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return d.toISOString().slice(0, 10) === yesterday.toISOString().slice(0, 10);
+function yesterdayKey(now = Date.now()): string {
+  const d = new Date(now);
+  d.setDate(d.getDate() - 1);
+  return localDateKey(d.getTime());
+}
+
+function calendarDaysBetween(earlier: string, later: string): number | null {
+  const a = /^(\d{4})-(\d{2})-(\d{2})$/.exec(earlier);
+  const b = /^(\d{4})-(\d{2})-(\d{2})$/.exec(later);
+  if (!a || !b) return null;
+  const ms =
+    Date.UTC(Number(b[1]), Number(b[2]) - 1, Number(b[3])) -
+    Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]));
+  return Math.round(ms / 86_400_000);
+}
+
+function dateKeyInTimeZone(ms: number, timeZone?: string): string {
+  if (!timeZone) return localDateKey(ms);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(ms));
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function isHourlyPlaceholderCluster(history: GameLog[]): Set<number> {
+  const skip = new Set<number>();
+  const solos = history
+    .map((log, i) => ({ log, i }))
+    .filter(
+      ({ log }) =>
+        log.mode === "solo" &&
+        !log.daily &&
+        (log.squares ?? 0) === 0 &&
+        (log.mistakes ?? 0) === 0 &&
+        !log.opponentName &&
+        typeof log.t === "number",
+    )
+    .sort((a, b) => a.log.t - b.log.t);
+  if (solos.length < 3) return skip;
+  let run: number[] = [solos[0].i];
+  for (let i = 1; i < solos.length; i++) {
+    const dt = solos[i].log.t - solos[i - 1].log.t;
+    if (dt >= 3_500_000 && dt <= 3_700_000) {
+      run.push(solos[i].i);
+    } else {
+      if (run.length >= 3) for (const idx of run) skip.add(idx);
+      run = [solos[i].i];
+    }
+  }
+  if (run.length >= 3) for (const idx of run) skip.add(idx);
+  return skip;
+}
+
+/** Unique play days from recorded games (skips synthetic hourly placeholders). */
+export function playDaysFromHistory(
+  history: GameLog[] | undefined,
+  timeZone?: string,
+  extraDays: string[] = [],
+): string[] {
+  const days = new Set<string>();
+  const logs = history ?? [];
+  const skip = isHourlyPlaceholderCluster(logs);
+  logs.forEach((log, i) => {
+    if (skip.has(i)) return;
+    if (typeof log.t !== "number" || !Number.isFinite(log.t)) return;
+    days.add(dateKeyInTimeZone(log.t, timeZone));
+  });
+  for (const day of extraDays) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(day)) days.add(day);
+  }
+  return [...days].sort();
+}
+
+export function streakFromPlayDays(days: string[]): {
+  streak: number;
+  bestStreak: number;
+  lastPlayedDate: string | null;
+} {
+  const unique = [...new Set(days)].sort();
+  if (unique.length === 0) {
+    return { streak: 0, bestStreak: 0, lastPlayedDate: null };
+  }
+  let best = 1;
+  let run = 1;
+  for (let i = 1; i < unique.length; i++) {
+    const gap = calendarDaysBetween(unique[i - 1], unique[i]);
+    if (gap === 1) run += 1;
+    else run = 1;
+    best = Math.max(best, run);
+  }
+  let streak = 1;
+  for (let i = unique.length - 1; i > 0; i--) {
+    if (calendarDaysBetween(unique[i - 1], unique[i]) === 1) streak += 1;
+    else break;
+  }
+  return {
+    streak,
+    bestStreak: best,
+    lastPlayedDate: unique[unique.length - 1] ?? null,
+  };
+}
+
+/**
+ * Rebuild current/best streak from history. Never lowers a stored streak
+ * (history can be truncated); heals UTC-ahead lastPlayedDate.
+ */
+export function repairSoloStreak(
+  solo: SoloStats,
+  history: GameLog[] | undefined,
+  extraDays: string[] = [],
+  timeZone?: string,
+): SoloStats {
+  const computed = streakFromPlayDays(
+    playDaysFromHistory(history, timeZone, extraDays),
+  );
+  let lastPlayedDate = solo.lastPlayedDate;
+  if (computed.lastPlayedDate) {
+    if (!lastPlayedDate || lastPlayedDate < computed.lastPlayedDate) {
+      lastPlayedDate = computed.lastPlayedDate;
+    } else {
+      const ahead = calendarDaysBetween(computed.lastPlayedDate, lastPlayedDate);
+      if (ahead === 1) lastPlayedDate = computed.lastPlayedDate;
+    }
+  }
+  const streak = Math.max(solo.streak, computed.streak);
+  const bestStreak = Math.max(solo.bestStreak, computed.bestStreak, streak);
+  return { ...solo, streak, bestStreak, lastPlayedDate };
+}
+
+/** Pick the live streak when two devices each have a last-played date. */
+function mergePlayStreaks(
+  a: SoloStats,
+  b: SoloStats,
+): { streak: number; lastPlayedDate: string | null } {
+  const lastA = a.lastPlayedDate;
+  const lastB = b.lastPlayedDate;
+  if (lastA && lastB) {
+    if (lastA === lastB) {
+      return { streak: Math.max(a.streak, b.streak), lastPlayedDate: lastA };
+    }
+    const [earlier, later] = lastA < lastB ? [a, b] : [b, a];
+    const earlierDay = earlier.lastPlayedDate;
+    const laterDay = later.lastPlayedDate;
+    if (!earlierDay || !laterDay) {
+      return { streak: later.streak, lastPlayedDate: laterDay ?? earlierDay };
+    }
+    const gap = calendarDaysBetween(earlierDay, laterDay);
+    // Consecutive days: keep the continuation (recovers a UTC-reset on one device).
+    if (gap === 1) {
+      return {
+        streak: Math.max(later.streak, earlier.streak + 1, 1),
+        lastPlayedDate: laterDay,
+      };
+    }
+    return { streak: later.streak, lastPlayedDate: laterDay };
+  }
+  if (lastA) return { streak: a.streak, lastPlayedDate: lastA };
+  if (lastB) return { streak: b.streak, lastPlayedDate: lastB };
+  return { streak: Math.max(a.streak, b.streak), lastPlayedDate: null };
+}
+
+/** If this finish never landed on lastPlayedDate, apply today's streak bump. */
+export function ensurePlayStreakForToday(
+  data: UserData,
+  now = Date.now(),
+): UserData {
+  if (data.solo.lastPlayedDate === localDateKey(now)) return data;
+  return { ...data, solo: applyPlayStreak(data.solo, now) };
+}
+
+/** Visible streak: still going if last play was today or yesterday (local). */
+export function liveStreak(solo: SoloStats, now = Date.now()): number {
+  const last = solo.lastPlayedDate;
+  if (!last || solo.streak <= 0) return 0;
+  const today = localDateKey(now);
+  if (last === today || last === yesterdayKey(now) || last > today) {
+    return solo.streak;
+  }
+  return 0;
 }
 
 /** Bump streak when any game finishes (solo, co-op, or versus; win or loss). */
-function applyPlayStreak(solo: SoloStats): SoloStats {
-  const today = todayKey();
+function applyPlayStreak(solo: SoloStats, now = Date.now()): SoloStats {
+  const today = localDateKey(now);
   const next = { ...solo };
-  if (next.lastPlayedDate === today) {
+  const last = next.lastPlayedDate;
+  if (last === today || (last && last > today)) {
+    // Same local day, or a leftover UTC "tomorrow" from evening play.
     next.streak = Math.max(next.streak, 1);
-  } else if (next.lastPlayedDate && isYesterday(next.lastPlayedDate)) {
+  } else if (last && last === yesterdayKey(now)) {
     next.streak = next.streak + 1;
   } else {
     next.streak = 1;

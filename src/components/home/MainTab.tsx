@@ -27,7 +27,7 @@ import { newRoomCode } from "@/lib/game/room";
 import { useOnline } from "@/lib/hooks/useOnline";
 import { usePullableSheet } from "@/lib/hooks/usePullableSheet";
 import type { UseUserData } from "@/lib/stats/useUserData";
-import type { UserData } from "@/lib/stats/types";
+import { liveStreak, type UserData } from "@/lib/stats/types";
 
 /** Space reserved for pinned title (must match header + scroll padding-top). */
 const PLAY_HEADER_HEIGHT =
@@ -107,7 +107,7 @@ export function MainTab({
   const [greetingReopenToken, setGreetingReopenToken] = useState(0);
   const readySent = useRef(false);
 
-  const streak = readyData?.solo.streak ?? data.solo.streak;
+  const streak = liveStreak(readyData?.solo ?? data.solo);
   const bones = readyData?.bones ?? data.bones ?? 0;
   // Wait for stats (+ username reconcile) before painting name-bearing lists
   // or wallet/streak — avoids emptyUserData / local-first flashes.

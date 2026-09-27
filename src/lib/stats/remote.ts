@@ -56,7 +56,10 @@ export async function loadRemote(userId: string): Promise<RemoteLoad> {
     sumHistorySquares(raw.history) < sumHistorySquares(normalized.history) ||
     JSON.stringify(raw.history ?? []) !== JSON.stringify(normalized.history) ||
     JSON.stringify(raw.multi?.opponents ?? {}) !==
-      JSON.stringify(normalized.multi.opponents);
+      JSON.stringify(normalized.multi.opponents) ||
+    normalized.solo.streak !== (raw.solo?.streak ?? 0) ||
+    normalized.solo.bestStreak !== (raw.solo?.bestStreak ?? 0) ||
+    normalized.solo.lastPlayedDate !== (raw.solo?.lastPlayedDate ?? null);
   if (needsRepair) {
     void upsertRemote(userId, normalized);
   }

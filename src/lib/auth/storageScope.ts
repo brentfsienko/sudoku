@@ -36,6 +36,11 @@ export function setStorageScopeUserId(uid: string | null): void {
   }
 }
 
+/** Remember a signed-in id. Never clears — timeouts must not demote you to guest. */
+export function rememberStorageScopeUserId(uid: string): void {
+  setStorageScopeUserId(uid);
+}
+
 export function getStorageScopeUserId(): string | null {
   return _userId;
 }

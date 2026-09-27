@@ -13,7 +13,10 @@ import {
   isSoloFinished,
 } from "@/lib/game/finishedSolo";
 import { getSupabase } from "@/lib/supabase/client";
-import { setStorageScopeUserId } from "@/lib/auth/storageScope";
+import {
+  getStorageScopeUserId,
+  rememberStorageScopeUserId,
+} from "@/lib/auth/storageScope";
 import { loadLocal, saveLocal } from "./local";
 import {
   applyWallet,
@@ -28,6 +31,7 @@ import {
   applyMultiResult,
   applySoloResult,
   emptyUserData,
+  ensurePlayStreakForToday,
   mergeActiveSolos,
   mergeUserData,
   multiBoneAward,
@@ -51,17 +55,27 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T
 }
 
 async function currentUserId(): Promise<string | null> {
+  const persisted = getStorageScopeUserId();
   const sb = getSupabase();
-  if (!sb) return null;
+  if (!sb) return persisted;
   try {
-    const { data } = await withTimeout(sb.auth.getSession(), 6000, {
-      data: { session: null },
-      error: null,
-    });
-    return data.session?.user?.id ?? null;
+    const result = await withTimeout<
+      Awaited<ReturnType<typeof sb.auth.getSession>> | null
+    >(sb.auth.getSession(), 8000, null);
+    if (!result) {
+      // Timed out — keep the last signed-in id so a phone does not write guest stats.
+      return persisted;
+    }
+    const id = result.data.session?.user?.id ?? null;
+    if (id) rememberStorageScopeUserId(id);
+    return id;
   } catch {
-    return null;
+    return persisted;
   }
+}
+
+function bindStorageScope(uid: string | null): void {
+  if (uid) rememberStorageScopeUserId(uid);
 }
 
 /** Include this device's in-progress solos AND finished IDs in the blob. */
@@ -107,7 +121,7 @@ async function loadRemoteRetry(uid: string) {
  */
 export async function loadUserData(): Promise<UserData> {
   const uid = await currentUserId();
-  setStorageScopeUserId(uid);
+  bindStorageScope(uid);
 
   let data = withDeviceActiveSolos(loadLocal());
   if (uid && data.accountId && data.accountId !== uid) {
@@ -124,6 +138,13 @@ export async function loadUserData(): Promise<UserData> {
   const remote = await loadRemoteRetry(uid);
   if (remote.ok && remote.data) {
     data = mergeUserData(data, remote.data);
+    if (
+      data.solo.streak > remote.data.solo.streak ||
+      data.solo.bestStreak > remote.data.solo.bestStreak ||
+      data.solo.lastPlayedDate !== remote.data.solo.lastPlayedDate
+    ) {
+      void upsertRemote(uid, { ...data, accountId: uid });
+    }
   }
   const wallet = await getBoneWalletRemote();
   if (wallet) data = applyWallet(data, wallet);
@@ -139,11 +160,27 @@ export const STATS_UPDATED_EVENT = "sudogku:stats-updated";
 
 export async function saveUserData(data: UserData): Promise<void> {
   const uid = await currentUserId();
-  setStorageScopeUserId(uid);
+  bindStorageScope(uid);
   let next = withDeviceActiveSolos(uid ? { ...data, accountId: uid } : data);
   applyActiveSolosToDeviceCache(next);
   saveLocal(next);
   if (uid) {
+    const remote = await loadRemoteRetry(uid);
+    if (remote.ok && remote.data) {
+      next = mergeUserData(next, remote.data);
+      saveLocal(next);
+    } else if (!remote.ok) {
+      const empty =
+        !next.solo.lastPlayedDate &&
+        next.solo.played === 0 &&
+        (next.history?.length ?? 0) === 0;
+      if (empty) {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event(STATS_UPDATED_EVENT));
+        }
+        return;
+      }
+    }
     const saved = await upsertRemote(uid, next);
     if (saved) {
       next = applyWallet(next, walletFromData(saved));
@@ -159,7 +196,7 @@ export async function saveUserData(data: UserData): Promise<void> {
 export async function seedRemoteIfMissing(): Promise<void> {
   const uid = await currentUserId();
   if (!uid) return;
-  setStorageScopeUserId(uid);
+  bindStorageScope(uid);
   const remote = await loadRemoteRetry(uid);
   if (!remote.ok) return;
   if (!remote.data) void upsertRemote(uid, withDeviceActiveSolos(loadLocal()));
@@ -167,7 +204,7 @@ export async function seedRemoteIfMissing(): Promise<void> {
 
 async function loadForWrite(): Promise<UserData> {
   const uid = await currentUserId();
-  setStorageScopeUserId(uid);
+  bindStorageScope(uid);
   let data = loadLocal();
   if (uid && data.accountId && data.accountId !== uid) {
     data = emptyUserData();
@@ -215,6 +252,8 @@ async function commitGameWithBones(
   await saveUserData(next);
 }
 
+const finishLocks = new Map<string, Promise<void>>();
+
 export async function recordSoloGame(
   result: SoloResult,
   opts?: { activeId?: string },
@@ -227,34 +266,59 @@ export async function recordSoloGame(
   const gameId =
     opts?.activeId ??
     `solo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-  const awardAmount = soloBoneAward(result);
 
-  if (opts?.activeId) {
-    const isNewFinish = claimSoloFinish(opts.activeId);
-    removeActiveSolo(opts.activeId);
-    if (!isNewFinish) {
-      // Duplicate finish (or a leftover finished id) — still credit the ledger.
-      const data = await loadForWrite();
-      await commitGameWithBones(data, gameId, awardAmount);
-      return;
-    }
-  } else {
-    claimSoloFinish(gameId);
+  const pending = finishLocks.get(gameId);
+  if (pending) {
+    await pending;
+    return;
   }
 
+  let release = () => {};
+  const lock = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  finishLocks.set(gameId, lock);
+
+  try {
+    await recordSoloGameOnce(result, gameId, opts?.activeId);
+  } finally {
+    finishLocks.delete(gameId);
+    release();
+  }
+}
+
+async function recordSoloGameOnce(
+  result: SoloResult,
+  gameId: string,
+  activeId?: string,
+): Promise<void> {
+  const awardAmount = soloBoneAward(result);
+  if (activeId) removeActiveSolo(activeId);
+
   let data = await loadForWrite();
-  if (opts?.activeId) {
+  if (activeId) {
     data = {
       ...data,
       activeSolos: mergeActiveSolos([], data.activeSolos).filter(
-        (item) => item.id !== opts.activeId,
+        (item) => item.id !== activeId,
       ),
     };
   }
 
+  const alreadyRecorded = isSoloFinished(gameId);
   const bonesFound = Math.max(0, result.bonesFound);
+
+  // A prior attempt may have claimed the id before the streak write landed
+  // (common on phones when the first persist dies). Still bump the day streak.
+  if (alreadyRecorded) {
+    data = ensurePlayStreakForToday(data);
+    await commitGameWithBones(data, gameId, awardAmount);
+    return;
+  }
+
   const after = applySoloResult(data, { ...result, bonesFound });
   await commitGameWithBones(after, gameId, awardAmount);
+  claimSoloFinish(gameId);
 }
 
 /**
@@ -352,6 +416,7 @@ export async function recordMultiGame(
 let activeSoloPersistTimer: ReturnType<typeof setTimeout> | null = null;
 
 async function persistActiveSolosToAccount(): Promise<void> {
+  if (finishLocks.size > 0) return;
   const uid = await currentUserId();
   if (!uid) return;
   try {

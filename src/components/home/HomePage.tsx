@@ -56,6 +56,7 @@ import {
   emptyUserData,
   hasCompletedFirstGame,
   lifetimeSquares,
+  liveStreak,
   type GameLog,
   type MultiStats,
   type OpponentRecord,
@@ -424,7 +425,7 @@ function MeTab({
       <MeProfileHeader
         profile={profile}
         history={history}
-        soloStreak={solo.streak}
+        soloStreak={liveStreak(solo)}
         bones={data.bones ?? 0}
         userData={userData}
         onSignIn={onSignIn}
@@ -767,7 +768,7 @@ function SoloSection({ solo }: { solo: SoloStats }) {
           { value: played.toLocaleString(), label: "Played" },
           { value: avgScore.toLocaleString(), label: "Avg Score" },
           { value: solo.bestScore.toLocaleString(), label: "Best Score" },
-          { value: String(solo.streak), label: "Day Streak" },
+          { value: String(liveStreak(solo)), label: "Day Streak" },
           { value: String(solo.bestStreak), label: "Best Streak" },
           { value: String(solo.perfectGames), label: "Perfect" },
           {

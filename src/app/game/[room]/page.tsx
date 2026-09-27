@@ -21,6 +21,7 @@ import {
   STATS_UPDATED_EVENT,
 } from "@/lib/stats/store";
 import { loadLocal } from "@/lib/stats/local";
+import { liveStreak } from "@/lib/stats/types";
 import {
   DIFFICULTIES,
   DIFFICULTY_LABELS,
@@ -134,12 +135,12 @@ function RoomInner({
 
   const syncWallet = () => {
     const d = loadLocal();
-    setWallet({ streak: d.solo.streak, bones: d.bones ?? 0 });
+    setWallet({ streak: liveStreak(d.solo), bones: d.bones ?? 0 });
   };
 
   useEffect(() => {
     void loadUserData().then((d) => {
-      setWallet({ streak: d.solo.streak, bones: d.bones ?? 0 });
+      setWallet({ streak: liveStreak(d.solo), bones: d.bones ?? 0 });
     });
   }, []);
 
