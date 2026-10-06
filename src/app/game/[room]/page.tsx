@@ -438,9 +438,11 @@ function Lobby({
   async function share() {
     const url =
       typeof window !== "undefined" ? `${window.location.origin}/game/${code}` : "";
+    // Pass text only (no separate `url`) so Messages/share targets send a single link.
+    const text = `Join my Sudogku game!\n${url}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Sudogku", text: `Join my game! Code: ${code}`, url });
+        await navigator.share({ title: "Sudogku", text });
         return;
       }
       await navigator.clipboard.writeText(url);
@@ -483,7 +485,7 @@ function Lobby({
         {/* Room code card */}
         <div className="w-full rounded-lg bg-white p-6 text-center shadow-sm">
           <div className="text-sm font-semibold text-[var(--muted)]">Room code</div>
-          <div className="font-display my-1 text-5xl font-extrabold tracking-[0.3em] text-[var(--primary)]">
+          <div className="font-display my-1 text-5xl font-extrabold tracking-[0.18em] text-[var(--primary)]">
             {code}
           </div>
           <div className="text-xs text-[var(--muted)]">

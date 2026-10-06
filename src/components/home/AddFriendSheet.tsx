@@ -56,10 +56,11 @@ export function AddFriendSheet({
 
   async function inviteFriend() {
     const handle = myUsername ? `@${myUsername}` : "Sudogku";
+    // Single link only — do not also pass `url` to navigator.share (duplicates on iOS).
     const text = `Play Sudogku with me! Find me as ${handle} — ${window.location.origin}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Sudogku", text, url: window.location.origin });
+        await navigator.share({ title: "Sudogku", text });
         return;
       }
     } catch {

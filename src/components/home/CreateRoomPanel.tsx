@@ -1,5 +1,7 @@
 "use client";
 
+import { ROOM_CODE_LENGTH } from "@/lib/game/room";
+
 type Props = {
   joinCode: string;
   onJoinCodeChange: (code: string) => void;
@@ -29,9 +31,13 @@ export function CreateRoomPanel({
       <div className="flex items-center gap-2">
         <input
           value={joinCode}
-          onChange={(e) => onJoinCodeChange(e.target.value.toUpperCase())}
-          placeholder="CODE"
-          maxLength={4}
+          onChange={(e) =>
+            onJoinCodeChange(
+              e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, ROOM_CODE_LENGTH),
+            )
+          }
+          placeholder="ABCDEF"
+          maxLength={ROOM_CODE_LENGTH}
           className="font-display w-full rounded-md border-2 border-[var(--border)] bg-[var(--background)] px-4 py-3 text-center text-lg font-bold tracking-[0.3em] outline-none focus:border-[var(--accent)]"
         />
         <button

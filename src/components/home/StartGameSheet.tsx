@@ -11,7 +11,7 @@ import type { UseFriends } from "@/lib/friends/useFriends";
 import type { PublicProfile } from "@/lib/friends/types";
 import type { UseUserData } from "@/lib/stats/useUserData";
 import type { DogId } from "@/lib/theme/dogs";
-import { newRoomCode } from "@/lib/game/room";
+import { newRoomCode, ROOM_CODE_LENGTH } from "@/lib/game/room";
 import { useOnline } from "@/lib/hooks/useOnline";
 
 type Props = {
@@ -29,7 +29,10 @@ type Props = {
 
 function JoinCodeInput({ onJoin }: { onJoin: (code: string) => void }) {
   const [code, setCode] = useState("");
-  const clean = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+  const clean = code
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, ROOM_CODE_LENGTH);
 
   return (
     <div className="mt-5 rounded-md border-2 border-[var(--border)] bg-[var(--background)] p-4">
@@ -40,14 +43,16 @@ function JoinCodeInput({ onJoin }: { onJoin: (code: string) => void }) {
         <input
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && clean.length === 4 && onJoin(clean)}
-          placeholder="ABCD"
-          maxLength={4}
+          onKeyDown={(e) =>
+            e.key === "Enter" && clean.length === ROOM_CODE_LENGTH && onJoin(clean)
+          }
+          placeholder="ABCDEF"
+          maxLength={ROOM_CODE_LENGTH}
           className="ui-input flex-1 rounded-md border border-[var(--border)] bg-white py-3 text-center text-xl font-bold uppercase tracking-widest text-[var(--foreground)] outline-none focus:border-[var(--foreground)]"
         />
         <button
           type="button"
-          disabled={clean.length !== 4}
+          disabled={clean.length !== ROOM_CODE_LENGTH}
           onClick={() => onJoin(clean)}
           className="rounded-md bg-[var(--foreground)] px-5 py-3 text-sm font-bold text-white disabled:opacity-40 active:scale-[0.98]"
         >
@@ -55,7 +60,7 @@ function JoinCodeInput({ onJoin }: { onJoin: (code: string) => void }) {
         </button>
       </div>
       <p className="mt-1.5 text-[11px] text-[var(--muted)]">
-        Ask your friend for their 4-letter room code.
+        Ask your friend for their {ROOM_CODE_LENGTH}-letter room code.
       </p>
     </div>
   );

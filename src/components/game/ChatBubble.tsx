@@ -1,6 +1,6 @@
 "use client";
 
-const MAX_BUBBLE_TEXT = 60;
+const MAX_BUBBLE_TEXT = 66;
 
 type Props = {
   text: string;
@@ -29,8 +29,9 @@ export function ChatBubble({ text, align = "center" }: Props) {
 
   return (
     <div className={`pointer-events-none absolute bottom-full mb-1.5 ${POSITION[align]}`}>
-      <div className="relative max-w-[160px] rounded-md bg-[var(--surface)] px-3 py-1.5 shadow-md">
-        <p className="font-display text-xs font-semibold leading-snug break-words text-[var(--foreground)]">
+      {/* ~10% larger than the previous 160px / text-xs bubble */}
+      <div className="relative max-w-[176px] rounded-md bg-[var(--surface)] px-3.5 py-[0.4125rem] shadow-md">
+        <p className="font-display text-[13px] font-semibold leading-snug break-words text-[var(--foreground)]">
           {display}
         </p>
         {/* Tail */}
@@ -39,9 +40,9 @@ export function ChatBubble({ text, align = "center" }: Props) {
           style={{
             width: 0,
             height: 0,
-            borderLeft: "6px solid transparent",
-            borderRight: "6px solid transparent",
-            borderTop: "6px solid var(--surface)",
+            borderLeft: "7px solid transparent",
+            borderRight: "7px solid transparent",
+            borderTop: "7px solid var(--surface)",
           }}
         />
       </div>

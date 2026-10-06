@@ -56,7 +56,10 @@ export function RoomChatPanel({ chat, myRole, onClose }: Props) {
 
   function onInputFocus() {
     window.scrollTo(0, 0);
-    requestAnimationFrame(() => window.scrollTo(0, 0));
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      inputRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
   }
 
   return (

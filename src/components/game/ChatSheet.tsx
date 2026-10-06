@@ -8,6 +8,9 @@ import type { RoomChatReturn } from "@/lib/liveblocks/useRoomChat";
 import type { PlayerRole } from "@/lib/game/types";
 
 const ANIM_MS = 300;
+const SHEET_MAX_H = 360;
+const SHEET_MIN_H = 220;
+const GAP = 8;
 
 type Props = {
   chat: RoomChatReturn;
@@ -19,6 +22,9 @@ type Props = {
  * Overlay chat, portaled to document.body. Does not lock body position/overflow
  * (that caused a full-page scroll jump on iOS). Background scroll is blocked
  * via touchmove on the overlay only.
+ *
+ * Positioned against the visual viewport so the composer stays above the
+ * software keyboard.
  */
 export function ChatSheet({ chat, myRole, onClose }: Props) {
   const [closing, setClosing] = useState(false);
@@ -26,7 +32,16 @@ export function ChatSheet({ chat, myRole, onClose }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
-  const keyboardInset = useKeyboardInset();
+  const { inset: keyboardInset, visibleHeight } = useKeyboardInset();
+
+  const sheetHeight = Math.min(
+    SHEET_MAX_H,
+    Math.max(SHEET_MIN_H, visibleHeight - GAP * 2),
+  );
+  const sheetBottom =
+    keyboardInset > 0
+      ? keyboardInset + GAP
+      : undefined;
 
   useEffect(() => {
     setMounted(true);
@@ -97,15 +112,10 @@ export function ChatSheet({ chat, myRole, onClose }: Props) {
         className={`absolute inset-x-4 z-10 mx-auto flex max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-xl ${closing ? "animate-sheet-down" : "animate-sheet-up"}`}
         style={{
           bottom:
-            keyboardInset > 0
-              ? keyboardInset + 8
-              : "max(1rem, env(safe-area-inset-bottom, 0px))",
-          height: 360,
-          maxHeight:
-            keyboardInset > 0
-              ? `calc(100% - ${keyboardInset + 16}px)`
-              : 360,
-          transition: "bottom 0.22s ease-out, max-height 0.22s ease-out",
+            sheetBottom ?? "max(1rem, env(safe-area-inset-bottom, 0px))",
+          height: sheetHeight,
+          maxHeight: sheetHeight,
+          transition: "bottom 0.18s ease-out, height 0.18s ease-out, max-height 0.18s ease-out",
         }}
         onClick={(e) => e.stopPropagation()}
       >

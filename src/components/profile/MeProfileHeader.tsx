@@ -178,8 +178,6 @@ export function MeProfileHeader({
         </p>
       </div>
 
-      <PuzzledDaysCalendar history={history} />
-
       <div className="flex w-full max-w-xs justify-center gap-10 self-center">
         <div className="flex flex-col items-center gap-1">
           <span className="text-[var(--primary)]">
@@ -202,6 +200,8 @@ export function MeProfileHeader({
           </p>
         </div>
       </div>
+
+      <PuzzledDaysCalendar history={history} />
 
       <ProfileEditModal open={editing} onClose={() => setEditing(false)}>
         <ProfileEditForm
