@@ -51,7 +51,7 @@ export const CORE_BREEDS: DailyBreed[] = [
     bark: "yap",
     sourceUrl: "https://www.akc.org/dog-breeds/shiba-inu/",
     sourceLabel: "American Kennel Club",
-    intro: "Hello pups, today’s daily dog is the Shiba Inu.",
+    intro: "Hello pups, today’s dog of the day is the Shiba Inu.",
     story:
       "Brought to America from Japan as recently as 60 years ago, Shibas are growing in popularity in the West and are already the most popular breed in their homeland. Their white markings combined with their coloring and their alert expression and smooth stride makes them almost foxlike.\n\nThey're sturdy, muscular dogs with a bold, confident personality to match. The first documented Shiba to enter the United States was imported by a military family in 1954."
   },
@@ -204,7 +204,7 @@ export const CORE_BREEDS: DailyBreed[] = [
     bark: "howl",
     sourceUrl: "https://www.akc.org/dog-breeds/basenji/",
     sourceLabel: "American Kennel Club",
-    intro: "Hello pups, today’s daily dog is the Basenji — the one that yodels.",
+    intro: "Hello pups, today’s dog of the day is the Basenji — the one that yodels.",
     story:
       "Basenjis are small, graceful hounds standing 16 or 17 inches at the shoulder. They are recognizable by their glistening short coat, tightly curled tail, and wrinkled forehead and expressive almond-shaped eyes that convey a variety of subtle, humanlike emotions.\n\nBasenjis are a lovely sight at a standstill but more impressive yet at a fast trot, when they exhibit the long, smooth strides of a mini-racehorse. And yes, it's true, they don't bark, but they make their feelings known with an odd sound described as something between a chortle and a yodel."
   },
@@ -289,7 +289,7 @@ export const CORE_BREEDS: DailyBreed[] = [
     bark: "woof",
     sourceUrl: "https://www.akc.org/dog-breeds/dachshund/",
     sourceLabel: "American Kennel Club",
-    intro: "Hello pups, today’s daily dog is the Dachshund — a badger hunter in a loaf.",
+    intro: "Hello pups, today’s dog of the day is the Dachshund — a badger hunter in a loaf.",
     story:
       "The word 'icon' is terribly overworked, but the Dachshund—with his unmistakable long-backed body, little legs, and big personality—is truly an icon of purebred dogdom. Dachshunds can be standard-sized or miniature , and come in one of three coat types: smooth, wirehaired, or longhaired.\n\nDachshunds aren't built for distance running, leaping, or strenuous swimming, but otherwise these tireless hounds are game for anything. Smart and vigilant, with a big-dog bark, they make fine watchdogs."
   },
@@ -391,7 +391,7 @@ export const CORE_BREEDS: DailyBreed[] = [
     bark: "yap",
     sourceUrl: "https://www.akc.org/dog-breeds/yorkshire-terrier/",
     sourceLabel: "American Kennel Club",
-    intro: "Hello pups, today’s daily dog is the Yorkshire Terrier.",
+    intro: "Hello pups, today’s dog of the day is the Yorkshire Terrier.",
     story:
       "They are a compact, toy-size terrier of no more than seven pounds whose crowning glory is a floor-length, silky coat of steel blue and a rich golden tan. Don't let the Yorkie's daintiness fool you.\n\nTenacious, feisty, brave, and sometimes bossy, the Yorkie exhibits all the traits of a true terrier. Often named the most popular dog breed in various American cities, Yorkies pack lots of big-town attitude into a small but self-important package."
   },
@@ -510,7 +510,7 @@ export const CORE_BREEDS: DailyBreed[] = [
     bark: "yap",
     sourceUrl: "https://www.akc.org/dog-breeds/maltese/",
     sourceLabel: "American Kennel Club",
-    intro: "Hello pups, today’s daily dog is the Maltese — a little white cloud with a very old passport.",
+    intro: "Hello pups, today’s dog of the day is the Maltese — a little white cloud with a very old passport.",
     story:
       "Maltese are affectionate toy dogs weighing less than seven pounds, covered by a long, straight, silky coat. Beneath the all-white mantle is a compact body moving with a smooth and effortless gait.\n\nThe overall picture depicts free-flowing elegance and balance. The irresistible Maltese face' with its big, dark eyes and black gumdrop nose' can conquer the most jaded sensibility."
   },
@@ -567,7 +567,7 @@ export const CORE_BREEDS: DailyBreed[] = [
   },
 ];
 
-/** Local calendar date YYYY-MM-DD — new Daily Dog at midnight in the user's timezone. */
+/** Local calendar date YYYY-MM-DD — new Dog of the Day at midnight in the user's timezone. */
 export function todayDateKey(now = Date.now()): string {
   const d = new Date(now);
   const y = d.getFullYear();

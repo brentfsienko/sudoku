@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDownIcon, PlayIcon, VolumeIcon, XIcon } from "@/components/icons";
-import { OriginMiniMap } from "@/components/home/OriginMiniMap";
 import { homeSectionTitleClass } from "@/components/home/FriendListPanel";
 import {
   breedForDateKey,
@@ -138,7 +137,7 @@ export function DailyDogCard() {
   if (!breed) {
     return (
       <section className="mb-5">
-        <h2 className={`${homeSectionTitleClass} mb-2.5`}>Daily Dog</h2>
+        <h2 className={`${homeSectionTitleClass} mb-2.5`}>Dog of the Day</h2>
         <div className="h-[72px] rounded-md border border-[var(--primary)]/35 bg-[var(--primary-soft)]" />
       </section>
     );
@@ -216,11 +215,11 @@ export function DailyDogCard() {
   return (
     <section className="mb-5">
       <h2 className={`${homeSectionTitleClass} mb-2.5 flex items-center gap-2`}>
-        Daily Dog
+        Dog of the Day
         {unseen && (
           <span
             className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e23d3d] text-[12px] font-bold leading-none text-white animate-new-badge"
-            aria-label="New daily dog"
+            aria-label="New dog of the day"
           >
             !
           </span>
@@ -347,13 +346,6 @@ export function DailyDogCard() {
               {paragraphs.map((p, i) => (
                 <p key={i}>{p}</p>
               ))}
-            </div>
-
-            <div className="mt-3">
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--muted)]">
-                Where they come from
-              </p>
-              <OriginMiniMap lat={breed.lat} lng={breed.lng} label={breed.origin} />
             </div>
 
             <p className="mt-3 text-xs text-[var(--muted)]">
