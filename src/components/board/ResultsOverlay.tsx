@@ -62,7 +62,17 @@ export function ResultsOverlay({
   if (mode === "competitive" && opponent) {
     const myCount = contrib[me.role];
     const oppCount = contrib[opponent.role];
-    if (myCount === oppCount) {
+    if (snapshot.lostRole) {
+      const iLost = snapshot.lostRole === me.role;
+      const winner = iLost ? opponent : me;
+      heroDogId = winner.dogId;
+      heroRing = playerColor(winner.role).hex;
+      const loser = iLost ? me : opponent;
+      title = iLost ? `${winner.name} wins!` : "You win!";
+      subtitle = iLost
+        ? "You made too many mistakes"
+        : `${loser.name} made too many mistakes`;
+    } else if (myCount === oppCount) {
       title = "It's a tie!";
       subtitle = `${myCount} squares each`;
     } else {

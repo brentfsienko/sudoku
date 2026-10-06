@@ -800,6 +800,8 @@ export type MultiResult = {
   mistakes: number;
   score: number;
   bonesFound: number;
+  /** Competitive: who hit the mistake limit and lost, from my perspective. */
+  mistakeLoss?: "me" | "opponent" | null;
 };
 
 export function multiBoneAward(r: MultiResult): number {
@@ -808,9 +810,13 @@ export function multiBoneAward(r: MultiResult): number {
       ? r.solved
         ? GAME_WIN_BONE_BONUS
         : 0
-      : r.mySquares > r.opponentSquares
-        ? GAME_WIN_BONE_BONUS
-        : 0;
+      : r.mode === "competitive" && r.mistakeLoss
+        ? r.mistakeLoss === "opponent"
+          ? GAME_WIN_BONE_BONUS
+          : 0
+        : r.mySquares > r.opponentSquares
+          ? GAME_WIN_BONE_BONUS
+          : 0;
   return Math.max(0, r.bonesFound) + winBonus;
 }
 
@@ -1089,8 +1095,15 @@ export function applyMultiResult(data: UserData, r: MultiResult): UserData {
   };
 
   const myWin =
-    r.mode === "coop" ? r.solved : r.mySquares > r.opponentSquares;
-  const tie = r.mode === "competitive" && r.mySquares === r.opponentSquares;
+    r.mode === "coop"
+      ? r.solved
+      : r.mode === "competitive" && r.mistakeLoss
+        ? r.mistakeLoss === "opponent"
+        : r.mySquares > r.opponentSquares;
+  const tie =
+    r.mode === "competitive" &&
+    !r.mistakeLoss &&
+    r.mySquares === r.opponentSquares;
 
   if (r.mode === "coop") {
     multi.coopPlayed += 1;

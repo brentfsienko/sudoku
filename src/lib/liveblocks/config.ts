@@ -65,6 +65,8 @@ export type GameMeta = {
   mistakes: number;
   hintsUsed: number;
   hostName: string;
+  /** In competitive mode, the first player to hit MAX_MISTAKES ends the game. */
+  lostRole: PlayerRole | null;
   /** Supabase user id of the first player to claim host (authoritative). */
   hostId: string;
 };
@@ -84,6 +86,8 @@ export type Storage = {
   cells: LiveMap<string, CellEntry>;
   meta: LiveObject<GameMeta>;
   messages: LiveList<ChatMessage>;
+  /** Mistakes per player role ("player-1".."player-4"). */
+  mistakesByRole: LiveMap<string, number>;
 };
 
 export type UserMeta = {

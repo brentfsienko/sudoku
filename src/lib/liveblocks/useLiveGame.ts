@@ -76,6 +76,10 @@ export function useLiveGame(opts: {
     | ReadonlyMap<string, CellEntry>
     | Record<string, CellEntry>
     | null;
+  const mistakesByRoleMap = useStorage((root) => root.mistakesByRole) as unknown as
+    | ReadonlyMap<string, number>
+    | Record<string, number>
+    | null;
   const [myPresence, updateMyPresence] = useMyPresence();
   const others = useOthers();
 
@@ -146,7 +150,18 @@ export function useLiveGame(opts: {
       const solution = m.get("solution");
       const correct = digit === solutionDigit(solution, index);
       cells.set(key, { value: digit, notes: [], owner: role, correct });
-      if (!correct) m.set("mistakes", m.get("mistakes") + 1);
+      if (!correct) {
+        m.set("mistakes", m.get("mistakes") + 1);
+        const perRole = storage.get("mistakesByRole");
+        const roleMistakes = (perRole.get(role) ?? 0) + 1;
+        perRole.set(role, roleMistakes);
+
+        // Competitive: mistakes count — the first player to hit the limit loses.
+        if (m.get("mode") === "competitive" && roleMistakes >= MAX_MISTAKES) {
+          m.update({ status: "done", finishedAt: Date.now(), lostRole: role });
+          return { index, prev };
+        }
+      }
 
       // Only clear matching notes in the same row/col/box when the fill is correct.
       if (correct) {
@@ -245,7 +260,10 @@ export function useLiveGame(opts: {
       finishedAt: null,
       mistakes: 0,
       hintsUsed: 0,
+      lostRole: null,
     });
+    const perRole = storage.get("mistakesByRole");
+    for (const k of [...perRole.keys()]) perRole.delete(k);
   }, []);
 
   const returnToLobbyMutation = useMutation(({ storage }) => {
@@ -262,7 +280,10 @@ export function useLiveGame(opts: {
       finishedAt: null,
       mistakes: 0,
       hintsUsed: 0,
+      lostRole: null,
     });
+    const storageRef = storage.get("mistakesByRole");
+    for (const k of [...storageRef.keys()]) storageRef.delete(k);
   }, []);
 
   // Claim host (first-writer) then generate puzzle.
@@ -323,6 +344,16 @@ export function useLiveGame(opts: {
     for (const [k, v] of entries) {
       cells[Number(k)] = v;
     }
+    const mistakesByRole: Partial<Record<PlayerRole, number>> = {};
+    if (mistakesByRoleMap) {
+      const mEntries: [string, number][] =
+        mistakesByRoleMap instanceof Map
+          ? Array.from(mistakesByRoleMap.entries())
+          : Object.entries(mistakesByRoleMap as Record<string, number>);
+      for (const [role, n] of mEntries) {
+        mistakesByRole[role as PlayerRole] = n;
+      }
+    }
     return {
       puzzle: meta.puzzle,
       solution: meta.solution,
@@ -337,8 +368,10 @@ export function useLiveGame(opts: {
       hintsUsed: meta.hintsUsed,
       cells,
       maxMistakes: MAX_MISTAKES,
+      mistakesByRole,
+      lostRole: meta.lostRole ?? null,
     };
-  }, [meta, cellsMap]);
+  }, [meta, cellsMap, mistakesByRoleMap]);
 
   // Deduplicate others by role: stale connections from reconnecting players can
   // appear multiple times in `others`. Keep only the first connection per role.
@@ -466,7 +499,9 @@ export function buildInitialStorage(args: {
       hintsUsed: 0,
       hostName: "",
       hostId: "",
+      lostRole: null,
     }),
     messages: new LiveList([]),
+    mistakesByRole: new LiveMap<string, number>(),
   };
 }

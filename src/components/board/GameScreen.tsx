@@ -179,12 +179,15 @@ export function GameScreen({
     if (mode === "single") return GAME_WIN_BONE_BONUS;
     if (mode === "coop") return GAME_WIN_BONE_BONUS;
     if (mode === "competitive" && opponent) {
+      if (snapshot.lostRole) {
+        return snapshot.lostRole !== me.role ? GAME_WIN_BONE_BONUS : 0;
+      }
       const myCount = contrib[me.role];
       const oppCount = contrib[opponent.role];
       return myCount > oppCount ? GAME_WIN_BONE_BONUS : 0;
     }
     return 0;
-  }, [solved, mode, opponent, contrib, me.role]);
+  }, [solved, mode, opponent, contrib, me.role, snapshot.lostRole]);
 
   const finishReported = useRef(false);
   const startReported = useRef(false);
@@ -314,6 +317,11 @@ export function GameScreen({
                     you={isMe}
                     count={contrib[player.role]}
                     showCount={mode === "competitive"}
+                    mistakes={
+                      mode === "competitive"
+                        ? snapshot.mistakesByRole?.[player.role] ?? 0
+                        : undefined
+                    }
                     online={isOnline}
                     alignRight={idx > 0 && (allPlayers ?? []).length <= 2}
                     bubble={chat?.latestByRole[player.role] ?? undefined}
@@ -334,7 +342,11 @@ export function GameScreen({
       <div className="px-4">
         <StatsBar
           difficultyLabel={DIFFICULTY_LABELS[snapshot.difficulty]}
-          mistakes={snapshot.mistakes}
+          mistakes={
+            mode === "competitive"
+              ? snapshot.mistakesByRole?.[me.role] ?? 0
+              : snapshot.mistakes
+          }
           maxMistakes={snapshot.maxMistakes ?? MAX_MISTAKES}
           unlimitedMistakes={isDailyPenalty}
           timeLabel={formatClock(elapsed)}
@@ -475,6 +487,7 @@ function PlayerStat({
   player,
   count,
   showCount,
+  mistakes,
   you,
   online,
   alignRight,
@@ -484,6 +497,7 @@ function PlayerStat({
   player: Player;
   count: number;
   showCount: boolean;
+  mistakes?: number;
   you?: boolean;
   online: boolean;
   alignRight?: boolean;
@@ -511,6 +525,13 @@ function PlayerStat({
         {showCount && (
           <div className="font-display text-lg font-extrabold leading-tight text-[var(--foreground)]">
             {count}
+          </div>
+        )}
+        {mistakes !== undefined && (
+          <div
+            className={`font-display text-xs font-bold leading-tight ${mistakes > 0 ? "text-[var(--cell-error-text)]" : "text-[var(--muted)]"}`}
+          >
+            {mistakes}/{MAX_MISTAKES} mistakes
           </div>
         )}
       </div>

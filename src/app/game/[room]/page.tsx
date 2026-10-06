@@ -270,6 +270,11 @@ function RoomInner({
             mistakes,
             score,
             bonesFound,
+            mistakeLoss: snap.lostRole
+              ? snap.lostRole === game.me.role
+                ? "me"
+                : "opponent"
+              : null,
           },
           { roomCode: code },
         );

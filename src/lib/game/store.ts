@@ -35,6 +35,10 @@ export type GameSnapshot = {
   cells: BoardCells;
   /** null = no mistake limit (daily penalty mode). A positive number = fail after that many mistakes. */
   maxMistakes: number | null;
+  /** Per-player mistake counts (multiplayer). */
+  mistakesByRole?: Partial<Record<PlayerRole, number>>;
+  /** Competitive mode: the player who hit the mistake limit first (they lose). */
+  lostRole?: PlayerRole | null;
 };
 
 export type GameController = {
@@ -91,6 +95,7 @@ export function createSnapshot(args: {
     hintsUsed: 0,
     cells: {},
     maxMistakes: args.maxMistakes !== undefined ? args.maxMistakes : MAX_MISTAKES,
+    lostRole: null,
   };
 }
 
