@@ -33,14 +33,22 @@ function parseList(raw: string | null): ActiveSoloSave[] {
   try {
     const parsed = JSON.parse(raw) as ActiveSoloSave[];
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (item) =>
-        item?.id &&
-        item.snapshot?.puzzle &&
-        item.snapshot.solution &&
-        isActiveSolo(item.snapshot) &&
-        !isSoloFinished(item.id),
-    );
+    return parsed
+      .filter(
+        (item) =>
+          item?.id &&
+          item.snapshot?.puzzle &&
+          item.snapshot.solution &&
+          isActiveSolo(item.snapshot) &&
+          !isSoloFinished(item.id),
+      )
+      // A save still marked "playing" means the page died without pausing
+      // (e.g. the OS killed a backgrounded tab). Stop the clock at the last
+      // save instead of counting all the time the game was away.
+      .map((item) => ({
+        ...item,
+        snapshot: pauseSnapshot(item.snapshot, item.updatedAt),
+      }));
   } catch {
     return [];
   }

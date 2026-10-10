@@ -215,10 +215,7 @@ function reducer(state: State, action: Action): State {
     case "SET_PAUSED": {
       if (s.status === "done") return state;
       if (action.paused && s.status === "playing") {
-        return {
-          ...state,
-          snapshot: { ...s, status: "paused", pauseStartedAt: Date.now() },
-        };
+        return { ...state, snapshot: pauseSnapshot(s) };
       }
       if (!action.paused && s.status === "paused") {
         const addMs = s.pauseStartedAt ? Date.now() - s.pauseStartedAt : 0;
@@ -310,5 +307,8 @@ export function wallClockSeconds(s: GameSnapshot, now: number): number {
 /** Pause an in-progress game for persistence when leaving the board. */
 export function pauseSnapshot(s: GameSnapshot, now = Date.now()): GameSnapshot {
   if (s.status !== "playing") return s;
-  return { ...s, status: "paused", pauseStartedAt: now };
+  // Never start a pause before the clock started (e.g. mid-countdown), or the
+  // resumed timer would go negative.
+  const at = s.startedAt != null ? Math.max(now, s.startedAt) : now;
+  return { ...s, status: "paused", pauseStartedAt: at };
 }

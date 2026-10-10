@@ -100,6 +100,22 @@ function SoloGame({
     };
   }, [activeId]);
 
+  // Save a paused copy right away when the app is backgrounded — the debounced
+  // save above may never run if the OS freezes or kills the tab.
+  useEffect(() => {
+    const persistPaused = () => {
+      if (document.visibilityState !== "hidden") return;
+      const s = controllerRef.current.snapshot;
+      if (isActiveSolo(s)) upsertActiveSolo(s, activeId, { pauseIfPlaying: true });
+    };
+    document.addEventListener("visibilitychange", persistPaused);
+    window.addEventListener("pagehide", persistPaused);
+    return () => {
+      document.removeEventListener("visibilitychange", persistPaused);
+      window.removeEventListener("pagehide", persistPaused);
+    };
+  }, [activeId]);
+
   const persistAndExit = () => {
     const s = controller.snapshot;
     if (isActiveSolo(s)) upsertActiveSolo(s, activeId, { pauseIfPlaying: true });

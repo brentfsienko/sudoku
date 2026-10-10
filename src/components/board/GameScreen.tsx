@@ -254,6 +254,22 @@ export function GameScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done, snapshot.puzzle, snapshot.startedAt]);
 
+  // Solo games: pause automatically when the app goes to the background (phone
+  // locked, tab switched) so the clock doesn't keep running while away.
+  const { setPaused } = controller;
+  useEffect(() => {
+    if (isMulti) return;
+    const onHide = () => {
+      if (document.visibilityState === "hidden") setPaused(true);
+    };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", onHide);
+    };
+  }, [isMulti, setPaused]);
+
   // Basic keyboard support for desktop testing.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
