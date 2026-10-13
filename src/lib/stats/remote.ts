@@ -4,6 +4,7 @@ import { getSupabase } from "@/lib/supabase/client";
 import type { ExclusiveDogId } from "@/lib/theme/dogs";
 import {
   normalizeUserData,
+  repairSoloStreak,
   sumHistorySquares,
   type UserData,
 } from "./types";
@@ -40,18 +41,24 @@ export type RemoteLoad =
 export async function loadRemote(userId: string): Promise<RemoteLoad> {
   const sb = getSupabase();
   if (!sb) return { ok: false };
-  const { data, error } = await sb
-    .from("user_data")
-    .select("data")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const [{ data, error }, dailyDays] = await Promise.all([
+    sb.from("user_data").select("data").eq("user_id", userId).maybeSingle(),
+    fetchDailyPlayDays(userId),
+  ]);
   if (error) {
     console.warn("[stats] remote fetch failed:", error.message);
     return { ok: false };
   }
   if (!data) return { ok: true, data: null };
   const raw = data.data as Partial<UserData>;
-  const normalized = normalizeUserData(raw);
+  let normalized = normalizeUserData(raw);
+  // A solved daily counts as a play day even if its history row never synced.
+  if (dailyDays.length > 0) {
+    normalized = {
+      ...normalized,
+      solo: repairSoloStreak(normalized.solo, normalized.history, dailyDays),
+    };
+  }
   const needsRepair =
     sumHistorySquares(raw.history) < sumHistorySquares(normalized.history) ||
     JSON.stringify(raw.history ?? []) !== JSON.stringify(normalized.history) ||
@@ -64,6 +71,22 @@ export async function loadRemote(userId: string): Promise<RemoteLoad> {
     void upsertRemote(userId, normalized);
   }
   return { ok: true, data: normalized };
+}
+
+/** Pacific dates of every daily this user has a result for (oldest first). */
+async function fetchDailyPlayDays(userId: string): Promise<string[]> {
+  const sb = getSupabase();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from("daily_results")
+    .select("puzzle_date")
+    .eq("user_id", userId)
+    .order("puzzle_date", { ascending: true });
+  if (error || !data) {
+    if (error) console.warn("[stats] daily days fetch failed:", error.message);
+    return [];
+  }
+  return data.map((row) => String(row.puzzle_date));
 }
 
 /** Reads the signed-in user's saved data row, or null if none / fetch failed. */
