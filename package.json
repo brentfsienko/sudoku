@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@liveblocks/client": "^3.19.4",
@@ -32,6 +33,7 @@
     "esbuild": "^0.28.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
+    "patch-package": "^8.0.1",
     "puppeteer-core": "^24.43.1",
     "serwist": "^9.5.12",
     "tailwindcss": "^4",
